@@ -71,6 +71,32 @@ Mistura dos caminhos A e B dos conceitos:
 
 Se precisar mudar um arquivo de outra área, **não mude**. Mande uma mensagem ao coordenador, que repassa à sessão dona.
 
+## Combinados entre sessões (atualizado pelo coordenador)
+
+- **Tamanho de texto:** no app, `1rem = 10px`, porque o `skeleton.css` define `html{font-size:62.5%}`. Os tokens `--g-t-*` estão em px. Nos `<style scoped>` use `var(--g-t-*)`, px ou em. Nunca use rem.
+- **Abrir os Ajustes numa seção:** a rota é `#settings/<secao>`, e o router passa a prop `abaInicial` para `SettingsView`. As seções são `voz`, `aparencia`, `crianca` (Modo Criança e segurança) e `offline` (Sem internet).
+  - Casca: generalizar a rota que hoje existe só para `#settings/offline`.
+  - Ajustes: aceitar `props: ['abaInicial']`, rolar até a seção e destacá-la.
+  - Prancha: usar `#settings/voz` e `#settings/aparencia`.
+  - Esse formato substitui a ideia anterior de `#settings?secao=…`.
+- **Rotas fixas:**
+  - Início do adulto: `#inicio`.
+  - Trocar criança, ou "Quem vai falar hoje?": `#welcome`.
+  - Sem ninguém conectado, o app abre sempre em `#welcome`. `#login` é só "Entrar com conta".
+- **Depois de entrar num perfil:** chame `Router.toMain()`. Ele segue a regra de abertura: se o Modo Criança estiver ligado (`metadata.locked`), vai para a prancha; senão, vai para `#inicio`. Também existem `Router.toInicio()` e `Router.toAbertura()`.
+- **Perfil da criança (nome, foto e cor):**
+  - O Início e o topo leem com `MainVue.getPerfil()`.
+  - O dado fica em localStorage `AG_USER_SETTINGS[usuario].perfil = {nome, foto (dataURL), cor?}`.
+  - Quem grava (a entrada) dispara `$(document).trigger(MainVue.EVENT_PERFIL_ALTERADO)`.
+  - Atenção: `SettingsUserLocal` descarta campos desconhecidos. Grave direto no JSON ou acrescente `perfil` ao modelo.
+- **A barra lateral não existe mais:**
+  - `MainVue.isSidebarOpen()` devolve `false` e `restoreSidebar()` não faz nada.
+  - Os eventos `EVENT_SIDEBAR_*` não têm mais quem escute.
+  - O `header-icon` virou um botão "Início" com a marca do Grilo.
+- **Componentes compartilhados:**
+  - `photoPicker.vue` (gestão) e `settings/offlineVoiceHelper.vue` (ajustes) passam para os ícones Tabler.
+  - As props e os eventos desses dois componentes não mudam.
+
 ## Como trabalhar na pasta compartilhada
 
 Neste computador as sessões não conseguem pasta própria (worktree). Por isso:
