@@ -162,34 +162,7 @@ button.btn-primary:focus,
     color: #FFFFFF;
 }
 
-/* ---------- barra lateral e cabeçalho ---------- */
-.holy-grail-sidebar-1 {
-    background-color: #FFFFFF;
-    border-right: 2px solid var(--gf-linha);
-}
-
-.hg-sidebar h2 {
-    font-size: 1.1em;
-    color: var(--gf-cinza);
-}
-
-.hg-sidebar nav button {
-    background-color: transparent;
-    border-color: transparent;
-    box-shadow: none;
-}
-
-.hg-sidebar nav button:hover,
-.hg-sidebar nav button:focus {
-    background-color: var(--gf-folha);
-    border-color: var(--gf-mata);
-}
-
-.hg-sidebar nav button i,
-.hg-sidebar .fa-bars {
-    color: var(--gf-mata);
-}
-
+/* ---------- cabeçalho das telas antigas (a barra lateral do original foi removida) ---------- */
 header {
     background-color: #FFFFFF;
     border-bottom: 2px solid var(--gf-linha);
@@ -437,34 +410,3 @@ a:focus-visible > button {
     background-color: var(--gf-folha);
 }
 
-/* botão do menu (três linhas) com área de toque inteira */
-button:has(> .fa-bars) {
-    min-width: 48px;
-    min-height: 48px;
-}
-
-/* barra lateral nas cores do Grilo */
-.hg-sidebar nav button {
-    color: var(--gf-tinta);
-}
-
-.hg-sidebar nav li:hover button,
-.hg-sidebar nav li button:focus,
-.hg-sidebar nav button.selected {
-    background-color: var(--gf-folha);
-}
-
-.hg-sidebar nav button.selected {
-    border: 3px solid var(--gf-mata);
-    border-radius: 12px;
-    font-weight: 700;
-}
-
-a:has(> .fa-bars) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    min-height: 48px;
-    margin: 0.2em 0 0 0.3em !important; /* mesma largura total de antes: o logo não é empurrado */
-}

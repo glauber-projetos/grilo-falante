@@ -5,8 +5,8 @@
    "start_url": "../",
    "id": "/",
    "display": "standalone",
-   "background_color": "#F3F8F0",
-   "theme_color": "#1D6B35",
+   "background_color": "#FBF6EA",
+   "theme_color": "#3F8A2A",
    "description": "App gratuito de comunicação alternativa (CAA) que funciona sem internet",
    "icons": [
       {
@@ -32,12 +32,6 @@
          "sizes": "512x512",
          "src": "img/app-icons/icon512_rounded.png",
          "type": "image/png"
-      },
-      {
-         "purpose": "any",
-         "sizes": "any",
-         "src": "img/grilo/logo-icone.svg",
-         "type": "image/svg+xml"
       }
    ]
 }
