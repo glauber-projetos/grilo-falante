@@ -19,14 +19,14 @@
                     :title="$t('SYS_ENTER_FULLSCREEN')">
                 <i class="fas fa-expand"></i>
             </button>
-            <button tabindex="32"
+            <button v-if="hasPasscode" tabindex="32"
                     @click="unlock()"
                     class="floating-control-button"
                     :aria-label="$t('unlock')"
                     :title="$t('unlock')">
                 <i class="fas fa-unlock"></i>
-                <span v-if="unlockCounter !== unlockCount">{{unlockCounter}}</span>
             </button>
+            <hold-to-unlock v-else tabindex="32" class="floating-control-button" :duration="unlockHoldMs" @unlock="unlock(true)"/>
         </div>
 
         <div class="srow content text-content" v-show="!renderGridData">
@@ -41,6 +41,7 @@
         <scanning-modal v-if="showModal === modalTypes.MODAL_SCANNING" @close="showModal = null; reloadInputMethods();"/>
         <sequential-input-modal v-if="showModal === modalTypes.MODAL_SEQUENTIAL" @close="showModal = null; reloadInputMethods();"/>
         <unlock-modal v-if="showModal === modalTypes.MODAL_UNLOCK" @unlock="unlock(true)" @close="showModal = null;"/>
+        <edit-element-quick v-if="quickEditElementId" :grid-ids="quickEditGridIds" :element-id="quickEditElementId" @close="closeQuickEdit()" @changed="rerenderGrid()"/>
 
         <div class="srow content spaced" v-if="renderGridData && renderGridData.gridElements.length === 0">
             <div style="margin-top: 2em">
@@ -52,7 +53,7 @@
             </div>
         </div>
         <div class="srow content d-flex" v-if="showGrid && renderGridData && renderGridData.gridElements.length > 0" style="min-height: 0">
-            <app-grid-display id="grid-container" :grid-data="renderGridData" :metadata="metadata" :elem-css-fn="(elem) => gridUtil.getElemBackgroundCss(elem, renderGridData, globalGridData, metadata.colorConfig.gridBackgroundColor)"/>
+            <app-grid-display id="grid-container" :grid-data="renderGridData" :metadata="metadata" :elem-css-fn="(elem) => gridUtil.getElemBackgroundCss(elem, renderGridData, globalGridData, metadata.colorConfig.gridBackgroundColor) + (elem.hidden ? HIDDEN_ELEM_CSS : '')"/>
         </div>
     </div>
 </template>
@@ -88,6 +89,9 @@
     import {imageUtil} from "../../js/util/imageUtil";
     import {audioUtil} from "../../js/util/audioUtil.js";
     import UnlockModal from "../modals/unlockModal.vue";
+    import HoldToUnlock from "../components/holdToUnlock.vue";
+    import EditElementQuick from "../modals/editElementQuick.vue";
+    import {holdGesture} from "../../js/input/holdGesture";
     import {MainVue} from "../../js/vue/mainVue.js";
     import {stateService} from "../../js/service/stateService.js";
     import { systemActionService } from '../../js/service/systemActionService';
@@ -100,6 +104,9 @@
 
     let vueApp = null;
     let UNLOCK_COUNT = 8;
+    let UNLOCK_HOLD_MS = 3000; // Grilo Falante: hold the lock 3 seconds to leave the child mode (if no PIN is set)
+    let QUICK_EDIT_HOLD_MS = 1000; // Grilo Falante: hold a button 1 second in adult mode to open the quick edit panel
+    let HIDDEN_ELEM_CSS = ' opacity: 0.35; filter: grayscale(1);'; // hidden buttons, only visible in adult mode
     let modalTypes = {
         MODAL_SCANNING: 'MODAL_SCANNING',
         MODAL_MOUSE: 'MODAL_MOUSE',
@@ -132,6 +139,13 @@
                 modalTypes: modalTypes,
                 unlockCount: UNLOCK_COUNT,
                 unlockCounter: UNLOCK_COUNT,
+                unlockHoldMs: UNLOCK_HOLD_MS,
+                hasPasscode: !!localStorageService.getAppSettings().unlockPasscode,
+                quickEditElementId: null,
+                quickEditGridIds: [],
+                suppressSelectionUntil: 0,
+                detachQuickEditHold: null,
+                HIDDEN_ELEM_CSS: HIDDEN_ELEM_CSS,
                 MainVue: MainVue,
                 highlightTimeoutHandler: null,
                 highlightedElementId: null,
@@ -142,6 +156,8 @@
         components: {
             AppGridDisplay,
             UnlockModal,
+            HoldToUnlock,
+            EditElementQuick,
             SequentialInputModal,
             HuffmanInputModal,
             DirectionInputModal,
@@ -157,8 +173,10 @@
                 let thiz = this;
                 thiz.metadata.locked = true;
                 thiz.unlockCounter = UNLOCK_COUNT;
+                thiz.hasPasscode = !!localStorageService.getAppSettings().unlockPasscode;
                 dataService.saveMetadata(thiz.metadata).then(() => {
                     this.setViewPropsLocked();
+                    this.rerenderGrid();
                 });
             },
             unlock(force) {
@@ -176,6 +194,7 @@
                     dataService.saveMetadata(thiz.metadata).then(() => {
                         MainVue.restoreSidebar();
                         this.setViewPropsUnlocked();
+                        this.rerenderGrid();
                     });
                 }
             },
@@ -195,6 +214,25 @@
                 $('#viewPortMeta').attr('content', 'width=device-width, initial-scale=1');
                 document.body.classList.remove(constants.CLASS_UI_LOCKED);
                 $('#gridView').off('touchmove', this.preventZoomHandler);
+            },
+            isHiddenElement(id) {
+                let elem = this.renderGridData ? this.renderGridData.gridElements.find(e => e.id === id) : null;
+                return !!(elem && elem.hidden);
+            },
+            openQuickEdit(target) {
+                if (!target || !target.id || !this.renderGridData) {
+                    return;
+                }
+                this.suppressSelectionUntil = new Date().getTime() + 1500;
+                stopInputMethods();
+                let globalGridId = this.renderGridData.globalGridId || (this.globalGridData ? this.globalGridData.id : null);
+                this.quickEditGridIds = [this.renderGridData.id, globalGridId];
+                this.quickEditElementId = target.id;
+            },
+            closeQuickEdit() {
+                this.quickEditElementId = null;
+                this.suppressSelectionUntil = new Date().getTime() + 300;
+                this.initInputMethods({continueInputMethods: true});
             },
             preventZoomHandler(event) {
                 event.preventDefault();
@@ -216,6 +254,9 @@
                 let thiz = this;
                 let inputConfig = thiz.metadata.inputConfig;
                 let selectionListener = (item) => {
+                    if (new Date().getTime() < this.suppressSelectionUntil || this.isHiddenElement(item.id)) {
+                        return; // release after opening the quick edit panel, or hidden button (adult mode)
+                    }
                     this.stopHighlightElements();
                     L.removeAddClass(item, 'selected');
                     actionService.doAction(thiz.renderGridData, item.id);
@@ -435,7 +476,8 @@
                 this.renderGridData = gridUtil.adaptFirstRowHeight(this.renderGridData, this.metadata.firstRowHeightFactor);
                 this.renderGridData.minColumnCount = gridUtil.getWidthWithBounds(this.renderGridData);
                 this.renderGridData.rowCount = gridUtil.getHeightWithBounds(this.renderGridData);
-                this.renderGridData.gridElements = this.renderGridData.gridElements.filter(e => !e.hidden);
+                // hidden buttons keep their place: empty in child mode, shown faded in adult mode (see HIDDEN_ELEM_CSS)
+                this.renderGridData.gridElements = this.renderGridData.gridElements.filter(e => !e.hidden || !this.metadata.locked);
 
                 let effectiveLevel = gridUtil.getCurrentVocabularyLevel(this.metadata);
 
@@ -498,6 +540,9 @@
             $(document).off(constants.EVENT_METADATA_UPDATED, this.metadataUpdated);
             $(document).off(constants.EVENT_GRID_RERENDER, this.rerenderGrid);
             stopInputMethods();
+            if (this.detachQuickEditHold) {
+                this.detachQuickEditHold();
+            }
             this.setViewPropsUnlocked();
             $.contextMenu('destroy');
             liveElementService.stop();
@@ -505,6 +550,17 @@
         },
         mounted: async function () {
             vueApp = this;
+            this.detachQuickEditHold = holdGesture.attach(this.$el, {
+                selector: '.element-container',
+                duration: QUICK_EDIT_HOLD_MS,
+                enabled: () => !!this.metadata && !this.metadata.locked && !this.showModal && !this.quickEditElementId,
+                onStart: (target) => target.classList.add('gf-holding'),
+                onCancel: (target) => target.classList.remove('gf-holding'),
+                onDone: (target) => {
+                    target.classList.remove('gf-holding');
+                    this.openQuickEdit(target);
+                }
+            });
 
             let savedMetadata = await dataService.getMetadata();
             let metadata = JSON.parse(JSON.stringify(savedMetadata || new MetaData()));
@@ -638,6 +694,19 @@
 </script>
 
 <style scoped>
+    /* Grilo Falante: button held for the quick edit panel (adult mode) */
+    #gridView >>> .element-container {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    #gridView >>> .element-container.gf-holding {
+        outline: 4px solid var(--gf-sol, #FFC83D);
+        outline-offset: -2px;
+        transition: outline-color 1s;
+    }
+
     .floating-controls {
         position: fixed;
         top: 0.2em;
