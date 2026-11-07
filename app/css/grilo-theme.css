@@ -1,0 +1,470 @@
+/*
+ * Grilo Falante — tema visual
+ * Carregado por último em index.html: só troca cores, fontes, cantos e sombras.
+ * Não muda tamanhos nem o layout das pranchas (cores das células vêm das configurações de cada usuário).
+ *
+ * Fontes (licença SIL OFL 1.1, ver app/fonts/OFL-*.txt), guardadas no app para funcionar sem internet:
+ *   Atkinson Hyperlegible (Braille Institute) — textos
+ *   Baloo 2 (Ek Type) — títulos
+ */
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Baloo 2";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/baloo-2-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Baloo 2";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("../fonts/baloo-2-latin-800-normal.woff2") format("woff2");
+}
+
+:root {
+    --gf-mata: #1D6B35;        /* botões principais, links (6,5:1 com branco) */
+    --gf-mata-escuro: #175A2C;
+    --gf-tinta: #14261A;       /* texto (14,8:1 no fundo) */
+    --gf-fundo: #F3F8F0;       /* fundo das telas */
+    --gf-folha: #E7F2E0;       /* realce suave */
+    --gf-linha: #D3E0D0;       /* bordas */
+    --gf-cinza: #4A5C4F;       /* texto de apoio (6,6:1 no fundo) */
+    --gf-sol: #FFC83D;         /* destaque */
+    --gf-coral: #B8391F;       /* apagar / perigo (5,8:1 com branco) */
+    --gf-texto: "Atkinson Hyperlegible", "Segoe UI", Roboto, Arial, sans-serif;
+    --gf-titulo: "Baloo 2", "Atkinson Hyperlegible", "Arial Rounded MT Bold", Arial, sans-serif;
+}
+
+html,
+body {
+    font-family: var(--gf-texto);
+    color: var(--gf-tinta);
+    background-color: var(--gf-fundo);
+}
+
+h1, h2, h3, h4,
+.modal-header h3 {
+    font-family: var(--gf-titulo);
+    font-weight: 800;
+    color: var(--gf-tinta);
+    letter-spacing: 0;
+}
+
+a {
+    color: var(--gf-mata);
+}
+
+a:hover {
+    color: var(--gf-mata-escuro);
+}
+
+/* foco sempre visível: contorno verde, com 3:1 ou mais sobre o fundo */
+*:focus {
+    outline-color: var(--gf-mata);
+}
+
+/* ---------- botões ---------- */
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+.file-input {
+    font-family: var(--gf-texto);
+    font-weight: 700;
+    color: var(--gf-tinta);
+    background-color: #FFFFFF;
+    border: 2px solid var(--gf-linha);
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+    border: 2px solid var(--gf-mata);
+    background-color: var(--gf-folha);
+}
+
+button:disabled,
+button[disabled],
+button[disabled]:hover {
+    color: #6B7A70;
+    background-color: #FFFFFF;
+    border-color: var(--gf-linha);
+}
+
+.btn-primary,
+.big-button {
+    background-color: var(--gf-mata);
+    border-color: var(--gf-mata);
+    color: #FFFFFF;
+}
+
+button.btn-primary:hover,
+button.btn-primary:focus,
+.big-button:hover,
+.big-button:focus {
+    background-color: var(--gf-mata-escuro);
+    border-color: var(--gf-tinta);
+    color: #FFFFFF;
+}
+
+.big-button {
+    border-radius: 16px;
+    min-height: 2.6em;
+}
+
+.btn-danger:not(:disabled) {
+    background-color: var(--gf-coral);
+    border-color: var(--gf-coral);
+    color: #FFFFFF;
+}
+
+.btn-danger:hover:not(:disabled),
+.btn-danger:focus:not(:disabled) {
+    background-color: #9A2E18;
+    border-color: var(--gf-tinta);
+    color: #FFFFFF;
+}
+
+/* ---------- barra lateral e cabeçalho ---------- */
+.holy-grail-sidebar-1 {
+    background-color: #FFFFFF;
+    border-right: 2px solid var(--gf-linha);
+}
+
+.hg-sidebar h2 {
+    font-size: 1.1em;
+    color: var(--gf-cinza);
+}
+
+.hg-sidebar nav button {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.hg-sidebar nav button:hover,
+.hg-sidebar nav button:focus {
+    background-color: var(--gf-folha);
+    border-color: var(--gf-mata);
+}
+
+.hg-sidebar nav button i,
+.hg-sidebar .fa-bars {
+    color: var(--gf-mata);
+}
+
+header {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid var(--gf-linha);
+}
+
+#astericsIcon {
+    border-radius: 0;
+}
+
+/* ---------- modais ---------- */
+.modal-container {
+    border-radius: 18px;
+    color: var(--gf-tinta);
+}
+
+/* ---------- textos de apoio ---------- */
+.fa-check,
+.fa-li .fa-check {
+    color: var(--gf-mata);
+}
+
+/* ---------- cores por tipo de palavra (esquema "Grilo Falante") ---------- */
+:root {
+    --gf-cat-pessoas: #FFE38C;     --gf-cat-pessoas-borda: #A87700;
+    --gf-cat-acoes: #C6EAA9;       --gf-cat-acoes-borda: #3D8A2E;
+    --gf-cat-descricao: #C2DDF8;   --gf-cat-descricao-borda: #2B6CB8;
+    --gf-cat-sentimentos: #B5EBE0; --gf-cat-sentimentos-borda: #1D7F6E;
+    --gf-cat-perguntas: #DED0F4;   --gf-cat-perguntas-borda: #7451C0;
+    --gf-cat-social: #F9C9DF;      --gf-cat-social-borda: #B83F78;
+    --gf-cat-coisas: #FFD0AA;      --gf-cat-coisas-borda: #C25A12;
+}
+
+/* ---------- animações leves (desligadas por "Reduzir movimentos" ou pelo sistema) ---------- */
+
+/* a célula "afunda" enquanto é tocada */
+#gridView #grid-container .element-container {
+    transition: transform 0.09s ease-out, filter 0.09s ease-out;
+}
+
+#gridView #grid-container .element-container.gf-pressed {
+    transform: scale(0.95);
+    filter: brightness(0.94);
+}
+
+/* a palavra "voa" para a barra de frases */
+.gf-flyer {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #FFFFFF;
+    box-shadow: 0 6px 18px rgba(20, 38, 26, 0.25);
+    will-change: transform, opacity;
+}
+
+.gf-flyer img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.gf-flyer-text {
+    font-family: var(--gf-texto);
+    font-weight: 700;
+    font-size: 1.2em;
+    color: var(--gf-tinta);
+    padding: 0.2em 0.4em;
+    overflow: hidden;
+}
+
+/* o Grilo aparece um instante quando a frase é falada */
+#gf-grilo-reacao {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right, 0px));
+    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    width: 96px;
+    height: 96px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+}
+
+#gf-grilo-reacao img {
+    width: 100%;
+    height: 100%;
+}
+
+#gf-grilo-reacao.gf-show {
+    animation: gf-grilo-fala 1.8s ease-out forwards;
+}
+
+@keyframes gf-grilo-fala {
+    0% { opacity: 0; transform: translateY(40px) scale(0.6); }
+    14% { opacity: 1; transform: translateY(-8px) scale(1.05); }
+    22% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-6px) rotate(-4deg); }
+    55% { transform: translateY(0) rotate(3deg); }
+    70% { opacity: 1; transform: translateY(0) rotate(0); }
+    100% { opacity: 0; transform: translateY(20px) scale(0.8); }
+}
+
+/* tudo parado: pedido do sistema ou chave "Reduzir movimentos" */
+body.gf-reduce-motion #gridView #grid-container .element-container,
+body.gf-reduce-motion .gf-flyer,
+body.gf-reduce-motion #gf-grilo-reacao {
+    transition: none !important;
+    animation: none !important;
+}
+
+body.gf-reduce-motion #gridView #grid-container .element-container.gf-pressed {
+    transform: none;
+    filter: none;
+}
+
+body.gf-reduce-motion .gf-flyer,
+body.gf-reduce-motion #gf-grilo-reacao {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #gridView #grid-container .element-container,
+    .gf-flyer,
+    #gf-grilo-reacao {
+        transition: none !important;
+        animation: none !important;
+    }
+    #gridView #grid-container .element-container.gf-pressed {
+        transform: none;
+        filter: none;
+    }
+    .gf-flyer,
+    #gf-grilo-reacao {
+        display: none !important;
+    }
+}
+
+body.gf-reduce-motion .phrase-main {
+    transition: none !important;
+    transform: none !important;
+}
+
+/* ---------- acessibilidade: alvos de toque, campos e foco ----------
+ * Alvos de toque com 48px ou mais. As células e a barra de frases (#grid-container) ficam de fora:
+ * o tamanho delas vem da prancha.
+ */
+:root {
+    --gf-campo: #6F8274; /* borda de campos: 4,1:1 com branco (WCAG 1.4.11 pede 3:1) */
+}
+
+.button:not(#grid-container *),
+button:not(#grid-container *),
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+select:not(#grid-container *),
+input[type="text"]:not(#grid-container *),
+input[type="password"],
+input[type="number"]:not(#grid-container *),
+input[type="email"],
+input[type="search"]:not(#grid-container *),
+input[type="url"],
+input[type="tel"],
+input[type="date"] {
+    min-height: 48px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    font-family: var(--gf-texto);
+    font-size: 1rem;
+    color: var(--gf-tinta);
+    background-color: #FFFFFF;
+    border: 2px solid var(--gf-campo);
+    border-radius: 10px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--gf-mata);
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 1px;
+}
+
+/* caixas de marcar e opções maiores; o rótulo ao lado também recebe o toque */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin: 0 0.4em 0 0;
+    vertical-align: middle;
+    accent-color: var(--gf-mata);
+    cursor: pointer;
+}
+
+input[type="checkbox"] + label,
+input[type="radio"] + label {
+    padding: 12px 0;
+    cursor: pointer;
+}
+
+input[type="range"] {
+    min-height: 48px;
+    accent-color: var(--gf-mata);
+}
+
+/* foco do teclado sempre visível: anel verde (6,5:1 com branco) */
+:focus-visible:not(#grid-container *) {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 2px;
+}
+
+button:focus-visible:not(#grid-container *) {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 2px;
+}
+
+/* links que só embrulham um botão: o anel vai no botão */
+a:has(> button):focus-visible {
+    outline: none;
+}
+
+a:focus-visible > button {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: -3px;
+    background-color: var(--gf-folha);
+}
+
+/* botão do menu (três linhas) com área de toque inteira */
+button:has(> .fa-bars) {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+/* barra lateral nas cores do Grilo */
+.hg-sidebar nav button {
+    color: var(--gf-tinta);
+}
+
+.hg-sidebar nav li:hover button,
+.hg-sidebar nav li button:focus,
+.hg-sidebar nav button.selected {
+    background-color: var(--gf-folha);
+}
+
+.hg-sidebar nav button.selected {
+    border: 3px solid var(--gf-mata);
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+a:has(> .fa-bars) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
+    margin: 0.2em 0 0 0.3em !important; /* mesma largura total de antes: o logo não é empurrado */
+}

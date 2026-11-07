@@ -1,12 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="en" class="notranslate" translate="no">
 <head>
-    <title>Asterics AAC</title>
+    <title>Grilo Falante</title>
     <meta id="viewPortMeta" name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-site-verification" content="UWnxfeRniUm-l7GAbNdqfZQmCCaAU3HB6jGOuEHZ26k" />
 
-    <link rel="icon" href="app/img/favicon-no-circle.svg" type="image/svg+xml">
-    <link rel="icon" href="app/img/favicon-no-circle.png" type="image/png">
+    <meta name="theme-color" content="#1D6B35">
+    <link rel="icon" href="app/img/grilo/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="app/img/grilo/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="app/img/app-icons/icon192_maskable.png">
     <link rel="manifest" href="app/manifest.webmanifest">
 
     <link rel="stylesheet" href="app/css/fontawesome/css/all.css">
@@ -15,13 +17,14 @@
     <link rel="stylesheet" href="app/css/skeleton.css">
     <link rel="stylesheet" href="app/css/bootstrap-grid.css">
     <link rel="stylesheet" href="app/css/grid-styles.css">
+    <link rel="stylesheet" href="app/css/grilo-theme.css">
 </head>
 <body onload="window.loaded = true;">
 <div style="display: none" aria-hidden="false">
     {{ $t('accessKey1NavigationAccessKey2Main') }}
 </div>
 <div id="app" class="holy-grail">
-    <h1 class="sr-only">Asterics AAC</h1>
+    <h1 class="sr-only">Grilo Falante</h1>
     <div id="touchElement" class="grid-container" style="z-index: 2; display: none; -webkit-touch-callout: none; -webkit-user-select: none;">
     </div>
     <audio style="display: none" id="audioPlayer" src="" preload="none"></audio>
@@ -45,7 +48,7 @@
                 </div>
                 <div class="hide-mobile" style="display: inline-flex">
                     <a tabindex="1" href="javascript:void(0)" :aria-label="$t('closeSidebar')" @click="closeSidebar()" style="margin: 0.2em 0.5em 0 1.2em"><i class="fas fa-2x fa-bars inline"></i></a>
-                    <a tabindex="-1" aria-hidden="true" href="javascript:void(0)" @click="toMain"><h1 class="inline hide-mobile"><img id="astericsIcon" src="app/img/asterics-aac-logo-raw.svg" height="40" alt="Asterics AAC"/></h1></a>
+                    <a tabindex="-1" aria-hidden="true" href="javascript:void(0)" @click="toMain"><h1 class="inline hide-mobile"><img id="astericsIcon" src="app/img/grilo/logo-horizontal.svg" height="40" alt="Grilo Falante"/></h1></a>
                 </div>
             </div>
 
