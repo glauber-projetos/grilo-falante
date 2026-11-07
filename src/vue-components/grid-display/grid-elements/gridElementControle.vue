@@ -56,7 +56,7 @@ export default {
 }
 .controle .ti { line-height: 1; color: var(--g-folha-escura); }
 .controle-deitado { flex-direction: row; gap: 0.4em; }
-.controle-texto { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.controle-texto { max-width: 100%; overflow: hidden; text-align: center; line-height: 1.1; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
 .controle-destaque { background: var(--g-coral); color: #fff; }
 .controle-destaque .ti { color: #fff; }
