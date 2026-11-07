@@ -96,6 +96,35 @@ Se precisar mudar um arquivo de outra área, **não mude**. Mande uma mensagem a
   - `photoPicker.vue` (gestão) e `settings/offlineVoiceHelper.vue` (ajustes) passam para os ícones Tabler.
   - As props e os eventos desses dois componentes não mudam.
 
+## Mascote novo (arte do Glauber, 2026-11-07)
+
+As poses ficam em `app/img/grilo/mascote/`, em WebP com fundo transparente e até 480px. O ícone do app é `app/img/grilo/icone-app.png`; os ícones do PWA em `app/img/app-icons/` e o `favicon.png` já foram trocados. Use sempre estas imagens. Os SVGs antigos (`grilo-acenando.svg`, `grilo-falando.svg`, `logo-horizontal.svg`, etc.) saem de cena.
+
+| Arquivo | Onde usar |
+|---|---|
+| `grilo-feliz.webp` | Boas-vindas, "Quem vai falar hoje?", Início do adulto |
+| `grilo-orientando.webp` | Dicas e passos de um assistente |
+| `grilo-apontando.webp` | "Toque aqui", chamar atenção para um botão |
+| `grilo-explicando.webp` | Ajuda e explicações (tem balão "…") |
+| `grilo-apresentando.webp` | Novidades e resumo para a fono (tem quadro com gráfico) |
+| `grilo-ideia.webp` | Sugestões ("Que tal…?") |
+| `grilo-pensando.webp` / `grilo-pensativo.webp` | Carregando, processando ou importando |
+| `grilo-duvida.webp` | Tela vazia ("Ainda não tem pranchas"), "não encontrei" |
+| `grilo-surpreso.webp` | Avisos ("Sem internet agora") |
+| `grilo-triste.webp` | Erros ("Não deu certo, tente de novo") |
+| `grilo-aprovando.webp` | Confirmação ("Pronto!", "Salvo") |
+| `grilo-festa.webp` | Conquistas ("Tudo pronto para usar sem internet", perfil criado) |
+| `grilo-confiante.webp` | Segurança e Modo Criança ligado |
+| `grilo-bravo.webp` | Evitar. Use só se fizer sentido, nunca em erro do usuário |
+
+- **Marca no topo:** `icone-app.png` (cantos já arredondados) ao lado do texto "Grilo Falante" em Baloo 2, no lugar de `logo-horizontal.svg`.
+- **Tamanhos:**
+  - 96 a 160px em telas vazias e avisos;
+  - até 200px nas boas-vindas;
+  - 32 a 40px no topo.
+  - Sempre com `alt=""` quando for decorativo.
+- **Na prancha da criança:** o mascote não aparece, para não competir com as figuras da comunicação.
+
 ## Como trabalhar na pasta compartilhada
 
 Neste computador as sessões não conseguem pasta própria (worktree). Por isso:
