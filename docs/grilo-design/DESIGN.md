@@ -85,9 +85,9 @@ Se precisar mudar um arquivo de outra área, **não mude**. Mande uma mensagem a
 - **Depois de entrar num perfil:** chame `Router.toMain()`. Ele segue a regra de abertura: se o Modo Criança estiver ligado (`metadata.locked`), vai para a prancha; senão, vai para `#inicio`. Também existem `Router.toInicio()` e `Router.toAbertura()`.
 - **Perfil da criança (nome, foto e cor):**
   - O Início e o topo leem com `MainVue.getPerfil()`.
-  - O dado fica em localStorage `AG_USER_SETTINGS[usuario].perfil = {nome, foto (dataURL), cor?}`.
-  - Quem grava (a entrada) dispara `$(document).trigger(MainVue.EVENT_PERFIL_ALTERADO)`.
-  - Atenção: `SettingsUserLocal` descarta campos desconhecidos. Grave direto no JSON ou acrescente `perfil` ao modelo.
+  - O dado fica em localStorage `GRILO_PERFIS[usuario] = {nome, foto (dataURL), criadoEm}`.
+  - Para gravar, use `perfilService.salvarPerfil(usuario, {nome, foto})` (`src/js/service/perfilService.js`). Para ler, use `perfilService.getPerfil` ou `MainVue.getPerfil`.
+  - Depois de mudar o nome ou a foto, dispare `$(document).trigger(MainVue.EVENT_PERFIL_ALTERADO)`.
 - **A barra lateral não existe mais:**
   - `MainVue.isSidebarOpen()` devolve `false` e `restoreSidebar()` não faz nada.
   - Os eventos `EVENT_SIDEBAR_*` não têm mais quem escute.
