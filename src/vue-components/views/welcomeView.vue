@@ -3,7 +3,13 @@
         <header-icon full-header="true"></header-icon>
         <div class="container ms-0">
             <div class="row ps-2 ps-sm-3 ps-md-4 col-12 col-md-10 col-xl-8">
-                <h2><span class="show-mobile">Asterics AAC - </span><span>{{ $t('welcome') }}</span></h2>
+                <div class="gf-welcome">
+                    <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="gf-welcome-grilo"/>
+                    <div>
+                        <h2><span class="show-mobile">Grilo Falante - </span><span>{{ $t('welcome') }}</span></h2>
+                        <p class="gf-welcome-hello">{{ $t('griloFalanteHello') }}</p>
+                    </div>
+                </div>
                 <div>
                     <h3>
                         <i18n path="useAstericsGridWithoutRegistrationBold" tag="span">
@@ -120,11 +126,29 @@
         margin-bottom: 0.5em;
     }
     .fa-check {
-        color: green;
+        color: #1D6B35;
         margin-right: 1em;
     }
     .fa-info-circle {
-        color: #266697;
+        color: #1D6B35;
         margin-right: 0.5em;
+    }
+    .gf-welcome {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        margin: 0.5em 0 1em 0;
+    }
+    .gf-welcome h2 {
+        margin-bottom: 0;
+    }
+    .gf-welcome-grilo {
+        width: 5.5em;
+        height: 5.5em;
+        flex: none;
+    }
+    .gf-welcome-hello {
+        margin: 0;
+        font-size: 1.1em;
     }
 </style>

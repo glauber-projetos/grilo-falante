@@ -4,8 +4,15 @@
         <div class="srow content spaced" style="max-width: 900px">
             <h2 class="twelve columns">{{ $t('aboutAstericsGrid') }}</h2>
             <div>
+                <div class="srow gf-about">
+                    <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="gf-about-grilo"/>
+                    <div>
+                        <p>{{ $t('griloFalanteIntro') }}</p>
+                        <a target="_blank" href="https://github.com/glauber-projetos/Asterics-AAC">{{ $t('griloFalanteOnGithub') }}</a>
+                    </div>
+                </div>
                 <div class="srow">
-                    <h3 class="mt-2">{{ $t('generalInformation') }}</h3>
+                    <h3 class="mt-2">{{ $t('aboutOriginalProject') }}</h3>
                     <div>
                         {{ $t('astericsGridIsFreeAndOpenSource') }}<br/>
                         <a target="_blank" href="https://github.com/asterics/Asterics-AAC">{{ $t('astericsGridOnGithub') }}</a><br/><br/>
@@ -161,5 +168,18 @@
     }
     .srow {
         margin-bottom: 1.5em;
+    }
+    .gf-about {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+    }
+    .gf-about p {
+        margin-bottom: 0.5em;
+    }
+    .gf-about-grilo {
+        width: 6em;
+        height: 6em;
+        flex: none;
     }
 </style>

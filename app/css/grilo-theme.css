@@ -1,0 +1,212 @@
+/*
+ * Grilo Falante — tema visual
+ * Carregado por último em index.html: só troca cores, fontes, cantos e sombras.
+ * Não muda tamanhos nem o layout das pranchas (cores das células vêm das configurações de cada usuário).
+ *
+ * Fontes (licença SIL OFL 1.1, ver app/fonts/OFL-*.txt), guardadas no app para funcionar sem internet:
+ *   Atkinson Hyperlegible (Braille Institute) — textos
+ *   Baloo 2 (Ek Type) — títulos
+ */
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Baloo 2";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/baloo-2-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Baloo 2";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("../fonts/baloo-2-latin-800-normal.woff2") format("woff2");
+}
+
+:root {
+    --gf-mata: #1D6B35;        /* botões principais, links (6,5:1 com branco) */
+    --gf-mata-escuro: #175A2C;
+    --gf-tinta: #14261A;       /* texto (14,8:1 no fundo) */
+    --gf-fundo: #F3F8F0;       /* fundo das telas */
+    --gf-folha: #E7F2E0;       /* realce suave */
+    --gf-linha: #D3E0D0;       /* bordas */
+    --gf-cinza: #4A5C4F;       /* texto de apoio (6,6:1 no fundo) */
+    --gf-sol: #FFC83D;         /* destaque */
+    --gf-coral: #B8391F;       /* apagar / perigo (5,8:1 com branco) */
+    --gf-texto: "Atkinson Hyperlegible", "Segoe UI", Roboto, Arial, sans-serif;
+    --gf-titulo: "Baloo 2", "Atkinson Hyperlegible", "Arial Rounded MT Bold", Arial, sans-serif;
+}
+
+html,
+body {
+    font-family: var(--gf-texto);
+    color: var(--gf-tinta);
+    background-color: var(--gf-fundo);
+}
+
+h1, h2, h3, h4,
+.modal-header h3 {
+    font-family: var(--gf-titulo);
+    font-weight: 800;
+    color: var(--gf-tinta);
+    letter-spacing: 0;
+}
+
+a {
+    color: var(--gf-mata);
+}
+
+a:hover {
+    color: var(--gf-mata-escuro);
+}
+
+/* foco sempre visível: contorno verde, com 3:1 ou mais sobre o fundo */
+*:focus {
+    outline-color: var(--gf-mata);
+}
+
+/* ---------- botões ---------- */
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+.file-input {
+    font-family: var(--gf-texto);
+    font-weight: 700;
+    color: var(--gf-tinta);
+    background-color: #FFFFFF;
+    border: 2px solid var(--gf-linha);
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+    border: 2px solid var(--gf-mata);
+    background-color: var(--gf-folha);
+}
+
+button:disabled,
+button[disabled],
+button[disabled]:hover {
+    color: #6B7A70;
+    background-color: #FFFFFF;
+    border-color: var(--gf-linha);
+}
+
+.btn-primary,
+.big-button {
+    background-color: var(--gf-mata);
+    border-color: var(--gf-mata);
+    color: #FFFFFF;
+}
+
+button.btn-primary:hover,
+button.btn-primary:focus,
+.big-button:hover,
+.big-button:focus {
+    background-color: var(--gf-mata-escuro);
+    border-color: var(--gf-tinta);
+    color: #FFFFFF;
+}
+
+.big-button {
+    border-radius: 16px;
+    min-height: 2.6em;
+}
+
+.btn-danger:not(:disabled) {
+    background-color: var(--gf-coral);
+    border-color: var(--gf-coral);
+    color: #FFFFFF;
+}
+
+.btn-danger:hover:not(:disabled),
+.btn-danger:focus:not(:disabled) {
+    background-color: #9A2E18;
+    border-color: var(--gf-tinta);
+    color: #FFFFFF;
+}
+
+/* ---------- barra lateral e cabeçalho ---------- */
+.holy-grail-sidebar-1 {
+    background-color: #FFFFFF;
+    border-right: 2px solid var(--gf-linha);
+}
+
+.hg-sidebar h2 {
+    font-size: 1.1em;
+    color: var(--gf-cinza);
+}
+
+.hg-sidebar nav button {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.hg-sidebar nav button:hover,
+.hg-sidebar nav button:focus {
+    background-color: var(--gf-folha);
+    border-color: var(--gf-mata);
+}
+
+.hg-sidebar nav button i,
+.hg-sidebar .fa-bars {
+    color: var(--gf-mata);
+}
+
+header {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid var(--gf-linha);
+}
+
+#astericsIcon {
+    border-radius: 0;
+}
+
+/* ---------- modais ---------- */
+.modal-container {
+    border-radius: 18px;
+    color: var(--gf-tinta);
+}
+
+/* ---------- textos de apoio ---------- */
+.fa-check,
+.fa-li .fa-check {
+    color: var(--gf-mata);
+}

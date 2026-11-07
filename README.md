@@ -1,4 +1,30 @@
-# Asterics AAC
+<p align="center"><img src="app/img/grilo/logo-horizontal.svg" alt="Grilo Falante" width="420"></p>
+
+# Grilo Falante
+
+App **gratuito** de comunicação alternativa (CAA) para crianças e adultos que não falam ou falam pouco. Funciona no navegador e no tablet Android, **sem internet**, e foi pensado para famílias de baixa renda.
+
+O Grilo Falante é uma versão do **[AsTeRICS Grid](https://github.com/asterics/Asterics-AAC)** (também chamado Asterics AAC), criado pela **[FH Technikum Wien](https://www.technikum-wien.at/)** (UAS Technikum Wien). Todo o mérito da base do app é deles. Como o original, o Grilo Falante é software livre sob a licença **[GNU AGPL-3.0](LICENSE)**: qualquer pessoa pode usar, estudar, mudar e redistribuir, desde que mantenha o código aberto.
+
+*Grilo Falante is a free AAC app for Brazilian families, based on AsTeRICS Grid by UAS Technikum Wien, licensed under AGPL-3.0.*
+
+### O que o Grilo Falante acrescenta
+
+* **Modo Criança**: a prancha trava, sem rolagem nem zoom, e arrastos ou a palma da mão não acionam nada.
+* **Fotos enquadradas**: fotos preenchem a célula, com ferramenta de recorte.
+* **Português do Brasil** completo, com vozes brasileiras e voz salva no perfil.
+* **Frases favoritas** e histórico de frases faladas.
+* Visual próprio pensado para tablet e para dificuldade motora: alvos grandes, cores com bom contraste e as fontes Atkinson Hyperlegible e Baloo 2 (licença SIL OFL, em `app/fonts`).
+
+O mascote, o logo e os ícones do Grilo Falante são desenhos originais (pasta `app/img/grilo`).
+
+---
+
+## Projeto original: AsTeRICS Grid (Asterics AAC)
+
+O texto abaixo é o README do projeto original.
+
+### Asterics AAC
 
 ![Asterics AAC use cases](docs/ag-use-cases.png)
 

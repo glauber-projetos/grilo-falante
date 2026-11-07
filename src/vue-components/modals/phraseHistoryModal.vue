@@ -10,7 +10,7 @@
                     <div class="modal-body">
                         <div v-if="loading" class="phrase-empty"><i class="fas fa-spinner fa-spin"></i></div>
                         <div v-if="!loading && favorites.length === 0 && recent.length === 0" class="phrase-empty">
-                            <i class="far fa-comment fa-3x"></i>
+                            <img src="app/img/grilo/grilo-pensando.svg" alt="" aria-hidden="true" style="width: 7em; height: 7em;"/>
                             <p>{{ $t('phrasesEmpty') }}</p>
                         </div>
 

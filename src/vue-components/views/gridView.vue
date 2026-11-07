@@ -676,7 +676,7 @@
     }
 
     .floating-control-button:focus-visible {
-        outline: 2px solid #266697;
+        outline: 2px solid #1D6B35;
         outline-offset: 2px;
     }
 

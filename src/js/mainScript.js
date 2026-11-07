@@ -24,7 +24,7 @@ async function init() {
     //timingLogger.initLogging();
     log.setLevel(log.levels.INFO);
     log.info(
-        'Asterics AAC, release version: https://github.com/asterics/Asterics-AAC/releases/tag/' +
+        'Grilo Falante (based on AsTeRICS Grid), release version: https://github.com/asterics/Asterics-AAC/releases/tag/' +
             constants.CURRENT_VERSION
     );
     consoleReService.init();

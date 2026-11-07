@@ -2,10 +2,10 @@
     <component :is="tag" v-if="!fullHeader || show">
         <div>
             <div v-if="show">
-                <a tabindex="20" href="javascript:void(0)" :aria-label="$t('openSidebar')" @click="openSidebar()" style="margin: 0.2em 1em 0 0.5em; color: #266697;"><i class="fas fa-2x fa-bars inline"></i></a>
-                <a tabindex="21" aria-hidden="true" href="#main" class="hide-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/asterics-aac-logo-raw.svg" height="40" alt="Asterics AAC"/></h1></a>
+                <a tabindex="20" href="javascript:void(0)" :aria-label="$t('openSidebar')" @click="openSidebar()" style="margin: 0.2em 1em 0 0.5em; color: #1D6B35;"><i class="fas fa-2x fa-bars inline"></i></a>
+                <a tabindex="21" aria-hidden="true" href="#main" class="hide-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/grilo/logo-horizontal.svg" height="40" alt="Grilo Falante"/></h1></a>
             </div>
-            <a tabindex="22" aria-hidden="true" href="#main" class="show-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/favicon.svg" alt="Asterics AAC" style="margin: 0"/></h1></a>
+            <a tabindex="22" aria-hidden="true" href="#main" class="show-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/grilo/logo-icone.svg" alt="Grilo Falante" style="margin: 0"/></h1></a>
         </div>
     </component>
 </template>
