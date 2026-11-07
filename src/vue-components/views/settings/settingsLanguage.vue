@@ -48,6 +48,11 @@
                     <button id="testVoice" class="three columns" @click="testSpeak">{{ $t('test') }}</button>
                 </div>
                 <div class="srow">
+                    <accordion :acc-label="$t('offlineVoiceTitle')" class="eleven columns">
+                        <offline-voice-helper :can-select="true" :current-voice-id="userSettingsLocal.voiceConfig.preferredVoice" @use-voice="useVoice"/>
+                    </accordion>
+                </div>
+                <div class="srow">
                     <accordion :acc-label="$t('advancedVoiceSettings')" class="eleven columns">
                         <div v-if="userSettingsLocal.voiceConfig.preferredVoice">
                             <slider-input :label="$t('voicePitch')" id="voicePitch" min="0.1" max="2" step="0.1" decimals="1" v-model.number="userSettingsLocal.voiceConfig.voicePitch" @change="saveUserSettings(true)"/>
@@ -120,12 +125,13 @@
     import { settingsSaveMixin } from './settingsSaveMixin';
     import Accordion from "../../components/accordion.vue";
     import SliderInput from '../../modals/input/sliderInput.vue';
+    import OfflineVoiceHelper from './offlineVoiceHelper.vue';
 
     let KEY_SETTINGS_SHOW_ALL_VOICES = "KEY_SETTINGS_SHOW_ALL_VOICES";
     let KEY_SETTINGS_SHOW_ALL_CONTENTLANGS = "KEY_SETTINGS_SHOW_ALL_CONTENTLANGS";
 
     export default {
-        components: { SliderInput, Accordion},
+        components: { SliderInput, Accordion, OfflineVoiceHelper },
         props: ["userSettingsLocal", "metadata"],
         mixins: [settingsSaveMixin],
         data() {
@@ -225,6 +231,16 @@
                 let voice = this.voices.filter(voice => voice.id === this.userSettingsLocal.voiceConfig.preferredVoice)[0];
                 let voiceLang = voice ? voice.lang : i18nService.getContentLang();
                 this.testText = i18nService.tl('thisIsAnEnglishSentence', [], i18nService.getBaseLang(voiceLang))
+            },
+            useVoice(voiceId) {
+                // voice chosen in the offline voice check: show all voices if it has another language than the content
+                if (!this.selectVoices.map(v => v.id).includes(voiceId)) {
+                    this.selectAllVoices = true;
+                    this.showAllVoicesChanged();
+                }
+                this.userSettingsLocal.voiceConfig.preferredVoice = voiceId;
+                this.resetVoiceProps();
+                this.saveUserSettings(true);
             },
             testSpeak() {
                 speechService.speak(this.testText, {preferredVoice: this.userSettingsLocal.voiceConfig.preferredVoice});

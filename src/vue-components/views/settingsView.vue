@@ -14,6 +14,7 @@
             <settings-appearance v-if="currentTab === TABS.TAB_APPEARANCE" :metadata="metadata" :user-settings-local="userSettingsLocal" @changing="onChanging" @changed="onChanged"/>
             <settings-input-methods v-if="currentTab === TABS.TAB_INPUTMETHODS" :metadata="metadata" :user-settings-local="userSettingsLocal" @changing="onChanging" @changed="onChanged"/>
             <settings-integrations v-if="currentTab === TABS.TAB_INTEGRATIONS" :metadata="metadata" :user-settings-local="userSettingsLocal" :app-settings="appSettings" @changing="onChanging" @changed="onChanged"/>
+            <settings-offline v-if="currentTab === TABS.TAB_OFFLINE" :metadata="metadata" :user-settings-local="userSettingsLocal"/>
         </div>
         <div class="bottom-spacer"></div>
     </div>
@@ -29,13 +30,15 @@
     import SettingsIntegrations from './settings/settingsIntegrations.vue';
     import SettingsAppearance from './settings/settingsAppearance.vue';
     import SettingsInputMethods from './settings/settingsInputMethods.vue';
+    import SettingsOffline from './settings/settingsOffline.vue';
 
     const TABS = {
         TAB_GENERAL: 'TAB_GENERAL',
         TAB_LANGUAGE: 'TAB_LANGUAGE',
         TAB_APPEARANCE: 'TAB_APPEARANCE',
         TAB_INPUTMETHODS: 'TAB_INPUTMETHODS',
-        TAB_INTEGRATIONS: 'TAB_INTEGRATIONS'
+        TAB_INTEGRATIONS: 'TAB_INTEGRATIONS',
+        TAB_OFFLINE: 'TAB_OFFLINE'
     };
 
     const SAVE_STATES = {
@@ -45,7 +48,7 @@
     };
 
     export default {
-        components: { SettingsInputMethods, SettingsAppearance, SettingsIntegrations, SettingsLanguage, SettingsGeneral, NavTabs, HeaderIcon},
+        components: { SettingsOffline, SettingsInputMethods, SettingsAppearance, SettingsIntegrations, SettingsLanguage, SettingsGeneral, NavTabs, HeaderIcon},
         props: [],
         data() {
             return {

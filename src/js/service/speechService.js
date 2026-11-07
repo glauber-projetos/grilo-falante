@@ -283,6 +283,64 @@ speechService.testSpeak = function(voiceId, testSentence, testLang) {
 };
 
 /**
+ * speaks a sample sentence and tells if the voice really started speaking.
+ * Used by the offline voice check: if a device voice starts while there is no internet, it works offline.
+ * @param voiceId id of the voice to test (a voice of speechService.getVoices())
+ * @param text sentence to speak
+ * @param options.timeoutMs (optional) how long to wait for the voice to start, default 6000
+ * @return {Promise<{started: boolean|null, error: string|null}>} started is null if it can't be detected
+ *         (voices that are not device voices)
+ */
+speechService.speakSample = function(voiceId, text, options = {}) {
+    let timeoutMs = options.timeoutMs || 6000;
+    let voice = (getVoicesById(voiceId) || [])[0];
+    let isNative = voice && voice.type === constants.VOICE_TYPE_NATIVE;
+    if (!voice || !isNative || !speechService.nativeSpeechSupported()) {
+        if (voice) {
+            speechService.speak(text, { preferredVoice: voiceId, useStandardRatePitch: true });
+        }
+        return Promise.resolve({ started: voice ? null : false, error: voice ? null : 'no-voice' });
+    }
+    speechService.stopSpeaking();
+    return new Promise(resolve => {
+        let done = false;
+        let finish = (started, error) => {
+            if (done) {
+                return;
+            }
+            done = true;
+            clearTimeout(timeoutHandler);
+            resolve({ started: started, error: error || null });
+        };
+        let msg = new SpeechSynthesisUtterance(text);
+        if (voice.ref) {
+            msg.voice = voice.ref;
+        }
+        msg.lang = voice.langFull || voice.lang;
+        let userSettings = localStorageService.getUserSettings();
+        msg.volume = userSettings && typeof userSettings.systemVolume === 'number' ? Math.max(0.5, userSettings.systemVolume / 100.0) : 1;
+        msg.addEventListener('start', () => {
+            hasSpoken = true;
+            isSpeakingNative = true;
+            finish(true);
+        });
+        let startTime = Date.now();
+        msg.addEventListener('end', () => {
+            isSpeakingNative = false;
+            // some Android versions don't send "start", but "end" after really speaking.
+            // An "end" right away means nothing was spoken (e.g. voice data missing).
+            finish(Date.now() - startTime > 400, Date.now() - startTime > 400 ? null : 'ended-immediately');
+        });
+        msg.addEventListener('error', (event) => {
+            isSpeakingNative = false;
+            finish(false, (event && event.error) || 'error');
+        });
+        let timeoutHandler = setTimeout(() => finish(false, 'timeout'), timeoutMs);
+        window.speechSynthesis.speak(msg);
+    });
+};
+
+/**
  * returns array of languages codes where a TTS voice exists
  * @return {*} array of languages where one element has properties [en, de, code].
  */

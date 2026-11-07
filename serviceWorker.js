@@ -19,7 +19,10 @@ constants.SW_CACHE_TYPE_IMG = 'CACHE_TYPE_IMG';
 constants.SW_CACHE_TYPE_GENERIC = 'CACHE_TYPE_GENERIC';
 constants.SW_CONSOLE = 'SW_CONSOLE';
 constants.ENABLE_REMOTE_DEBUGGING = false;
-constants.KNOWN_IMAGE_APIS = ['https://api.arasaac.org', 'https://d18vdu4p71yql0.cloudfront.net'];
+constants.KNOWN_IMAGE_APIS = ['https://api.arasaac.org', 'https://static.arasaac.org', 'https://d18vdu4p71yql0.cloudfront.net', 'https://globalsymbols.com'];
+// these image sources send CORS headers, so a normal (checkable) response is always possible. An "opaque" (no-cors)
+// response of them is never stored: it can't be checked for errors and browsers count it with ~7 MB against the quota.
+constants.KNOWN_CORS_IMAGE_APIS = constants.KNOWN_IMAGE_APIS;
 
 const APP_CACHE_NAME = "app-cache";
 let imageCachePromise = null;
@@ -77,8 +80,10 @@ const dynamicImageHandler = async ({ url, request }) => {
         }
     }
 
-    // Cache successful responses
-    if (response.status === 200 || response.status === 304 || response.type === 'opaque') {
+    // Cache successful responses (the page also fills this cache: offlineService.downloadImages())
+    let isOpaque = response.type === 'opaque';
+    let opaqueAllowed = !constants.KNOWN_CORS_IMAGE_APIS.some(apiUrl => url.href.startsWith(apiUrl));
+    if (response.status === 200 || response.status === 304 || (isOpaque && opaqueAllowed)) {
         let responseToCache = response.clone();
         await cache.put(url.href, responseToCache);
     }
