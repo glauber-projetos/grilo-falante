@@ -1,5 +1,13 @@
 <template>
     <div class="p-4">
+        <div class="gf-wizard-card">
+            <img src="app/img/grilo/grilo-apontando.svg" alt="" aria-hidden="true"/>
+            <div>
+                <h2>{{ $t('wizardCardTitle') }}</h2>
+                <p>{{ $t('wizardCardText') }}</p>
+                <a href="#configurar" class="button big-button gf-wizard-btn">{{ $t('wizardCardButton') }}</a>
+            </div>
+        </div>
         <h2 class="my-3">{{ $t('chooseHowToStart') }}</h2>
         <div class="container-fluid">
             <div class="mt-2 mb-5 row">
@@ -125,6 +133,36 @@
 </script>
 
 <style scoped>
+    /* Grilo Falante: guided setup card */
+    .gf-wizard-card {
+        display: flex;
+        gap: 1.2em;
+        align-items: center;
+        background: var(--gf-folha, #E7F2E0);
+        border: 2px solid var(--gf-mata, #1D6B35);
+        border-radius: 16px;
+        padding: 1em 1.2em;
+        margin-bottom: 1.5em;
+    }
+    .gf-wizard-card img {
+        width: 5em;
+        flex: none;
+    }
+    .gf-wizard-card h2 {
+        margin: 0 0 0.2em;
+    }
+    .gf-wizard-card p {
+        margin: 0 0 0.8em;
+    }
+    .gf-wizard-btn {
+        display: inline-flex;
+        align-items: center;
+        text-transform: none;
+        letter-spacing: 0;
+        height: auto;
+        padding: 0.6em 1.4em;
+    }
+
 #boardGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 400px); grid-gap: 1rem; list-style-type: none

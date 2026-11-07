@@ -98,7 +98,7 @@
             useDefaultUser() {
                 this.loading = true;
                 loginService.registerOffline(constants.LOCAL_NOLOGIN_USERNAME, constants.LOCAL_NOLOGIN_USERNAME).then(() => {
-                    Router.toManageGrids();
+                    Router.toSetupWizard(); // Grilo Falante: guided setup on first use
                 });
             },
             openHelp() {

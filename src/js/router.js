@@ -19,6 +19,7 @@ import { databaseService } from './service/data/databaseService';
 import { localStorageService } from './service/data/localStorageService';
 import { MainVue } from './vue/mainVue';
 import HelpView from '../vue-components/views/helpView.vue';
+import SetupWizardView from '../vue-components/wizard/setupWizardView.vue';
 import { constants } from './util/constants.js';
 import { urlParamService } from './service/urlParamService';
 
@@ -121,6 +122,10 @@ Router.init = function (injectIdParam, initialHash) {
         },
         help: function () {
             loadVueView(HelpView);
+        },
+        configurar: function () {
+            // Grilo Falante: setup wizard for families (first use)
+            loadVueView(SetupWizardView);
         },
         '*': function () {
             helpService.setHelpLocation('02_navigation', '#main-view');
@@ -254,6 +259,10 @@ Router.toEditGrid = async function(id, highlightId) {
     if (id) {
         Router.to(`#grid/edit/${id}/${highlightId ? highlightId : ''}`);
     }
+};
+
+Router.toSetupWizard = function () {
+    Router.to('#configurar');
 };
 
 Router.toManageGrids = function () {
