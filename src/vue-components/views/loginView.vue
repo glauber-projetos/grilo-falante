@@ -1,326 +1,324 @@
 <template>
-    <div class="overflow-content">
-        <header-icon full-header="true"></header-icon>
-        <div class="srow content spaced" @keyup.enter="loginPlain(user, password)">
-            <h2><span class="show-mobile">Grilo Falante - </span><span>{{ $t('login') }}</span></h2>
-            <div class="eleven columns offset-by-one">
-                <div v-show="allUsersList.length > 0">
-                    <div class="srow">
-                        <div class="eleven columns">
-                            <div class="srow saved-user" v-for="username in allUsersList" style="margin-bottom: 0">
-                                <div :class="username === activeUser ? 'loggedIn' : ''">
-                                    <div class="four columns" style="margin-bottom: 0.5em">
-                                    <span style="margin-right: 0.6em">
-                                        <span class="fa-stack" v-if="savedLocalUsers.includes(username)" :title="'LABEL_USER_LOCAL' | translate">
-                                            <i class="fas fa-user fa-2x" ></i>
-                                        </span>
-                                        <span class="fa-stack" v-if="savedOnlineUsers.includes(username)" :title="'LABEL_USER_CLOUD' | translate">
-                                            <i class="fas fa-user fa-stack-2x"></i>
-                                            <i class="fas fa-cloud fa-1x" style="position: absolute; top: 20px; left: 20px; color: dodgerblue"></i>
-                                        </span>
-                                        <span class="fa-stack" v-if="!savedOnlineUsers.includes(username) && !savedLocalUsers.includes(username)" :title="'LABEL_USER_ONLINE' | translate">
-                                            <i class="fas fa-user fa-stack-2x"></i>
-                                            <i class="fas fa-globe fa-1x" style="position: absolute; top: 20px; left: 20px; color: dodgerblue"></i>
-                                        </span>
-                                    </span>
-                                        <strong >{{username}}</strong>
-                                        <em v-show="username === activeUser">{{ $t('activeBracket') }}</em>
-                                    </div>
-                                    <button class="four columns" @click="loginStored(username)" v-show="hasValidMajorModelVersion(username)">
-                                        <span>{{ $t('open') }}</span>
-                                        <i class="fas fa-sign-in-alt" v-show="loginTryUser !== username"></i>
-                                        <i class="fas fa-spinner fa-spin" v-show="loginSuccess == undefined && loginTryUser === username"></i>
-                                        <i style="color: red" class="fas fa-times" v-show="loginSuccess == false && loginTryUser === username"/>
-                                        <i style="color: green" class="fas fa-check" v-show="loginSuccess == true && loginTryUser === username"/>
-                                    </button>
-                                    <button class="four columns" @click="removeStoredUser(username)" v-show="hasValidMajorModelVersion(username)">
-                                        <span v-show="!savedLocalUsers.includes(username)">
-                                            <span>{{ $t('logout') }}</span> <i class="fas fa-user-times"></i>
-                                        </span>
-                                            <span v-show="savedLocalUsers.includes(username)">
-                                            <span>{{ $t('delete') }}</span> <i class="fas fa-trash"></i>
-                                        </span>
-                                    </button>
-                                    <div class="eight columns" v-show="!hasValidMajorModelVersion(username)">
-                                        <div>
-                                            <i class="fas fa-exclamation-triangle"></i> <span>{{ $t('incompatibleDataModelVersion') }}</span>
-                                        </div>
-                                        <div>
-                                            <i18n path="changeToLatestToOpen" tag="span">
-                                                <template v-slot:latestLink>
-                                                    <a href="https://grid.asterics.eu/latest/#login">grid.asterics.eu/latest</a>
-                                                </template>
-                                            </i18n>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <div class="overflow-content g-tela conta">
+        <aside class="conta-arte" aria-hidden="true">
+            <img src="app/img/grilo/grilo-falando.svg" alt="" class="conta-grilo"/>
+            <p class="conta-arte-frase">{{ $t('entradaContaArteFrase') }}</p>
+        </aside>
+
+        <main class="conta-lado">
+            <header class="conta-topo">
+                <button type="button" class="g-btn g-btn-leve" @click="voltar()">
+                    <i class="ti ti-arrow-left" aria-hidden="true"></i> {{ $t('entradaVoltarPerfis') }}
+                </button>
+            </header>
+
+            <div class="conta-corpo">
+                <h1>{{ $t('entradaEntrarComConta') }}</h1>
+
+                <div v-if="!temServidor" class="conta-sem-servidor">
+                    <div class="g-aviso" role="status">
+                        <i class="ti ti-cloud-off" aria-hidden="true"></i>
+                        <div>
+                            <strong>{{ $t('entradaContasEmBreve') }}</strong>
+                            <p>{{ $t('entradaContasEmBreveTexto') }}</p>
                         </div>
                     </div>
-                    <div class="srow">
-                        <form autocomplete="on" class="eleven columns saved-user" onsubmit="event.preventDefault()">
-                            <div class="srow">
-                                <strong>{{ $t('loginWithOtherUser') }}</strong>
-                            </div>
-                            <div class="srow">
-                                <label for="inputUser" class="two columns"><span>{{ $t('username') }}</span></label>
-                                <input type="text" name="username" v-model="user" id="inputUser" class="four columns" autocomplete="username"/>
-                                <button type="button" v-if="savedUsers.includes(user) && hasValidMajorModelVersion(user)" class="four columns" @click="loginStored(user)">
-                                    <span>{{ $t('open') }}</span> <i class="fas fa-sign-in-alt"></i>
-                                </button>
-                            </div>
-                            <div class="srow" v-show="!savedUsers.includes(user)">
-                                <label for="inputPassword" class="two columns"><span>{{ $t('password') }}</span></label>
-                                <input type="password" v-model="password" id="inputPassword" class="four columns" autocomplete="current-password"/>
-                            </div>
-                            <div class="srow" v-show="!savedUsers.includes(user)">
-                                <div class="four columns offset-by-two" style="margin-bottom: 1.0em">
-                                    <input type="checkbox" checked v-model="remember" id="inputRemember"/>
-                                    <label for="inputRemember"><span>{{ $t('rememberThisUserAndMakeItAvailableForOfflineUse') }}</span></label>
-                                </div>
-                                <button type="button" @click="loginPlain(user, password)" :disabled="!user || !password" class="five columns offset-by-one">
-                                    <span>{{ $t('login') }}</span>
-                                    <span>
-                                        <i class="fas fa-spinner fa-spin" v-show="loginSuccess === undefined && loginTryUser === user"/>
-                                        <i style="color: red" class="fas fa-times" v-show="loginSuccess == false && loginTryUser === user"/>
-                                        <i style="color: green" class="fas fa-check" v-show="loginSuccess == true && loginTryUser === user"/>
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <button type="button" class="g-btn g-btn-principal g-btn-grande g-btn-bloco" @click="voltar()">
+                        <i class="ti ti-device-tablet" aria-hidden="true"></i> {{ $t('entradaUsarSoNesteAparelho') }}
+                    </button>
+                    <button v-if="!mostrarContaAntiga" type="button" class="conta-link" @click="mostrarContaAntiga = true" :aria-expanded="'false'">
+                        {{ $t('entradaTenhoContaAntiga') }}
+                    </button>
+                    <p v-else class="g-dica">{{ $t('entradaContaAntigaDica') }}</p>
                 </div>
-                <div v-show="allUsersList.length == 0">
-                    <form autocomplete="on" onsubmit="event.preventDefault()">
-                        <div class="srow">
-                            <label for="inputUser2" class="one column"><span class="desktop-right">{{ $t('username') }}</span></label>
-                            <input type="text" name="username" v-model="user" id="inputUser2" class="four columns" autocomplete="username"/>
-                        </div>
-                        <div class="srow">
-                            <label for="inputPassword2" class="one column"><span class="desktop-right">{{ $t('password') }}</span></label>
-                            <input type="password" v-model="password" id="inputPassword2" class="four columns" autocomplete="current-password"/>
-                        </div>
-                        <div class="srow">
-                            <div class="four columns offset-by-one">
-                                <input type="checkbox" checked v-model="remember" id="inputRemember2"/>
-                                <label for="inputRemember2"><span>{{ $t('rememberThisUserAndMakeItAvailableForOfflineUse') }}</span></label>
-                                <br/>
-                                <span class="fa fa-info-circle"/> <span>{{ $t('doNotCheckForAOnetimeLoginOnForeign') }}</span>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="srow">
-                        <button @click="loginPlain(user, password)" :disabled="!user || !password" class="four columns offset-by-one">{{ $t('login') }}</button>
+
+                <form v-if="temServidor || mostrarContaAntiga" class="conta-form" autocomplete="on" @submit.prevent="entrar()" novalidate>
+                    <div class="g-campo" :class="{'g-campo-erro': erro && !usuario}">
+                        <label for="contaUsuario">{{ $t('entradaNomeDeUsuario') }}</label>
+                        <input id="contaUsuario" ref="usuario" type="text" name="username" v-model.trim="usuario" autocapitalize="none"
+                               autocomplete="username" spellcheck="false" @input="erro = null"/>
                     </div>
-                    <div class="srow">
-                        <div class="four columns offset-by-one">
-                            <div v-show="loginSuccess === undefined">
-                                <span>{{ $t('loggingIn') }}</span> <i class="fas fa-spinner fa-spin"/>
-                            </div>
-                            <div v-show="loginSuccess === false">
-                                <i style="color: red" class="fas fa-times"/>
-                                <span>{{loginErrorCode | translate}}</span>
-                            </div>
-                            <div v-show="loginSuccess === true">
-                                <span>{{ $t('loginSuccessful') }}</span> <i style="color: green" class="fas fa-check"/>
-                            </div>
+                    <div class="g-campo" :class="{'g-campo-erro': erro && !senha}">
+                        <label for="contaSenha">{{ $t('entradaSenha') }}</label>
+                        <div class="conta-senha">
+                            <input id="contaSenha" :type="verSenha ? 'text' : 'password'" name="password" v-model="senha"
+                                   autocomplete="current-password" @input="erro = null"/>
+                            <button type="button" class="g-btn g-btn-icone conta-ver" @click="verSenha = !verSenha"
+                                    :aria-label="verSenha ? $t('entradaEsconderSenha') : $t('entradaMostrarSenha')" :aria-pressed="String(verSenha)">
+                                <i :class="verSenha ? 'ti ti-eye-off' : 'ti ti-eye'" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
-                <div class="srow">
-                    <div class="twelve columns">
-                        <span v-show="allUsersList.length === 0">{{ $t('noAccount') }}</span>
-                        <span v-show="allUsersList.length > 0">{{ $t('addNewAccount') }}</span>
-                        <a href="#register">{{ $t('registernow') }}</a>
-                        <div v-show="allUsersList.length === 0">
-                            <span>{{ $t('astericsGridIsFreeAndAllYouNeedToRegister') }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="srow">
-                    <div class="twelve columns">
-                        <span>{{ $t('wantToCreateAnOfflineonlyUser') }}</span>
-                        <a href="#add">{{ $t('addOfflineUser') }}</a>
-                    </div>
-                </div>
-                <div style="margin-top: 4em">
-                    <accordion :acc-label="$t('advancedOptions')" acc-background-color="white">
-                        <button class="btn-danger" @click="deleteOnlineUser(activeUser)" :disabled="!activeUser || !savedOnlineUsers.includes(activeUser)">
-                            <span class="fas fa-trash"></span>
-                            <span>{{ $t('deleteOnlineUser') }}</span>
-                        </button>
-                    </accordion>
-                </div>
+                    <label class="g-marcar">
+                        <input type="checkbox" v-model="lembrar"/>
+                        <span>
+                            {{ $t('entradaLembrarConta') }}
+                            <span class="g-dica conta-dica-bloco">{{ $t('entradaLembrarContaDica') }}</span>
+                        </span>
+                    </label>
+
+                    <p v-if="erro" class="g-erro conta-erro" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i> {{ erro }}</p>
+
+                    <button type="submit" class="g-btn g-btn-principal g-btn-grande g-btn-bloco" :disabled="entrando">
+                        <i :class="entrando ? 'ti ti-loader-2 conta-girar' : 'ti ti-login-2'" aria-hidden="true"></i>
+                        {{ entrando ? $t('entradaEntrando') : $t('entradaEntrar') }}
+                    </button>
+                </form>
+
+                <p v-if="temServidor" class="conta-rodape">
+                    {{ $t('entradaNaoTemConta') }}
+                    <button type="button" class="conta-link" @click="criarConta()">{{ $t('entradaCriarConta') }}</button>
+                </p>
             </div>
-        </div>
-        <div class="bottom-spacer"></div>
+        </main>
     </div>
 </template>
 
 <script>
-    import {i18nService} from "../../js/service/i18nService";
-    import {loginService} from './../../js/service/loginService.js';
-    import {databaseService} from "../../js/service/data/databaseService";
-    import {localStorageService} from "../../js/service/data/localStorageService";
-    import {Router} from "../../js/router";
-    import HeaderIcon from '../../vue-components/components/headerIcon.vue'
-    import {modelUtil} from "../../js/util/modelUtil";
-    import $ from '../../js/externals/jquery';
+    /**
+     * Grilo Falante: "Entrar com conta". Tela dividida (arte do grilo + formulário), rótulos em cima dos campos.
+     * Enquanto o Grilo Falante não tem servidor de login próprio (constants.HAS_CUSTOM_LOGIN_SERVER falso),
+     * explica que as contas online ainda não existem e oferece usar só neste aparelho. A conta antiga
+     * (servidor do app original) continua possível, escondida atrás de um link discreto.
+     */
+    import { loginService } from './../../js/service/loginService.js';
+    import { localStorageService } from "../../js/service/data/localStorageService";
+    import { Router } from "../../js/router";
     import { constants } from '../../js/util/constants';
-    import Accordion from '../components/accordion.vue';
-    import { MainVue } from '../../js/vue/mainVue';
 
     export default {
-        components: { Accordion, HeaderIcon},
-        props: [],
         data() {
             return {
-                user: null,
-                password: null,
-                remember: true,
-                loginTryUser: null,
-                loginSuccess: null,
-                loginErrorCode: null,
-                savedUsers: [],
-                savedOnlineUsers: [],
-                savedLocalUsers: [],
-                allUsersList: [],
-                activeUser: null
+                temServidor: constants.HAS_CUSTOM_LOGIN_SERVER,
+                mostrarContaAntiga: false,
+                usuario: '',
+                senha: '',
+                verSenha: false,
+                lembrar: true,
+                entrando: false,
+                erro: null
+            };
+        },
+        watch: {
+            mostrarContaAntiga(valor) {
+                if (valor) {
+                    this.$nextTick(() => this.$refs.usuario && this.$refs.usuario.focus());
+                }
             }
         },
         methods: {
-            toMain() {
-                Router.toMain();
+            voltar() {
+                Router.to('#welcome');
             },
-            loginPlain(user, password) {
-                let thiz = this;
-                if (this.savedUsers.includes(user)) {
-                    thiz.loginStored(user);
+            criarConta() {
+                Router.toRegister();
+            },
+            textoDoErro(motivo) {
+                if (motivo === loginService.ERROR_CODE_UNAUTHORIZED) {
+                    return this.$t('entradaErroSenha');
+                }
+                if (motivo === loginService.ERROR_CODE_LOCKED) {
+                    return this.$t('entradaErroBloqueada');
+                }
+                if (motivo === loginService.ERROR_CODE_NETWORK_ERROR || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                    return this.$t('entradaErroSemInternet');
+                }
+                return this.$t('entradaErroEntrarConta');
+            },
+            async entrar() {
+                if (this.entrando) {
                     return;
                 }
-                if (!user || !password) {
+                let usuario = (this.usuario || '').toLowerCase();
+                if (!usuario || !this.senha) {
+                    this.erro = this.$t('entradaPreenchaUsuarioSenha');
                     return;
                 }
-                thiz.loginTryUser = user;
-                thiz.loginSuccess = undefined;
-                thiz.loginErrorCode = '';
-                loginService.loginPlainPassword(user, password, this.remember).then(() => {
-                    thiz.loginSuccess = true;
+                this.erro = null;
+                this.entrando = true;
+                try {
+                    if (localStorageService.getSavedUsers().includes(usuario)) {
+                        await loginService.loginStoredUser(usuario, true);
+                    } else {
+                        await loginService.loginPlainPassword(usuario, this.senha, this.lembrar);
+                    }
                     Router.toMain();
-                }).catch((reason) => {
-                    thiz.loginSuccess = false;
-                    thiz.loginErrorCode = reason;
-                });
-            },
-            loginStored(user) {
-                let thiz = this;
-                if (!user || (!thiz.savedUsers.includes(user) && loginService.getLoggedInUsername() !== user)) {
-                    return;
+                } catch (motivo) {
+                    log.warn('login failed', motivo);
+                    this.erro = this.textoDoErro(motivo);
                 }
-                thiz.loginSuccess = undefined;
-                thiz.loginTryUser = user;
-                thiz.loginErrorCode = '';
-                loginService.loginStoredUser(user).then(() => {
-                    thiz.loginSuccess = true;
-                }).catch(reason => {
-                    thiz.loginSuccess = false;
-                    thiz.loginErrorCode = reason;
-                });
-            },
-            removeStoredUser(user) {
-                let localSettings = localStorageService.getUserSettings(user);
-                if (!(this.savedOnlineUsers.includes(user) || this.savedLocalUsers.includes(user))) {
-                    loginService.logout();
-                } else {
-                    let messageKey = this.savedOnlineUsers.includes(user) ? 'CONFIRM_REMOVE_USER' : 'CONFIRM_REMOVE_USER_LOCAL';
-                    if (!confirm(i18nService.t(messageKey, user))) {
-                        return;
-                    }
-                    localStorageService.removeLocalUser(user);
-                    if (loginService.getLoggedInUsername() === user) {
-                        loginService.logout();
-                    }
-                    databaseService.deleteDatabase(user);
-                }
-                this.updateUserLists();
-                $(document).trigger(constants.EVENT_USER_DELETED, [user, localSettings]);
-            },
-            async deleteOnlineUser(user) {
-                let givenPassword = prompt(i18nService.t('CONFIRM_DELETE_USER_ONLINE', user));
-                if (givenPassword === null) {
-                    return;
-                }
-                let deleteStatus = await loginService.deleteOnlineUser(user, givenPassword);
-                if (deleteStatus === loginService.DELETE_SUCCESS) {
-                    let localSettings = localStorageService.getUserSettings(user);
-                    localStorageService.removeLocalUser(user);
-                    databaseService.deleteDatabase(user);
-                    loginService.logout();
-                    this.activeUser = null;
-                    this.updateUserLists();
-                    $(document).trigger(constants.EVENT_USER_DELETED, [user, localSettings]);
-                    MainVue.setTooltip(i18nService.t('successRemovedOnlineUser', user), {
-                        msgType: "success"
-                    });
-                } else if (deleteStatus === loginService.DELETE_FAILED_WRONG_PASSWORD) {
-                    MainVue.setTooltip(i18nService.t('errorRemovingOnlineUserWrongPass', user), {
-                        msgType: "warn"
-                    });
-                } else {
-                    MainVue.setTooltip(i18nService.t('errorRemovingOnlineUser', user), {
-                        msgType: "warn"
-                    });
-                }
-            },
-            updateUserLists() {
-                this.allUsersList = localStorageService.getSavedUsers(this.activeUser);
-                this.savedUsers = localStorageService.getSavedUsers(this.activeUser);
-                this.savedOnlineUsers = localStorageService.getSavedOnlineUsers();
-                this.savedLocalUsers = localStorageService.getSavedLocalUsers();
-            },
-            hasValidMajorModelVersion(user) {
-                return modelUtil.hasValidMajorModelVersion(user);
+                this.entrando = false;
             }
         },
         mounted() {
-            let currentlyLoggedInUser = loginService.getLoggedInUsername();
-            this.activeUser = localStorageService.getAutologinUser() || currentlyLoggedInUser;
-            this.savedUsers = localStorageService.getSavedUsers(this.activeUser);
-            this.allUsersList = localStorageService.getSavedUsers(this.activeUser);
-            this.savedOnlineUsers = localStorageService.getSavedOnlineUsers();
-            this.savedLocalUsers = localStorageService.getSavedLocalUsers();
-            if (currentlyLoggedInUser && !this.allUsersList.includes(currentlyLoggedInUser)) {
-                this.allUsersList.unshift(currentlyLoggedInUser);
-            }
-            this.user = this.allUsersList && this.allUsersList.length > 0 ? null : localStorageService.getLastActiveUser();
-            if (this.user) {
-                document.getElementById('inputPassword2').focus();
+            if (this.temServidor) {
+                this.usuario = localStorageService.getLastActiveUser() || '';
+                this.$nextTick(() => this.$refs.usuario && this.$refs.usuario.focus());
             }
         }
-    }
+    };
 </script>
 
 <style scoped>
-    .content {
+    .conta {
+        min-height: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+    .conta-arte {
+        background: var(--g-folha-clara);
         display: flex;
         flex-direction: column;
-        flex: 1 0 auto;
+        align-items: center;
+        justify-content: center;
+        gap: var(--g-e4);
+        padding: var(--g-e6) var(--g-e5);
+        text-align: center;
     }
-    .srow {
-        margin-bottom: 1.0em;
+    .conta-grilo {
+        width: min(260px, 70%);
+        height: auto;
     }
-    .saved-user {
-        outline: 1px solid lightgray;
-        padding: 1.0em;
+    .conta-arte-frase {
+        font-family: var(--g-fonte-titulo);
+        font-weight: 700;
+        font-size: var(--g-t-h2);
+        line-height: 1.2;
+        color: var(--g-folha-escura);
+        max-width: 14em;
+        margin: 0;
     }
-    .loggedIn .fa-user {
-        color: black;
+    .conta-lado {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
     }
-    .fa-user {
-        color: gray;
+    .conta *, .conta *::before, .conta *::after {
+        box-sizing: border-box;
     }
-    .fa-info-circle {
-        color: blue;
-        margin-left: 3px;
+    .conta-topo {
+        background: transparent;
+        border: none;
+        padding: var(--g-e2) var(--g-e3);
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+    }
+    .conta-corpo {
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto;
+        padding: var(--g-e3) var(--g-e4) var(--g-e6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e4);
+    }
+    .conta-corpo h1 {
+        margin: 0;
+    }
+    .conta-sem-servidor {
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e4);
+    }
+    .conta-sem-servidor .g-aviso p {
+        margin: var(--g-e1) 0 0;
+    }
+    .conta-form {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+    }
+    .conta-senha {
+        display: flex;
+        gap: var(--g-e2);
+        align-items: center;
+    }
+    .conta-senha input {
+        flex: 1;
+        min-width: 0;
+    }
+    .conta-ver {
+        flex: none;
+    }
+    .conta-dica-bloco {
+        display: block;
+        font-weight: 400;
+    }
+    .conta-form .g-marcar {
+        margin-bottom: var(--g-e4);
+        font-weight: 700;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .conta-erro {
+        display: flex;
+        gap: var(--g-e2);
+        align-items: center;
+        margin: 0 0 var(--g-e3);
+        font-size: var(--g-t-corpo);
+    }
+    .conta-link {
+        align-self: flex-start;
+        margin: 0;
+        padding: 0 var(--g-e1);
+        min-height: var(--g-alvo);
+        background: transparent;
+        border: none;
+        color: var(--g-folha-escura);
+        font-family: var(--g-fonte);
+        font-size: var(--g-t-corpo);
+        font-weight: 700;
+        text-decoration: underline;
+        text-transform: none;
+        letter-spacing: 0;
+        height: auto;
+        cursor: pointer;
+    }
+    .conta-link:hover {
+        color: var(--g-tinta);
+        background: transparent;
+    }
+    .conta-link:focus-visible {
+        outline: none;
+        box-shadow: var(--g-foco);
+        border-radius: var(--g-raio-p);
+    }
+    .conta-rodape {
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--g-e1);
+        color: var(--g-tinta-2);
+    }
+    .conta-girar {
+        display: inline-block;
+        animation: conta-girar 0.9s linear infinite;
+    }
+    @keyframes conta-girar {
+        to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .conta-girar { animation: none; }
+    }
+    @media (max-width: 760px) {
+        .conta {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto 1fr;
+        }
+        .conta-arte {
+            order: 2;
+            flex-direction: row;
+            padding: var(--g-e4);
+            gap: var(--g-e3);
+        }
+        .conta-grilo {
+            width: 72px;
+        }
+        .conta-arte-frase {
+            font-size: var(--g-t-h3);
+            text-align: left;
+        }
     }
 </style>

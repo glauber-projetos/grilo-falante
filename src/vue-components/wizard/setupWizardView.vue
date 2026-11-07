@@ -1,5 +1,5 @@
 <template>
-    <div class="overflow-content wz-page">
+    <div class="overflow-content g-tela wz-page">
         <div class="wz-wrap">
             <header class="wz-header">
                 <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="wz-grilo"/>
@@ -9,37 +9,45 @@
                         <i v-for="n in TOTAL" :key="n" :class="{on: n <= step}"></i>
                     </div>
                 </div>
-                <button type="button" class="wz-later" @click="doLater()">{{ $t('wizardDoLater') }}</button>
+                <button v-if="novaCrianca" type="button" class="g-btn g-btn-leve" @click="cancel()" :disabled="saving">
+                    <i class="ti ti-x" aria-hidden="true"></i> {{ $t('entradaCancelar') }}
+                </button>
+                <button v-else type="button" class="g-btn g-btn-leve" @click="doLater()">{{ $t('wizardDoLater') }}</button>
             </header>
 
             <!-- 1: nome e foto -->
             <section v-if="step === 1" class="wz-step" aria-labelledby="wzTitle1">
                 <h1 id="wzTitle1" class="wz-question">{{ $t('wizardNameQuestion') }}</h1>
-                <input id="wzName" ref="nameInput" type="text" class="wz-input" v-model.trim="childName" maxlength="40"
-                       :aria-label="$t('wizardNameLabel')" :placeholder="$t('wizardNamePlaceholder')" autocomplete="off" @keydown.enter.prevent="next()"/>
+                <div class="g-campo wz-campo">
+                    <label for="wzName">{{ $t('wizardNameLabel') }}</label>
+                    <input id="wzName" ref="nameInput" type="text" class="wz-input" v-model.trim="childName" maxlength="40"
+                           :placeholder="$t('wizardNamePlaceholder')" autocomplete="off" @keydown.enter.prevent="next()"/>
+                </div>
                 <h2 class="wz-sub">{{ $t('wizardPhotoTitle') }}</h2>
                 <p class="wz-hint">{{ $t('wizardPhotoHint') }}</p>
                 <div class="wz-photo-row">
                     <div class="wz-photo" :class="{empty: !childPhoto}">
                         <img v-if="childPhoto" :src="childPhoto" :alt="$t('wizardPhotoAlt', {name: displayName})"/>
-                        <i v-else class="fas fa-child" aria-hidden="true"></i>
+                        <i v-else class="ti ti-mood-kid" aria-hidden="true"></i>
                     </div>
                     <div class="wz-photo-actions">
                         <photo-picker facing="user" :cell-aspect="1" :output-width="400" @photo="childPhoto = $event"/>
-                        <button v-if="childPhoto" type="button" class="wz-link" @click="childPhoto = null">{{ $t('wizardRemovePhoto') }}</button>
+                        <button v-if="childPhoto" type="button" class="g-btn g-btn-leve wz-link" @click="childPhoto = null">
+                            <i class="ti ti-trash" aria-hidden="true"></i> {{ $t('wizardRemovePhoto') }}
+                        </button>
                     </div>
                 </div>
-                <p class="wz-privacy"><i class="fas fa-lock" aria-hidden="true"></i> {{ $t('wizardPhotoPrivacy') }}</p>
+                <p class="wz-privacy"><i class="ti ti-lock" aria-hidden="true"></i> {{ $t('wizardPhotoPrivacy') }}</p>
             </section>
 
             <!-- 2: idade -->
             <section v-if="step === 2" class="wz-step" aria-labelledby="wzTitle2">
                 <h1 id="wzTitle2" class="wz-question">{{ $t('wizardAgeQuestion', {name: displayName}) }}</h1>
-                <div class="wz-options" role="radiogroup" :aria-labelledby="'wzTitle2'">
+                <div class="wz-options" role="radiogroup" aria-labelledby="wzTitle2">
                     <button v-for="age in AGES" :key="age.value" type="button" role="radio" class="wz-option"
                             :aria-checked="String(ageGroup === age.value)" :class="{selected: ageGroup === age.value}" @click="setAge(age.value)">
                         <span>{{ $t(age.label) }}</span>
-                        <i v-if="ageGroup === age.value" class="fas fa-check" aria-hidden="true"></i>
+                        <i :class="ageGroup === age.value ? 'ti ti-circle-check-filled' : 'ti ti-circle'" aria-hidden="true"></i>
                     </button>
                 </div>
                 <p class="wz-hint">{{ $t('wizardAgeHint') }}</p>
@@ -48,15 +56,18 @@
             <!-- 3: voz -->
             <section v-if="step === 3" class="wz-step" aria-labelledby="wzTitle3">
                 <h1 id="wzTitle3" class="wz-question">{{ childName ? $t('wizardVoiceQuestion', {name: childName}) : $t('wizardVoiceQuestionNoName') }}</h1>
-                <p v-if="voicesLoading"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i></p>
+                <p v-if="voicesLoading" class="wz-loading"><i class="ti ti-loader-2 wz-spin" aria-hidden="true"></i></p>
                 <div v-if="!voicesLoading && voices.length" class="wz-options" role="radiogroup" aria-labelledby="wzTitle3">
                     <div v-for="(voice, index) in voices" :key="voice.id" class="wz-option wz-voice" :class="{selected: voiceId === voice.id}">
                         <button type="button" role="radio" class="wz-voice-select" :aria-checked="String(voiceId === voice.id)" @click="voiceId = voice.id">
-                            <span>{{ $t('wizardVoiceN', {n: index + 1}) }}</span>
-                            <small>{{ voice.name }}<template v-if="voice.type !== VOICE_TYPE_NATIVE"> · {{ $t('wizardNeedsInternet') }}</template></small>
+                            <i :class="voiceId === voice.id ? 'ti ti-circle-check-filled' : 'ti ti-circle'" aria-hidden="true"></i>
+                            <span class="wz-voice-text">
+                                <span>{{ $t('wizardVoiceN', {n: index + 1}) }}</span>
+                                <small>{{ voice.name }}<template v-if="voice.type !== VOICE_TYPE_NATIVE"> · {{ $t('wizardNeedsInternet') }}</template></small>
+                            </span>
                         </button>
-                        <button type="button" class="wz-listen" @click="listen(voice.id)" :aria-label="$t('listen') + ': ' + $t('wizardVoiceN', {n: index + 1})">
-                            <i class="fas fa-play" aria-hidden="true"></i> {{ $t('listen') }}
+                        <button type="button" class="g-btn wz-listen" @click="listen(voice.id)" :aria-label="$t('listen') + ': ' + $t('wizardVoiceN', {n: index + 1})">
+                            <i class="ti ti-player-play" aria-hidden="true"></i> {{ $t('listen') }}
                         </button>
                     </div>
                 </div>
@@ -84,7 +95,7 @@
                         </span>
                         <strong>{{ $t(s.label) }}</strong>
                         <span>{{ $t('wizardButtonsPerScreen', {n: s.cols * s.rows}) }}</span>
-                        <small v-if="s.value === suggestedSize" class="wz-badge">{{ $t('wizardSuggestedForAge') }}</small>
+                        <small v-if="s.value === suggestedSize" class="g-pilula g-pilula-ok">{{ $t('wizardSuggestedForAge') }}</small>
                     </button>
                 </div>
                 <p class="wz-hint">{{ $t('wizardSizeHint') }}</p>
@@ -102,19 +113,20 @@
                 </div>
                 <p v-if="hiddenCount" class="wz-note">{{ $t('wizardHiddenWords', {n: hiddenCount}) }}</p>
                 <ul class="wz-tips">
-                    <li><i class="fas fa-hand-pointer" aria-hidden="true"></i> {{ $t('wizardTipHold') }}</li>
-                    <li><i class="fas fa-lock" aria-hidden="true"></i> {{ $t('wizardTipLock') }}</li>
+                    <li><i class="ti ti-hand-finger" aria-hidden="true"></i> {{ $t('wizardTipHold') }}</li>
+                    <li><i class="ti ti-lock" aria-hidden="true"></i> {{ $t('wizardTipLock') }}</li>
+                    <li v-if="novaCrianca"><i class="ti ti-device-tablet" aria-hidden="true"></i> {{ $t('entradaSemSenha') }}</li>
                 </ul>
                 <p class="wz-credit">{{ ARASAAC_CREDIT }}</p>
-                <p v-if="error" class="wz-error" role="alert">{{ $t('wizardSaveError') }}</p>
+                <p v-if="error" class="g-erro" role="alert">{{ $t('wizardSaveError') }}</p>
             </section>
 
             <footer class="wz-footer">
-                <button v-if="step > 1" type="button" class="wz-btn" @click="back()" :disabled="saving"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $t('back') }}</button>
-                <button v-if="step === 1" type="button" class="wz-btn" @click="next()">{{ $t('wizardSkip') }}</button>
-                <button v-if="step < TOTAL" type="button" class="wz-btn wz-primary" @click="next()">{{ $t('wizardNext') }} <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
-                <button v-if="step === TOTAL" type="button" class="wz-btn wz-primary" @click="finish()" :disabled="saving">
-                    <i v-if="saving" class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ $t('wizardStart') }}
+                <button v-if="step > 1" type="button" class="g-btn g-btn-grande" @click="back()" :disabled="saving"><i class="ti ti-arrow-left" aria-hidden="true"></i> {{ $t('back') }}</button>
+                <button v-if="step === 1" type="button" class="g-btn g-btn-grande" @click="next()">{{ $t('wizardSkip') }}</button>
+                <button v-if="step < TOTAL" type="button" class="g-btn g-btn-principal g-btn-grande" @click="next()">{{ $t('wizardNext') }} <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+                <button v-if="step === TOTAL" type="button" class="g-btn g-btn-principal g-btn-grande" @click="finish()" :disabled="saving">
+                    <i :class="saving ? 'ti ti-loader-2 wz-spin' : 'ti ti-player-play'" aria-hidden="true"></i> {{ $t('wizardStart') }}
                 </button>
             </footer>
         </div>
@@ -125,6 +137,7 @@
 /**
  * Setup wizard on first use (Grilo Falante): name and photo, age, voice, button size and a
  * ready starter board in Brazilian Portuguese. Every step can be skipped and changed later.
+ * With novaCrianca (opened from the Entrada) the offline profile is created, without password, on finish.
  */
 import PhotoPicker from '../components/photoPicker.vue';
 import OfflineVoiceHelper from '../views/settings/offlineVoiceHelper.vue';
@@ -137,11 +150,16 @@ import { speechService } from '../../js/service/speechService';
 import { localStorageService } from '../../js/service/data/localStorageService';
 import { Router } from '../../js/router';
 import { pickWizardVoices } from '../../js/wizard/wizardVoices';
+import { perfilArquivoService } from '../../js/service/perfilArquivoService';
 
 const TOTAL = 5;
 
 export default {
     components: { PhotoPicker, OfflineVoiceHelper },
+    props: {
+        // aberto pela Entrada ("Nova criança"): cria o perfil offline, sem senha, ao terminar
+        novaCrianca: { type: Boolean, default: false }
+    },
     data() {
         return {
             TOTAL,
@@ -175,7 +193,8 @@ export default {
             voiceRate: 1,
             images: null,
             saving: false,
-            error: false
+            error: false,
+            createdUser: null
         };
     },
     computed: {
@@ -269,6 +288,9 @@ export default {
             this.saving = true;
             this.error = false;
             try {
+                if (this.novaCrianca && !this.createdUser) {
+                    this.createdUser = await perfilArquivoService.criarPerfil(this.childName, { foto: this.childPhoto });
+                }
                 await setupWizard.saveVoice(this.voiceId, this.voiceRate);
                 let mainGrid = await setupWizard.createStarterBoard({
                     childName: this.childName,
@@ -287,6 +309,10 @@ export default {
         doLater() {
             speechService.stopSpeaking();
             Router.toManageGrids();
+        },
+        cancel() {
+            speechService.stopSpeaking();
+            this.$emit('fechar');
         }
     },
     async mounted() {
@@ -310,28 +336,32 @@ export default {
 
 <style scoped>
 .wz-page {
-    background: var(--gf-fundo, #F3F8F0);
-    color: var(--gf-tinta, #14261A);
     min-height: 100%;
 }
 
 .wz-wrap {
     max-width: 52em;
     margin: 0 auto;
-    padding: 1.2em max(1em, env(safe-area-inset-left, 0px)) 2em;
+    padding: var(--g-e4) max(var(--g-e4), env(safe-area-inset-left, 0px)) var(--g-e6);
     display: flex;
     flex-direction: column;
-    gap: 1.2em;
+    gap: var(--g-e5);
+}
+
+.wz-page *, .wz-page *::before, .wz-page *::after {
+    box-sizing: border-box;
 }
 
 .wz-header {
+    background: transparent;
+    border: none;
     display: flex;
     align-items: center;
-    gap: 1em;
+    gap: var(--g-e3);
 }
 
 .wz-grilo {
-    width: 4em;
+    width: 64px;
     height: auto;
     flex: none;
 }
@@ -340,54 +370,48 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.35em;
+    gap: var(--g-e2);
+    min-width: 0;
 }
 
 .wz-step-label {
     font-weight: 700;
-    color: var(--gf-cinza, #4A5C4F);
+    white-space: nowrap;
+    color: var(--g-tinta-2);
 }
 
 .wz-dots {
     display: flex;
-    gap: 0.4em;
+    gap: var(--g-e1);
 }
 
 .wz-dots i {
     display: block;
-    width: 2.2em;
-    height: 0.45em;
-    border-radius: 0.25em;
-    background: var(--gf-linha, #D3E0D0);
+    flex: 0 1 40px;
+    height: 8px;
+    border-radius: var(--g-raio-pilula);
+    background: var(--g-borda);
 }
 
 .wz-dots i.on {
-    background: var(--gf-mata, #1D6B35);
-}
-
-.wz-later {
-    margin: 0;
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: 0.95em;
+    background: var(--g-folha);
 }
 
 .wz-step {
     display: flex;
     flex-direction: column;
-    gap: 0.9em;
+    gap: var(--g-e3);
 }
 
-.wz-question {
-    font-size: clamp(1.6em, 4vw, 2.3em);
-    line-height: 1.15;
+.g-tela .wz-question {
+    font-size: clamp(26px, 4vw, 36px);
     margin: 0;
     outline: none;
 }
 
-.wz-sub {
-    font-size: 1.25em;
-    margin: 0.4em 0 0;
+.g-tela .wz-sub {
+    font-size: var(--g-t-h3);
+    margin: var(--g-e2) 0 0;
 }
 
 .wz-hint,
@@ -395,55 +419,66 @@ export default {
 .wz-note,
 .wz-credit {
     margin: 0;
-    color: var(--gf-cinza, #4A5C4F);
+    color: var(--g-tinta-2);
     max-width: 60ch;
 }
 
+.wz-privacy {
+    display: flex;
+    gap: var(--g-e2);
+    align-items: center;
+}
+
 .wz-note {
-    background: var(--gf-folha, #E7F2E0);
-    color: var(--gf-tinta, #14261A);
-    border-radius: 0.6em;
-    padding: 0.6em 0.9em;
+    background: var(--g-girassol-claro);
+    color: #4a3b00;
+    border-radius: var(--g-raio);
+    padding: var(--g-e3) var(--g-e4);
 }
 
 .wz-credit {
-    font-size: 0.85em;
+    font-size: var(--g-t-legenda);
+    color: var(--g-tinta-3);
 }
 
-.wz-input {
-    width: 100%;
-    max-width: 24em;
-    font-size: 1.4em;
-    min-height: 2.4em;
-    margin: 0;
+.wz-campo {
+    max-width: 26em;
+    margin-bottom: 0;
+}
+
+.g-campo input.wz-input {
+    font-size: 22px;
+    min-height: var(--g-alvo-g);
 }
 
 .wz-photo-row {
     display: flex;
-    gap: 1.2em;
+    gap: var(--g-e4);
     align-items: center;
     flex-wrap: wrap;
 }
 
 .wz-photo {
-    width: 7em;
-    height: 7em;
+    width: 112px;
+    height: 112px;
     border-radius: 50%;
     overflow: hidden;
     flex: none;
-    background: var(--gf-folha, #E7F2E0);
+    background: var(--g-folha-clara);
     display: grid;
     place-items: center;
-    border: 3px solid var(--gf-mata, #1D6B35);
+    border: 3px solid var(--g-folha);
 }
 
 .wz-photo.empty {
     border-style: dashed;
+    border-color: var(--g-borda-forte);
+    background: var(--g-superficie-2);
 }
 
-.wz-photo i {
-    font-size: 3em;
-    color: var(--gf-mata, #1D6B35);
+.wz-photo .ti {
+    font-size: 56px;
+    color: var(--g-folha-escura);
 }
 
 .wz-photo img {
@@ -457,19 +492,16 @@ export default {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: var(--g-e2);
 }
 
 .wz-link {
     align-self: flex-start;
-    margin: 0;
-    text-transform: none;
-    letter-spacing: 0;
 }
 
 .wz-options {
     display: grid;
-    gap: 0.6em;
+    gap: var(--g-e2);
     max-width: 34em;
 }
 
@@ -477,31 +509,45 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 0.6em;
+    gap: var(--g-e3);
     margin: 0;
-    min-height: 3.4em;
-    padding: 0.5em 1em;
+    min-height: var(--g-alvo-g);
+    padding: var(--g-e2) var(--g-e4);
     text-align: left;
     text-transform: none;
     letter-spacing: 0;
-    font-size: 1.15em;
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-grande);
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: normal;
     height: auto;
-    background: #FFFFFF;
-    border: 2px solid var(--gf-linha, #D3E0D0);
-    border-radius: 12px;
+    color: var(--g-tinta);
+    background: var(--g-superficie);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio);
+    cursor: pointer;
+}
+
+.wz-option:hover {
+    border-color: var(--g-borda-forte);
+    color: var(--g-tinta);
 }
 
 .wz-option.selected {
-    border-color: var(--gf-mata, #1D6B35);
-    background: var(--gf-folha, #E7F2E0);
+    border-color: var(--g-folha);
+    background: var(--g-folha-clara);
 }
 
-.wz-option i {
-    color: var(--gf-mata, #1D6B35);
+.wz-option .ti {
+    font-size: 26px;
+    color: var(--g-folha);
+    flex: none;
 }
 
 .wz-voice {
-    padding: 0.3em 0.3em 0.3em 0.3em;
+    padding: var(--g-e1) var(--g-e2) var(--g-e1) var(--g-e1);
+    cursor: default;
 }
 
 .wz-voice-select {
@@ -511,59 +557,81 @@ export default {
     border: none;
     background: transparent;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: var(--g-e3);
+    text-align: left;
     text-transform: none;
     letter-spacing: 0;
+    font-family: var(--g-fonte);
     font-size: 1em;
+    font-weight: 700;
+    color: var(--g-tinta);
     height: auto;
-    padding: 0.3em 0.7em;
+    min-height: var(--g-alvo);
+    padding: var(--g-e2) var(--g-e3);
+    border-radius: var(--g-raio-p);
+    white-space: normal;
+    cursor: pointer;
 }
 
 .wz-voice-select:hover,
 .wz-voice-select:focus {
     background: transparent;
     border: none;
+    color: var(--g-tinta);
+}
+
+.wz-voice-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .wz-voice-select small {
     font-weight: 400;
-    color: var(--gf-cinza, #4A5C4F);
-    font-size: 0.75em;
+    color: var(--g-tinta-2);
+    font-size: var(--g-t-legenda);
     overflow-wrap: anywhere;
 }
 
 .wz-listen {
-    margin: 0;
     flex: none;
-    text-transform: none;
-    letter-spacing: 0;
+    padding: 0 var(--g-e4);
 }
 
 .wz-segmented {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5em;
+    gap: var(--g-e2);
+    margin-top: var(--g-e2);
 }
 
 .wz-segmented button {
     margin: 0;
     flex: 1 1 8em;
-    min-height: 3em;
+    min-height: var(--g-alvo);
     text-transform: none;
     letter-spacing: 0;
-    font-size: 1em;
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-corpo);
+    font-weight: 700;
+    height: auto;
+    color: var(--g-tinta);
+    background: var(--g-superficie);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio-pilula);
+    cursor: pointer;
 }
 
 .wz-segmented button.selected {
-    border-color: var(--gf-mata, #1D6B35);
-    background: var(--gf-folha, #E7F2E0);
+    border-color: var(--g-folha);
+    background: var(--g-folha-clara);
 }
 
 .wz-sizes {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.8em;
+    gap: var(--g-e3);
 }
 
 @media (max-width: 560px) {
@@ -575,27 +643,36 @@ export default {
 .wz-size {
     margin: 0;
     height: auto;
-    padding: 0.9em;
+    padding: var(--g-e4);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4em;
+    gap: var(--g-e2);
     text-transform: none;
     letter-spacing: 0;
-    font-size: 1.05em;
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-corpo);
     font-weight: 400;
-    background: #FFFFFF;
-    border: 2px solid var(--gf-linha, #D3E0D0);
-    border-radius: 12px;
+    line-height: 1.25;
+    white-space: normal;
+    color: var(--g-tinta);
+    background: var(--g-superficie);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio-g);
+    cursor: pointer;
+}
+
+.wz-size:hover {
+    color: var(--g-tinta);
 }
 
 .wz-size.selected {
-    border-color: var(--gf-mata, #1D6B35);
-    background: var(--gf-folha, #E7F2E0);
+    border-color: var(--g-folha);
+    background: var(--g-folha-clara);
 }
 
 .wz-size strong {
-    font-size: 1.15em;
+    font-size: var(--g-t-grande);
 }
 
 .wz-mini {
@@ -603,43 +680,38 @@ export default {
     gap: 3px;
     width: 100%;
     max-width: 9em;
-    margin-bottom: 0.3em;
+    margin-bottom: var(--g-e1);
 }
 
 .wz-mini i {
     display: block;
     aspect-ratio: 1.2;
-    border: 1.5px solid var(--gf-cinza, #4A5C4F);
-    border-radius: 3px;
-    background: #FFFFFF;
+    border: 1.5px solid var(--g-borda-forte);
+    border-radius: 4px;
+    background: var(--g-superficie);
 }
 
-.wz-badge {
-    font-weight: 700;
-    color: var(--gf-mata, #1D6B35);
-    background: #FFFFFF;
-    border: 1.5px solid var(--gf-mata, #1D6B35);
-    border-radius: 999px;
-    padding: 0.05em 0.7em;
+.wz-size.selected .wz-mini i {
+    border-color: var(--g-folha);
 }
 
 .wz-board {
     display: grid;
-    gap: 0.4em;
-    background: #E8E8E8;
-    border-radius: 12px;
-    padding: 0.5em;
+    gap: var(--g-e2);
+    background: var(--g-superficie-2);
+    border-radius: var(--g-raio);
+    padding: var(--g-e2);
 }
 
 .wz-cell {
-    background: #FFFFFF;
-    border: 2px solid var(--gf-linha, #D3E0D0);
-    border-radius: 8px;
+    background: var(--g-superficie);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio-p);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.3em 0.2em;
+    padding: var(--g-e1);
     min-width: 0;
     aspect-ratio: 1.15;
     font-weight: 700;
@@ -664,7 +736,7 @@ export default {
 }
 
 .wz-cell.folder {
-    border-color: var(--gf-mata, #1D6B35);
+    border-color: var(--g-folha);
     border-top-width: 6px;
 }
 
@@ -679,61 +751,61 @@ export default {
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.4em;
+    gap: var(--g-e2);
 }
 
 .wz-tips li {
     display: flex;
-    gap: 0.6em;
-    align-items: baseline;
-}
-
-.wz-tips i {
-    color: var(--gf-mata, #1D6B35);
-    width: 1.2em;
-    text-align: center;
-}
-
-.wz-error {
+    gap: var(--g-e2);
+    align-items: center;
     margin: 0;
-    color: var(--gf-coral, #B8391F);
-    font-weight: 700;
+}
+
+.wz-tips .ti {
+    color: var(--g-folha);
+    font-size: 22px;
+    flex: none;
 }
 
 .wz-novoice {
     display: flex;
     flex-direction: column;
-    gap: 0.6em;
+    gap: var(--g-e2);
+}
+
+.wz-loading .ti {
+    font-size: 32px;
+    color: var(--g-folha);
+}
+
+.wz-spin {
+    display: inline-block;
+    animation: wz-girar 0.9s linear infinite;
+}
+
+@keyframes wz-girar {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wz-spin { animation: none; }
 }
 
 .wz-footer {
     display: flex;
-    gap: 0.8em;
+    gap: var(--g-e3);
     justify-content: flex-end;
     flex-wrap: wrap;
-    padding-top: 0.6em;
-    border-top: 2px solid var(--gf-linha, #D3E0D0);
+    padding-top: var(--g-e4);
+    border-top: 2px solid var(--g-borda);
 }
 
-.wz-btn {
-    margin: 0;
-    min-height: 3.2em;
+.wz-footer .g-btn {
     min-width: 9em;
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: 1.05em;
 }
 
-.wz-primary {
-    background-color: var(--gf-mata, #1D6B35);
-    border-color: var(--gf-mata, #1D6B35);
-    color: #FFFFFF;
-}
-
-.wz-primary:hover,
-.wz-primary:focus {
-    background-color: var(--gf-mata-escuro, #175A2C);
-    border-color: var(--gf-tinta, #14261A);
-    color: #FFFFFF;
+@media (max-width: 480px) {
+    .wz-grilo { width: 48px; }
+    .wz-footer .g-btn { flex: 1 1 40%; min-width: 0; }
 }
 </style>
