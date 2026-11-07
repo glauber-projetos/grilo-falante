@@ -113,6 +113,22 @@ test('downloadImages - errors and HTTP failures are reported, not saved', async 
     expect(status.missing.sort()).toEqual([A, B].sort());
 });
 
+test('downloadImages - image already shown (HTTP cache without CORS header) is fetched again from the network', async () => {
+    let caches = fakeCaches();
+    let calls = [];
+    let fetchFn = async (url, opts) => {
+        calls.push(opts.mode + (opts.cache ? '/' + opts.cache : ''));
+        if (opts.mode === 'cors' && opts.cache !== 'reload') {
+            throw new TypeError('CORS failed'); // cached copy of the <img> request has no Access-Control-Allow-Origin
+        }
+        return okResponse();
+    };
+    let result = await offlineService.downloadImages([A], { cachesApi: caches, fetchFn: fetchFn });
+    expect(result.failed).toEqual([]);
+    expect(calls).toEqual(['cors', 'cors/reload']);
+    expect((await offlineService.getStatus([A], caches)).cached).toBe(1);
+});
+
 test('downloadImages - opaque answers of known CORS sources are never saved, of other sources they are', async () => {
     let caches = fakeCaches();
     const OTHER = 'https://example.org/picture.png';

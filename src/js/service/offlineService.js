@@ -195,7 +195,14 @@ async function downloadOne(url, cache, fetchFn) {
         try {
             response = await fetchFn(url, { mode: 'cors', credentials: 'omit' });
         } catch (e) {
-            response = await fetchFn(url, { mode: 'no-cors', credentials: 'omit' });
+            try {
+                // An image already shown in the grid (<img>, request without "Origin") can be in the browser's HTTP
+                // cache without the CORS header (the CDN only sends it when asked). The CORS fetch then reuses this
+                // cached copy and fails. Asking the network again (cache: 'reload') gets an answer with CORS header.
+                response = await fetchFn(url, { mode: 'cors', credentials: 'omit', cache: 'reload' });
+            } catch (e2) {
+                response = await fetchFn(url, { mode: 'no-cors', credentials: 'omit' });
+            }
         }
         if (!response) {
             return false;
