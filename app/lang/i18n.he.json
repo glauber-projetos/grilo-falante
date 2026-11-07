@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "שולף לוחות מן הקובץ",
   "encryptingAndSavingGrids": "קידוד לוחות ושמירה במסד הנתונים",
   "creatingPageXOfY": "יוצר דף {0} מ {1}",
-  "printedByAstericsGrid": "הודפס על ידי Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "הודפס על ידי Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "מנגן: {0}",
   "errorPlayingWebradio": "שגיאת ניגון: {0}, אין אינטרנט?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

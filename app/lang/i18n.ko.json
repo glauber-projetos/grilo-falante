@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "파일에서 그리드 추출",
   "encryptingAndSavingGrids": "그리드를 암호화하여 데이터베이스에 저장",
   "creatingPageXOfY": "Creating page {0} of {1}",
-  "printedByAstericsGrid": "Grilo Falante에서 인쇄, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Grilo Falante에서 인쇄, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "playing: {0}",
   "errorPlayingWebradio": "Error playing: {0}, no internet?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

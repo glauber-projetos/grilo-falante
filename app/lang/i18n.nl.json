@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Rasters uit bestand halen",
   "encryptingAndSavingGrids": "Versleutelen en opslaan van rasters in de database",
   "creatingPageXOfY": "Pagina {0} van {1} wordt aangemaakt",
-  "printedByAstericsGrid": "Afgedrukt door Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Afgedrukt door Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "speelt: {0}",
   "errorPlayingWebradio": "Fout bij het afspelen: {0}, geen internet?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

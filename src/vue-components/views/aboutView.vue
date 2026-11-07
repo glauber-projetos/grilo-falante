@@ -8,7 +8,7 @@
                     <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="gf-about-grilo"/>
                     <div>
                         <p>{{ $t('griloFalanteIntro') }}</p>
-                        <a target="_blank" href="https://github.com/glauber-projetos/Asterics-AAC">{{ $t('griloFalanteOnGithub') }}</a>
+                        <a target="_blank" href="https://github.com/glauber-projetos/grilo-falante">{{ $t('griloFalanteOnGithub') }}</a>
                     </div>
                 </div>
                 <div class="srow">
@@ -117,7 +117,7 @@
                 <div class="srow" style="margin-top: 3em">
                     <i18n path="youreUsingAstericsGridVersion" tag="div">
                         <template v-slot:gridVersion>
-                            <a target="_blank" href="https://github.com/glauber-projetos/Asterics-AAC">#ASTERICS_GRID_VERSION#</a>
+                            <a target="_blank" href="https://github.com/glauber-projetos/grilo-falante">#ASTERICS_GRID_VERSION#</a>
                         </template>
                     </i18n>
                 </div>

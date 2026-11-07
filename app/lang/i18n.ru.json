@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Извлечение сеток из файла",
   "encryptingAndSavingGrids": "Шифрование и сохранение в базу данных",
   "creatingPageXOfY": "Создание страницы {0} из {1}",
-  "printedByAstericsGrid": "Напечатано Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Напечатано Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "воспроизводится: {0}",
   "errorPlayingWebradio": "Ошибка воспроизведения: {0}, нет интернета?!",
   "webradioVolume": "Громкость веб-радио: {0} / 100",

@@ -154,7 +154,7 @@ function checkAppVersion() {
             translateParams: [constants.CURRENT_VERSION],
             timeout: 30000,
             actionLink: 'moreInformation',
-            actionLinkUrl: 'https://github.com/glauber-projetos/Asterics-AAC',
+            actionLinkUrl: 'https://github.com/glauber-projetos/grilo-falante',
             msgType: 'info'
         });
     }

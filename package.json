@@ -65,14 +65,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glauber-projetos/Asterics-AAC.git"
+    "url": "git+https://github.com/glauber-projetos/grilo-falante.git"
   },
   "author": "Benjamin Klaus",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/glauber-projetos/Asterics-AAC/issues"
+    "url": "https://github.com/glauber-projetos/grilo-falante/issues"
   },
-  "homepage": "https://glauber-projetos.github.io/Asterics-AAC/",
+  "homepage": "https://glauber-projetos.github.io/grilo-falante/",
   "lint-staged": {
     "*.{js,css,md}": "prettier --write"
   },

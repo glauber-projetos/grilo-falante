@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Izdvajanje ploče iz datoteke",
   "encryptingAndSavingGrids": "Šifriranje i spremanje ploča u bazu podataka",
   "creatingPageXOfY": "Izrada stranice {0} od {1}",
-  "printedByAstericsGrid": "Tiskao Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Tiskao Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "reproducira: {0}",
   "errorPlayingWebradio": "Pogreška pri reprodukciji: {0}, nema interneta?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

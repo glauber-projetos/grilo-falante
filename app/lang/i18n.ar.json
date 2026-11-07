@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "استخراج الشبكات من الملف",
   "encryptingAndSavingGrids": "تشفير وحفظ الشبكات إلى قاعدة البيانات",
   "creatingPageXOfY": "إنشاء صفحة {0} من {1}",
-  "printedByAstericsGrid": "تم طباعتها بواسطة Grilo Falante، https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "تم طباعتها بواسطة Grilo Falante، https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "تشغيل: {0}",
   "errorPlayingWebradio": "خطأ في التشغيل: {0}، لا يوجد إنترنت؟!",
   "webradioVolume": "صوت الراديو على الإنترنت: {0} / 100",

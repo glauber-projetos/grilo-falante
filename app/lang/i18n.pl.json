@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Wyodrębnianie siatek z pliku",
   "encryptingAndSavingGrids": "Szyfrowanie i zapisywanie siatek w bazie danych",
   "creatingPageXOfY": "Tworzenie strony {0} z {1}",
-  "printedByAstericsGrid": "Wydrukowane przez Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Wydrukowane przez Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "odtwarzanie: {0}",
   "errorPlayingWebradio": "Błąd odtwarzania: {0}, brak internetu?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

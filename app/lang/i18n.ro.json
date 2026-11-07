@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Extragerea grilelor din fișier",
   "encryptingAndSavingGrids": "Criptarea și salvarea grilelor în baza de date",
   "creatingPageXOfY": "Crearea paginii {0} din {1}",
-  "printedByAstericsGrid": "Tipărit de Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Tipărit de Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "se redă: {0}",
   "errorPlayingWebradio": "Eroare de redare: {0}, fără internet?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Fitxategiko taulak ateratzen",
   "encryptingAndSavingGrids": "Sareak datu-basean enkriptatzen eta gordetzen",
   "creatingPageXOfY": "{0} of {1} orria sortzen",
-  "printedByAstericsGrid": "Grilo Falante-ek inprimatua, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Grilo Falante-ek inprimatua, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "erreproduzitzen: {0}",
   "errorPlayingWebradio": "Erreproduzitzean errorea: {0}, ez dago internetik?!",
   "webradioVolume": "Webradio Volume: {0} / 100",

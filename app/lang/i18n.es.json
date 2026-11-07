@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Extrayendo tableros del archivo",
   "encryptingAndSavingGrids": "Cifrando y guardando tableros en la base de datos",
   "creatingPageXOfY": "Creando página {0} de {1}",
-  "printedByAstericsGrid": "Impreso por Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Impreso por Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "reproduciendo: {0}",
   "errorPlayingWebradio": "Error reproduciendo: {0}, ¿sin internet?!",
   "webradioVolume": "Volumen de la Radio Web: {0} / 100",

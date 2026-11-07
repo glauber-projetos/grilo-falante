@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Táblák kibontása fileból",
   "encryptingAndSavingGrids": "Táblák titkosítása és adatbázisba mentése",
   "creatingPageXOfY": "Oldalak létrehozása {1}-ből {0}",
-  "printedByAstericsGrid": "Az Grilo Falante által nyomtatva, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Az Grilo Falante által nyomtatva, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "lejátszva: {0}",
   "errorPlayingWebradio": "Lejátszási hiba: {0}, nincs internet?!",
   "webradioVolume": "Webrádió hangerő: {0} / 100",

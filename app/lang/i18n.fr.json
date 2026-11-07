@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Extraction des grilles depuis un fichier",
   "encryptingAndSavingGrids": "Chiffrement et enregistrement des grilles dans la base de données",
   "creatingPageXOfY": "Création de la page {0} de {1}",
-  "printedByAstericsGrid": "Imprimé par Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Imprimé par Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "lecture en cours : {0}",
   "errorPlayingWebradio": "Erreur lors de la lecture : {0}, pas d'internet ?!",
   "webradioVolume": "Volume de la Webradio: {0} / 100",

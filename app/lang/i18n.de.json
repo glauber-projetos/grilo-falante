@@ -456,7 +456,7 @@
   "extractingGridsFromFile": " Grids werden aus Datei extrahiert",
   "encryptingAndSavingGrids": "Grids werden verschlüsselt und in Datenbank gespeichert",
   "creatingPageXOfY": "Erstelle Seite {0} von {1}",
-  "printedByAstericsGrid": "Gedruckt mit Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Gedruckt mit Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "Wiedergabe: {0}",
   "errorPlayingWebradio": "Fehler bei Wiedergabe: {0}, kein Internet?!",
   "webradioVolume": "Webradio Lautstärke: {0} / 100",

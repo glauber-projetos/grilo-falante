@@ -456,7 +456,7 @@
   "extractingGridsFromFile": "Rozbalování tabulek ze souboru",
   "encryptingAndSavingGrids": "Šifrování a ukládání tabulek do databáze",
   "creatingPageXOfY": "Vytváření stránky {0} z {1}",
-  "printedByAstericsGrid": "Vytisknuto z Grilo Falante, https://glauber-projetos.github.io/Asterics-AAC/",
+  "printedByAstericsGrid": "Vytisknuto z Grilo Falante, https://glauber-projetos.github.io/grilo-falante/",
   "playingWebradio": "hraje: {0}",
   "errorPlayingWebradio": "Chyba přehrávání: {0}, žádný internet?!",
   "webradioVolume": "Hlasitost Webrádia {0} / 100",
