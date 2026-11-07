@@ -6,9 +6,8 @@
     <meta name="google-site-verification" content="UWnxfeRniUm-l7GAbNdqfZQmCCaAU3HB6jGOuEHZ26k" />
 
     <meta name="theme-color" content="#1D6B35">
-    <link rel="icon" href="app/img/grilo/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="app/img/grilo/favicon.png" type="image/png">
-    <link rel="apple-touch-icon" href="app/img/app-icons/icon192_maskable.png">
+    <link rel="apple-touch-icon" href="app/img/app-icons/icon192_rounded.png">
     <link rel="manifest" href="app/manifest.webmanifest">
 
     <link rel="stylesheet" href="app/css/fontawesome/css/all.css">
@@ -37,7 +36,7 @@
         <main role="main" class="holy-grail-content">
             <!-- Grilo Falante: no sidebar; each screen brings its own top bar (gTopo.vue) or is the full-screen board -->
             <div class="casca-carregando" v-if="!component" role="status">
-                <img src="app/img/grilo/grilo-pensando.svg" alt="" width="120" height="120"/>
+                <img src="app/img/grilo/mascote/grilo-pensando.webp" alt="" width="140" height="140"/>
                 <span class="g-oculto-leitor">{{ $t('cascaCarregando') }}</span>
             </div>
             <component v-if="component" v-bind:is="component" v-bind="properties" :key="componentKey"></component>

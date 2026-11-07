@@ -38,8 +38,9 @@
 }
 
 .casca-carregando img {
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
     animation: casca-respirar 1.6s ease-in-out infinite;
 }
 

@@ -16,7 +16,6 @@ import AboutView from '../vue-components/views/aboutView.vue';
 import DictionariesView from '../vue-components/views/dictionariesView.vue';
 import SettingsView from '../vue-components/views/settingsView.vue';
 import { databaseService } from './service/data/databaseService';
-import { localStorageService } from './service/data/localStorageService';
 import { MainVue } from './vue/mainVue';
 import HelpView from '../vue-components/views/helpView.vue';
 import SetupWizardView from '../vue-components/wizard/setupWizardView.vue';
@@ -131,10 +130,6 @@ Router.init = function (injectIdParam, initialHash) {
         settings: function () {
             //TODO add correct help location
             loadVueView(SettingsView);
-        },
-        'settings/:aba': function (params) {
-            // e.g. "#settings/offline" from the "Sem internet" tile of the adult home
-            loadVueView(SettingsView, { abaInicial: params.aba });
         },
         help: function () {
             loadVueView(HelpView);
@@ -347,9 +342,10 @@ Router.toLastGrid = function () {
 function getValidHash() {
     let hashToUse = location.hash;
     if (!databaseService.getCurrentUsedDatabase()) {
-        let toLogin = localStorageService.getLastActiveUser() || localStorageService.getSavedUsers().length > 0;
+        // Grilo Falante: without an open profile always "Quem vai falar hoje?" (#welcome lists the saved profiles);
+        // #login is only "Entrar com conta"
         hashToUse = NO_DB_VIEWS.includes(hashToUse) ? hashToUse : null;
-        hashToUse = hashToUse || (toLogin ? '#login' : '#welcome');
+        hashToUse = hashToUse || '#welcome';
     }
     return hashToUse;
 }

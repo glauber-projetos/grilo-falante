@@ -5,11 +5,11 @@
     <!-- inside an existing header of an older screen: the Grilo mark and the way back to the adult home -->
     <div v-else class="casca-voltar">
         <a v-if="temUsuario" href="#inicio" class="casca-voltar-btn" :title="$t('cascaVoltarInicio')" :aria-label="$t('cascaVoltarInicio')">
-            <img src="app/img/grilo/logo-icone.svg" alt="" class="casca-voltar-marca"/>
+            <img src="app/img/grilo/icone-app.png" alt="" class="casca-voltar-marca"/>
             <i class="ti ti-home" aria-hidden="true"></i>
             <span class="casca-voltar-texto">{{ $t('cascaInicio') }}</span>
         </a>
-        <img v-else src="app/img/grilo/logo-icone.svg" alt="Grilo Falante" class="casca-voltar-marca"/>
+        <img v-else src="app/img/grilo/icone-app.png" alt="Grilo Falante" class="casca-voltar-marca"/>
     </div>
 </template>
 
@@ -76,7 +76,7 @@
         height: 34px;
         width: 34px;
         margin: 0;
-        border-radius: 0;
+        border-radius: 9px;
     }
 
     @media (max-width: 600px) {

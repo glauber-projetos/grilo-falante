@@ -97,7 +97,7 @@
 .g-tela h1 { font-size: var(--g-t-h1); }
 .g-tela h2 { font-size: var(--g-t-h2); }
 .g-tela h3 { font-size: var(--g-t-h3); }
-.g-conteudo { max-width: 1100px; margin: 0 auto; padding: var(--g-e5) var(--g-e4) var(--g-e6); }
+.g-conteudo { max-width: 1100px; margin: 0 auto; padding: var(--g-e5) var(--g-e4) var(--g-e6); box-sizing: border-box; }
 .g-apoio { color: var(--g-tinta-2); }
 .g-dica { color: var(--g-tinta-3); font-size: var(--g-t-legenda); }
 .g-tela .ti { line-height: 1; }
@@ -141,6 +141,7 @@
     text-align: center;
     height: auto;
     cursor: pointer;
+    text-decoration: none; /* também quando o botão é um link <a class="g-btn"> */
     transition: transform var(--g-rapido) var(--g-curva), background var(--g-rapido), border-color var(--g-rapido);
 }
 .g-btn:hover { border-color: var(--g-borda-forte); }

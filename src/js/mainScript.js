@@ -78,9 +78,10 @@ async function init() {
     Promise.all(promises)
         .finally(() => {
             let toMain = autologinUser || urlParamService.isDemoMode();
-            let toLogin = lastActiveUser || localStorageService.getSavedUsers().length > 0;
             localStorageService.setLastActiveUser(autologinUser || lastActiveUser || '');
-            let initHash = location.hash || (toMain ? '#main' : toLogin ? '#login' : '#welcome');
+            // Grilo Falante: with a profile, "#main" follows the opening rules in the router (child mode -> board,
+            // otherwise -> adult home "#inicio"); without one, always "Quem vai falar hoje?" (#welcome)
+            let initHash = location.hash || (toMain ? '#main' : '#welcome');
             if (!Router.isInitialized()) {
                 Router.init('#injectView', initHash);
             }

@@ -1,8 +1,8 @@
 <template>
     <header class="g-topo casca-topo no-print">
-        <a :href="temUsuario ? '#inicio' : '#login'" class="casca-topo-marca" :aria-label="temUsuario ? $t('cascaVoltarInicio') : 'Grilo Falante'">
-            <img v-if="marcaCompleta" class="g-marca casca-topo-logo-grande" src="app/img/grilo/logo-horizontal.svg" alt=""/>
-            <img v-else class="g-marca" src="app/img/grilo/logo-icone.svg" alt=""/>
+        <a :href="temUsuario ? '#inicio' : '#welcome'" class="casca-topo-marca" :aria-label="temUsuario ? $t('cascaVoltarInicio') : 'Grilo Falante'">
+            <img class="g-marca" src="app/img/grilo/icone-app.png" alt=""/>
+            <span v-if="marcaCompleta" class="casca-topo-nome-app">Grilo Falante</span>
         </a>
         <h1 v-if="titulo" class="g-topo-titulo casca-topo-titulo">{{ titulo }}</h1>
         <span v-else class="g-espaco"></span>
@@ -11,7 +11,7 @@
             <slot></slot>
         </div>
 
-        <a v-if="temUsuario && mostrarPerfil" href="#login" class="casca-topo-perfil"
+        <a v-if="temUsuario && mostrarPerfil" href="#welcome" class="casca-topo-perfil"
            :title="$t('cascaTrocarCrianca')" :aria-label="perfilLabel">
             <span class="g-avatar casca-topo-avatar" :style="{background: perfil.foto ? 'var(--g-superficie-2)' : perfil.cor}" aria-hidden="true">
                 <img v-if="perfil.foto" :src="perfil.foto" alt=""/>
@@ -106,13 +106,19 @@
 
     .casca-topo .g-marca {
         height: 40px;
-        width: auto;
-        border-radius: 0;
+        width: 40px;
+        border-radius: 10px;
         margin: 0;
     }
 
-    .casca-topo .casca-topo-logo-grande {
-        height: 40px;
+    .casca-topo-nome-app {
+        margin-left: var(--g-e2);
+        font-family: var(--g-fonte-titulo);
+        font-weight: 700;
+        font-size: 22px;
+        line-height: 1;
+        color: var(--g-folha-escura);
+        white-space: nowrap;
     }
 
     .casca-topo-titulo {
@@ -219,8 +225,12 @@
             border-radius: var(--g-raio-pilula);
         }
 
-        .casca-topo .casca-topo-logo-grande {
-            height: 34px;
+        .casca-topo .g-marca {
+            height: 36px;
+        }
+
+        .casca-topo-nome-app {
+            font-size: 19px;
         }
     }
 </style>

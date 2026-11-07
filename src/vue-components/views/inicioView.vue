@@ -13,7 +13,7 @@
                     <h1 id="inicioOi">{{ perfil.nome ? $t('inicioOi', {nome: perfil.nome}) : $t('inicioOiSemNome') }}</h1>
                     <p class="g-apoio">{{ $t('inicioPergunta') }}</p>
                 </div>
-                <img class="inicio-mascote" src="app/img/grilo/grilo-acenando.svg" alt=""/>
+                <img class="inicio-mascote" src="app/img/grilo/mascote/grilo-feliz.webp" alt=""/>
             </section>
 
             <nav :aria-label="$t('cascaInicio')">
@@ -34,8 +34,12 @@
                         <i class="ti ti-adjustments" aria-hidden="true"></i>
                         <span>{{ $t('inicioAjustes') }}<small>{{ $t('inicioAjustesDica') }}</small></span>
                     </a>
-                    <a href="#settings/offline" class="g-ladrilho g-ladrilho-ceu">
-                        <i class="ti ti-wifi-off" aria-hidden="true"></i>
+                    <a href="#settings?secao=offline" class="g-ladrilho g-ladrilho-ceu inicio-offline-ladrilho">
+                        <span class="inicio-ladrilho-alto">
+                            <i class="ti ti-wifi-off" aria-hidden="true"></i>
+                            <img v-if="offline" class="inicio-offline-grilo" alt=""
+                                 :src="offline.missing === 0 ? 'app/img/grilo/mascote/grilo-festa.webp' : 'app/img/grilo/mascote/grilo-surpreso.webp'"/>
+                        </span>
                         <span>{{ $t('inicioSemInternet') }}
                             <small class="inicio-offline" :class="{'inicio-offline-ok': offline && offline.missing === 0}">
                                 <i v-if="offline && offline.missing === 0" class="ti ti-circle-check" aria-hidden="true"></i>{{ textoOffline }}
@@ -58,7 +62,7 @@
                         <i class="ti ti-info-circle" aria-hidden="true"></i>
                         <span>{{ $t('inicioSobre') }}<small>{{ $t('inicioSobreDica') }}</small></span>
                     </a>
-                    <a href="#login" class="inicio-mais-item">
+                    <a href="#welcome" class="inicio-mais-item">
                         <i class="ti ti-users" aria-hidden="true"></i>
                         <span>{{ $t('inicioTrocar') }}<small>{{ $t('inicioTrocarDica') }}</small></span>
                     </a>
@@ -133,11 +137,12 @@
                     return;
                 }
                 this.favoritas = ((metadata && metadata.phraseHistory) || []).filter(e => e && e.favorite).length;
-                let grids = await dataService.getGrids(true, true);
+                // all grids, also the global bar, like the "Sem internet" settings count the images
+                let grids = await dataService.getGrids(true);
                 if (this._isDestroyed) {
                     return;
                 }
-                this.pranchas = grids.length;
+                this.pranchas = grids.filter(g => !metadata || g.id !== metadata.globalGridId).length;
                 if (this.offlineSuportado) {
                     try {
                         let urls = offlineService.collectImageUrls(grids);
@@ -166,6 +171,7 @@
 
     .inicio-conteudo {
         width: 100%;
+        box-sizing: border-box;
         padding-top: var(--g-e5);
     }
 
@@ -204,10 +210,25 @@
     }
 
     .inicio-mascote {
-        height: 104px;
-        width: auto;
+        height: 128px;
+        width: 128px;
+        object-fit: contain;
         flex: none;
-        margin: -8px 0 -8px;
+        margin: -16px 0 -16px;
+    }
+
+    .inicio-ladrilho-alto {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--g-e2);
+    }
+
+    .inicio-offline-grilo {
+        width: 84px;
+        height: 84px;
+        object-fit: contain;
+        margin: -12px -8px -16px 0;
     }
 
     /* ---------- ladrilhos principais ---------- */
@@ -352,7 +373,15 @@
         }
 
         .inicio-mascote {
-            height: 72px;
+            height: 84px;
+            width: 84px;
+            margin: -8px 0;
+        }
+
+        .inicio-offline-grilo {
+            width: 60px;
+            height: 60px;
+            margin: -8px -6px -10px 0;
         }
 
         .inicio-grade {
