@@ -164,7 +164,7 @@
         color: var(--g-tinta);
         margin-bottom: var(--g-e3);
     }
-    .ovh-estado .ti { font-size: 1.5rem; flex: none; }
+    .ovh-estado .ti { font-size: 24px; flex: none; }
     .ovh-ok { background: var(--g-folha-clara); color: var(--g-folha-escura); }
     .ovh-aviso { background: var(--g-girassol-claro); color: #4a3b00; }
     .ovh-acoes {
@@ -184,6 +184,6 @@
         font-weight: 700; cursor: pointer; list-style: none;
     }
     .aj-mais > summary::-webkit-details-marker { display: none; }
-    .aj-mais > summary .ti { font-size: 1.3rem; color: var(--g-folha-escura); }
+    .aj-mais > summary .ti { font-size: 21px; color: var(--g-folha-escura); }
     .aj-mais-corpo { padding: 0 var(--g-e4) var(--g-e4); }
 </style>

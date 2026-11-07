@@ -4,7 +4,7 @@
         <p class="g-apoio">{{ $t('offlineImagesExplanation') }}</p>
 
         <div class="aj-estado" :class="'aj-estado-' + estado" aria-live="polite">
-            <span class="aj-estado-icone" aria-hidden="true"><i :class="'ti ti-' + iconeEstado"></i></span>
+            <img :src="'app/img/grilo/mascote/grilo-' + mascoteEstado + '.webp'" alt="" aria-hidden="true" class="aj-estado-grilo"/>
             <div class="aj-estado-textos">
                 <strong class="aj-estado-titulo">{{ tituloEstado }}</strong>
                 <span v-if="textoEstado" class="aj-estado-texto">{{ textoEstado }}</span>
@@ -92,8 +92,9 @@
                 }
                 return this.faltam === 0 ? 'pronto' : 'falta';
             },
-            iconeEstado() {
-                return { carregando: 'loader-2', aviso: 'alert-triangle', pronto: 'circle-check', falta: 'cloud-download' }[this.estado];
+            mascoteEstado() {
+                // new mascot (DESIGN.md): festa when all is ready, surpreso when something is missing, pensando while checking
+                return { carregando: 'pensando', aviso: 'surpreso', pronto: 'festa', falta: 'surpreso' }[this.estado];
             },
             tituloEstado() {
                 switch (this.estado) {
@@ -176,25 +177,20 @@
         margin: var(--g-e3) 0 var(--g-e4);
         background: var(--g-superficie-2);
     }
-    .aj-estado-icone {
-        flex: none;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        font-size: 2rem;
-        background: var(--g-superficie);
+    .aj-estado-grilo { width: 72px; height: 84px; object-fit: contain; flex: none; }
+    @media (max-width: 420px) {
+        .aj-estado { gap: var(--g-e3); padding: var(--g-e3) var(--g-e4); align-items: flex-start; }
+        .aj-estado-grilo { width: 52px; height: 64px; }
     }
     .aj-estado-pronto { background: var(--g-folha-clara); color: var(--g-folha-escura); }
     .aj-estado-falta { background: var(--g-girassol-claro); color: #4a3b00; }
     .aj-estado-aviso { background: var(--g-perigo-claro); color: var(--g-perigo); }
     .aj-estado-textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .aj-estado-titulo { font-family: var(--g-fonte-titulo); font-size: var(--g-t-h3); line-height: 1.2; }
-    .aj-estado-carregando .aj-estado-icone .ti, .aj-offline-acoes .ti-loader-2 { animation: aj-girar 1s linear infinite; }
+    .aj-offline-acoes .ti-loader-2 { animation: aj-girar 1s linear infinite; }
     @keyframes aj-girar { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) {
-        .aj-estado-carregando .aj-estado-icone .ti, .aj-offline-acoes .ti-loader-2 { animation: none; }
+        .aj-offline-acoes .ti-loader-2 { animation: none; }
     }
     .aj-offline-acoes {
         display: flex;
@@ -217,6 +213,6 @@
         color: var(--g-tinta-2);
     }
     .aj-detalhes li { display: flex; gap: var(--g-e2); align-items: flex-start; margin: 0; }
-    .aj-detalhes .ti { font-size: 1.25rem; flex: none; margin-top: 1px; }
+    .aj-detalhes .ti { font-size: 20px; flex: none; margin-top: 1px; }
     .aj-licenca { margin-bottom: var(--g-e5); }
 </style>

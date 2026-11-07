@@ -3,9 +3,9 @@
         <g-topo :titulo="$t('sobreTitulo')"></g-topo>
         <main class="g-conteudo sobre-conteudo">
             <section class="sobre-heroi" aria-labelledby="sobre-nome">
-                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="sobre-grilo"/>
+                <img src="app/img/grilo/mascote/grilo-feliz.webp" alt="" aria-hidden="true" class="sobre-grilo"/>
                 <div>
-                    <h2 id="sobre-nome" class="sobre-nome">Grilo Falante</h2>
+                    <h2 id="sobre-nome" class="sobre-nome"><img src="app/img/grilo/icone-app.png" alt="" aria-hidden="true" class="sobre-icone"/>Grilo Falante</h2>
                     <p class="sobre-lema">{{ $t('sobreLema') }}</p>
                     <div class="g-linha sobre-pilulas">
                         <span class="g-pilula g-pilula-ok"><i class="ti ti-heart" aria-hidden="true"></i>{{ $t('sobrePilulaGratis') }}</span>
@@ -82,6 +82,7 @@
                         </i18n>
                     </li>
                     <li>{{ $t('sobreCreditoFontes') }}</li>
+                    <li>{{ $t('sobreCreditoMascote') }}</li>
                     <li>
                         <i18n path="sobreCreditoResponsiveVoice" tag="span">
                             <template v-slot:rv><a target="_blank" rel="noopener" href="https://responsivevoice.org">ResponsiveVoice</a></template>
@@ -147,8 +148,9 @@
         border-radius: var(--g-raio-g);
         background: var(--g-girassol-claro);
     }
-    .sobre-grilo { width: 120px; height: 120px; flex: none; }
-    .sobre-nome { font-size: var(--g-t-h1); margin: 0 0 var(--g-e1) !important; }
+    .sobre-grilo { width: 120px; height: 160px; object-fit: contain; flex: none; }
+    .sobre-nome { font-size: var(--g-t-h1); margin: 0 0 var(--g-e1) !important; display: flex; align-items: center; gap: var(--g-e2); }
+    .sobre-icone { width: 40px; height: 40px; flex: none; }
     .sobre-lema { font-size: var(--g-t-grande); margin: 0 0 var(--g-e3); }
     .sobre-pilulas { gap: var(--g-e2); }
     .sobre-grade {
@@ -161,7 +163,7 @@
         align-items: center;
         gap: var(--g-e2);
     }
-    .sobre-cartao h3 .ti, .sobre-creditos h3 .ti { color: var(--g-folha-escura); font-size: 1.5rem; }
+    .sobre-cartao h3 .ti, .sobre-creditos h3 .ti { color: var(--g-folha-escura); font-size: 24px; }
     .sobre-cartao p:last-child { margin-bottom: 0; }
     .sobre-historia { background: var(--g-folha-clara); border-color: transparent; }
     .sobre-lista {
@@ -182,7 +184,7 @@
         color: var(--g-ceu-escuro);
         display: grid;
         place-items: center;
-        font-size: 1.3rem;
+        font-size: 21px;
     }
     .sobre-links { display: flex; flex-wrap: wrap; gap: var(--g-e2); }
     .sobre-links .g-btn { text-decoration: none; padding: 0 var(--g-e4); }
@@ -201,6 +203,7 @@
     @media (max-width: 560px) {
         .sobre-heroi { flex-direction: column; text-align: center; padding: var(--g-e4); }
         .sobre-pilulas { justify-content: center; }
-        .sobre-grilo { width: 96px; height: 96px; }
+        .sobre-grilo { width: 96px; height: 128px; }
+        .sobre-nome { justify-content: center; }
     }
 </style>

@@ -43,7 +43,7 @@
         border-radius: var(--g-raio);
         display: grid;
         place-items: center;
-        font-size: 1.75rem;
+        font-size: 28px;
     }
     .aj-cor-folha { background: var(--g-folha-clara); color: var(--g-folha-escura); }
     .aj-cor-girassol { background: var(--g-girassol-claro); color: #4a3b00; }
@@ -59,7 +59,7 @@
     .aj-secao-resumo { margin: 0; }
     @media (max-width: 480px) {
         .aj-secao { padding: var(--g-e4); border-radius: var(--g-raio); }
-        .aj-secao-icone { width: 44px; height: 44px; font-size: 1.5rem; }
+        .aj-secao-icone { width: 44px; height: 44px; font-size: 24px; }
         .aj-secao-titulo { font-size: var(--g-t-h3); }
     }
 </style>

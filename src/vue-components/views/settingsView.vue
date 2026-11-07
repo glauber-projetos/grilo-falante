@@ -8,7 +8,7 @@
         </g-topo>
 
         <nav class="aj-atalhos" :aria-label="$t('ajustesAtalhos')">
-            <a v-for="secao in SECOES" :key="secao.id" :href="'#settings/' + secao.id" class="aj-atalho"
+            <a v-for="secao in SECOES" :key="secao.id" :href="'#settings?secao=' + secao.id" class="aj-atalho"
                :class="{ 'aj-atalho-on': secaoAtual === secao.id }" @click.prevent="irPara(secao.id)">
                 <i :class="'ti ti-' + secao.icone" aria-hidden="true"></i>{{ $t(secao.titulo) }}
             </a>
@@ -77,7 +77,7 @@
 
     /**
      * Grilo Falante: Ajustes, one page with a card per thing the family wants to do.
-     * Stable links to a card: "#settings/<id>" with id = voz, aparencia, modo-crianca, sem-internet,
+     * Stable links to a card: "#settings?secao=<id>" with id = voz, aparencia, modo-crianca, sem-internet,
      * formas-de-tocar, idioma, avancado (the card's element id is "ajustes-<id>").
      */
     const SECOES = [
@@ -105,9 +105,6 @@
 
     export default {
         components: { GTopo, AjusteSecao, SettingsVoz, SettingsAppearance, SettingsModoCrianca, SettingsOffline, SettingsFormasDeTocar, SettingsLanguage, SettingsAvancado },
-        props: {
-            abaInicial: { type: String, default: '' } // from the route "#settings/:aba"
-        },
         data() {
             return {
                 metadata: null,
@@ -141,7 +138,7 @@
                     this.secaoAtual = secao;
                     elementId = elementId && document.getElementById(elementId) ? elementId : this.idDe(secao);
                     if (history && history.replaceState) {
-                        history.replaceState(null, null, location.origin + location.pathname + location.search + '#settings/' + secao);
+                        history.replaceState(null, null, location.origin + location.pathname + location.search + '#settings?secao=' + secao);
                     }
                 }
                 this.$nextTick(() => {
@@ -181,9 +178,6 @@
                 }
             },
             secaoDoLink() {
-                if (this.abaInicial) {
-                    return this.abaInicial;
-                }
                 let match = location.hash.match(/[?&]secao=([^&]+)/);
                 return match ? decodeURIComponent(match[1]) : null;
             }
@@ -235,7 +229,7 @@
     }
     .aj-atalho:hover { border-color: var(--g-borda-forte); color: var(--g-tinta); }
     .aj-atalho:focus-visible { outline: none; box-shadow: var(--g-foco); }
-    .aj-atalho .ti { font-size: 1.25rem; color: var(--g-folha-escura); }
+    .aj-atalho .ti { font-size: 20px; color: var(--g-folha-escura); }
     .aj-atalho-on { background: var(--g-folha-clara); border-color: var(--g-folha); color: var(--g-folha-escura); }
     @media (min-width: 1100px) {
         .aj-atalhos { justify-content: center; flex-wrap: wrap; }
@@ -269,19 +263,19 @@
         border-radius: var(--g-raio);
         display: grid;
         place-items: center;
-        font-size: 1.75rem;
+        font-size: 28px;
         background: var(--g-superficie-2);
         color: var(--g-tinta-2);
     }
     .aj-avancado-textos { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     .aj-avancado-titulo { font-family: var(--g-fonte-titulo); font-weight: 700; font-size: var(--g-t-h2); line-height: 1.15; }
-    .aj-avancado-seta { font-size: 1.5rem; transition: transform var(--g-medio) var(--g-curva); }
+    .aj-avancado-seta { font-size: 24px; transition: transform var(--g-medio) var(--g-curva); }
     .aj-avancado-details[open] .aj-avancado-seta { transform: rotate(180deg); }
     .aj-avancado-corpo { padding: 0 var(--g-e5) var(--g-e5); }
     @media (max-width: 480px) {
         .aj-avancado-details > summary { padding: var(--g-e4); }
         .aj-avancado-corpo { padding: 0 var(--g-e4) var(--g-e4); }
-        .aj-avancado-icone { width: 44px; height: 44px; font-size: 1.5rem; }
+        .aj-avancado-icone { width: 44px; height: 44px; font-size: 24px; }
         .aj-avancado-titulo { font-size: var(--g-t-h3); }
     }
 </style>
@@ -338,7 +332,7 @@
     }
     .aj-tela .aj-mais > summary::-webkit-details-marker { display: none; }
     .aj-tela .aj-mais > summary:focus-visible { outline: none; box-shadow: var(--g-foco); }
-    .aj-tela .aj-mais > summary .ti { font-size: 1.3rem; color: var(--g-folha-escura); }
+    .aj-tela .aj-mais > summary .ti { font-size: 21px; color: var(--g-folha-escura); }
     .aj-tela .aj-mais-corpo { padding: var(--g-e2) var(--g-e4) var(--g-e4); }
     .aj-tela .g-cartao { transition: border-color var(--g-medio), box-shadow var(--g-medio); }
     .aj-tela .g-cartao.aj-destaque { border-color: var(--g-girassol); box-shadow: 0 0 0 4px var(--g-girassol-claro); }

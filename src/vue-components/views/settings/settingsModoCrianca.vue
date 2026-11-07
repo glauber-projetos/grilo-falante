@@ -1,8 +1,11 @@
 <template>
     <div class="aj-modo">
-        <div class="g-aviso aj-modo-aviso">
-            <i class="ti ti-hand-stop" aria-hidden="true"></i>
-            <span>{{ $t('ajustesModoComoSair') }}</span>
+        <div class="aj-modo-topo">
+            <img src="app/img/grilo/mascote/grilo-confiante.webp" alt="" aria-hidden="true" class="aj-modo-grilo"/>
+            <div class="g-aviso aj-modo-aviso">
+                <i class="ti ti-hand-stop" aria-hidden="true"></i>
+                <span>{{ $t('ajustesModoComoSair') }}</span>
+            </div>
         </div>
 
         <fieldset class="aj-grupo">
@@ -77,7 +80,9 @@
 </script>
 
 <style scoped>
-    .aj-modo-aviso { margin-bottom: var(--g-e4); }
+    .aj-modo-topo { display: flex; align-items: center; gap: var(--g-e3); margin-bottom: var(--g-e4); }
+    .aj-modo-grilo { width: 64px; height: 84px; object-fit: contain; flex: none; }
+    .aj-modo-aviso { margin: 0; flex: 1; min-width: 0; }
     .aj-teste-linha {
         display: flex;
         gap: var(--g-e3);

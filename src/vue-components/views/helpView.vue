@@ -3,7 +3,7 @@
         <g-topo :titulo="$t('ajudaTitulo')"></g-topo>
         <main class="g-conteudo ajuda-conteudo">
             <div class="ajuda-intro">
-                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="ajuda-grilo"/>
+                <img src="app/img/grilo/mascote/grilo-explicando.webp" alt="" aria-hidden="true" class="ajuda-grilo"/>
                 <p class="g-apoio">{{ $t('ajudaIntro') }}</p>
             </div>
 
@@ -20,7 +20,7 @@
 
             <article v-for="(guia, i) in guias" :key="guia.id" :id="'ajuda-' + guia.id" class="g-cartao ajuda-guia" :aria-labelledby="'ajuda-' + guia.id + '-titulo'">
                 <div class="ajuda-guia-topo">
-                    <span class="ajuda-guia-icone" :class="'ajuda-cor-' + (i % cores.length)" aria-hidden="true"><i :class="'ti ti-' + guia.icone"></i></span>
+                    <img :src="'app/img/grilo/mascote/grilo-' + guia.mascote + '.webp'" alt="" aria-hidden="true" class="ajuda-guia-grilo"/>
                     <div>
                         <h2 :id="'ajuda-' + guia.id + '-titulo'">{{ $t(guia.prefixo + 'Titulo') }}</h2>
                         <p class="g-apoio">{{ $t(guia.prefixo + 'Resumo') }}</p>
@@ -47,13 +47,13 @@
      * Each guide has the element id "ajuda-<id>".
      */
     const GUIAS = [
-        { id: 'primeiros-passos', icone: 'rocket', prefixo: 'ajudaPrimeirosPassos', passos: 4 },
-        { id: 'montar-frase', icone: 'message-circle', prefixo: 'ajudaMontarFrase', passos: 5 },
-        { id: 'botao-foto-voz', icone: 'camera', prefixo: 'ajudaBotaoFoto', passos: 5 },
-        { id: 'sem-internet', icone: 'wifi-off', prefixo: 'ajudaSemInternet', passos: 5 },
-        { id: 'modo-crianca', icone: 'lock', prefixo: 'ajudaModoCrianca', passos: 5 },
-        { id: 'arquivo-copia', icone: 'file-import', prefixo: 'ajudaArquivoCopia', passos: 4 },
-        { id: 'instalar', icone: 'device-mobile', prefixo: 'ajudaInstalar', passos: 4 }
+        { id: 'primeiros-passos', icone: 'rocket', prefixo: 'ajudaPrimeirosPassos', passos: 4, mascote: 'orientando' },
+        { id: 'montar-frase', icone: 'message-circle', prefixo: 'ajudaMontarFrase', passos: 5, mascote: 'apontando' },
+        { id: 'botao-foto-voz', icone: 'camera', prefixo: 'ajudaBotaoFoto', passos: 5, mascote: 'ideia' },
+        { id: 'sem-internet', icone: 'wifi-off', prefixo: 'ajudaSemInternet', passos: 5, mascote: 'festa' },
+        { id: 'modo-crianca', icone: 'lock', prefixo: 'ajudaModoCrianca', passos: 5, mascote: 'confiante' },
+        { id: 'arquivo-copia', icone: 'file-import', prefixo: 'ajudaArquivoCopia', passos: 4, mascote: 'aprovando' },
+        { id: 'instalar', icone: 'device-mobile', prefixo: 'ajudaInstalar', passos: 4, mascote: 'feliz' }
     ];
 
     export default {
@@ -87,7 +87,7 @@
     }
     .ajuda-intro { display: flex; align-items: center; gap: var(--g-e4); }
     .ajuda-intro p { margin: 0; font-size: var(--g-t-grande); }
-    .ajuda-grilo { width: 72px; height: 72px; flex: none; }
+    .ajuda-grilo { width: 112px; height: 104px; object-fit: contain; flex: none; }
     .ajuda-indice {
         list-style: none;
         margin: 0;
@@ -111,7 +111,7 @@
         line-height: 1.25;
     }
     .ajuda-indice-item:focus-visible { outline: none; box-shadow: var(--g-foco); }
-    .ajuda-indice-item .ti { font-size: 1.75rem; flex: none; }
+    .ajuda-indice-item .ti { font-size: 28px; flex: none; }
     .ajuda-cor-0 { background: var(--g-folha-clara); color: var(--g-folha-escura); }
     .ajuda-cor-1 { background: var(--g-girassol-claro); color: #4a3b00; }
     .ajuda-cor-2 { background: var(--g-ceu); color: var(--g-ceu-escuro); }
@@ -123,15 +123,7 @@
     .ajuda-guia-topo { display: flex; gap: var(--g-e4); align-items: flex-start; margin-bottom: var(--g-e3); }
     .ajuda-guia-topo h2 { font-size: var(--g-t-h2); margin: 4px 0 2px !important; }
     .ajuda-guia-topo p { margin: 0; }
-    .ajuda-guia-icone {
-        flex: none;
-        width: 52px;
-        height: 52px;
-        border-radius: var(--g-raio);
-        display: grid;
-        place-items: center;
-        font-size: 1.75rem;
-    }
+    .ajuda-guia-grilo { width: 72px; height: 80px; object-fit: contain; flex: none; }
     .ajuda-passos {
         counter-reset: passo;
         list-style: none;
@@ -170,11 +162,12 @@
     .ajuda-manual a { color: var(--g-tinta-2); }
     @media (max-width: 480px) {
         .ajuda-guia { padding: var(--g-e4); border-radius: var(--g-raio); }
-        .ajuda-guia-icone { width: 44px; height: 44px; font-size: 1.5rem; }
+        .ajuda-guia-grilo { width: 56px; height: 64px; }
+        .ajuda-grilo { width: 88px; height: 84px; }
         .ajuda-guia-topo h2 { font-size: var(--g-t-h3); }
         .ajuda-passos li { font-size: var(--g-t-corpo); }
         .ajuda-indice { grid-template-columns: 1fr 1fr; }
         .ajuda-indice-item { padding: var(--g-e2) var(--g-e3); gap: var(--g-e2); font-size: var(--g-t-legenda); }
-        .ajuda-indice-item .ti { font-size: 1.4rem; }
+        .ajuda-indice-item .ti { font-size: 22px; }
     }
 </style>

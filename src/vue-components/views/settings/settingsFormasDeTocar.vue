@@ -139,13 +139,13 @@
         color: var(--g-ceu-escuro);
         display: grid;
         place-items: center;
-        font-size: 1.6rem;
+        font-size: 26px;
     }
     .aj-metodo-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .aj-metodo-titulo { font-weight: 700; font-size: var(--g-t-grande); }
     .aj-metodo-resumo { color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
     .aj-metodo .g-pilula { align-self: flex-start; margin-top: var(--g-e2); min-height: 28px; }
-    .aj-metodo-seta { flex: none; color: var(--g-tinta-3); font-size: 1.3rem; align-self: center; }
+    .aj-metodo-seta { flex: none; color: var(--g-tinta-3); font-size: 21px; align-self: center; }
     @media (max-width: 420px) {
         .aj-metodos { grid-template-columns: minmax(0, 1fr); }
         .aj-metodo-seta { display: none; }
