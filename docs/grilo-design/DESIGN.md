@@ -74,11 +74,10 @@ Se precisar mudar um arquivo de outra área, **não mude**. Mande uma mensagem a
 ## Combinados entre sessões (atualizado pelo coordenador)
 
 - **Tamanho de texto:** no app, `1rem = 10px`, porque o `skeleton.css` define `html{font-size:62.5%}`. Os tokens `--g-t-*` estão em px. Nos `<style scoped>` use `var(--g-t-*)`, px ou em. Nunca use rem.
-- **Abrir os Ajustes numa seção:** a rota é `#settings/<secao>`, e o router passa a prop `abaInicial` para `SettingsView`. As seções são `voz`, `aparencia`, `crianca` (Modo Criança e segurança) e `offline` (Sem internet).
-  - Casca: generalizar a rota que hoje existe só para `#settings/offline`.
-  - Ajustes: aceitar `props: ['abaInicial']`, rolar até a seção e destacá-la.
-  - Prancha: usar `#settings/voz` e `#settings/aparencia`.
-  - Esse formato substitui a ideia anterior de `#settings?secao=…`.
+- **Abrir os Ajustes numa seção:** use `#settings?secao=<secao>`. A tela de Ajustes lê esse parâmetro sozinha, rola até a seção e a destaca. As seções são `voz`, `aparencia`, `crianca` (Modo Criança e segurança) e `offline` (Sem internet).
+  - O Início já usa `#settings?secao=offline`.
+  - A prancha usa `#settings?secao=voz` e `#settings?secao=aparencia`.
+  - A rota `#settings/offline` e a prop `abaInicial` foram retiradas.
 - **Rotas fixas:**
   - Início do adulto: `#inicio`.
   - Trocar criança, ou "Quem vai falar hoje?": `#welcome`.
