@@ -54,15 +54,17 @@
     --g-e5: 24px;
     --g-e6: 32px;
 
-    /* texto */
+    /* texto
+     * Em px, não em rem: o skeleton.css herdado põe html { font-size: 62.5% }, então no app 1rem = 10px.
+     * Nos estilos das telas novas use estas variáveis, px ou em; evite rem. */
     --g-fonte-titulo: "Baloo 2", "Atkinson Hyperlegible", system-ui, sans-serif;
     --g-fonte: "Atkinson Hyperlegible", system-ui, sans-serif;
-    --g-t-legenda: 0.875rem;
-    --g-t-corpo: 1rem;
-    --g-t-grande: 1.125rem;
-    --g-t-h3: 1.25rem;
-    --g-t-h2: 1.5rem;
-    --g-t-h1: 2rem;
+    --g-t-legenda: 14px;
+    --g-t-corpo: 16px;
+    --g-t-grande: 18px;
+    --g-t-h3: 20px;
+    --g-t-h2: 24px;
+    --g-t-h1: 32px;
 
     /* movimento */
     --g-rapido: 120ms;
@@ -200,7 +202,7 @@
     transition: transform var(--g-rapido) var(--g-curva);
 }
 .g-ladrilho:active { transform: scale(0.97); }
-.g-ladrilho .ti { font-size: 2.2rem; }
+.g-ladrilho .ti { font-size: 36px; }
 .g-ladrilho small { display: block; font-weight: 400; font-size: var(--g-t-legenda); opacity: 0.85; margin-top: 2px; }
 .g-ladrilho-folha { background: var(--g-folha); color: #fff; }
 .g-ladrilho-girassol { background: var(--g-girassol); color: #4a3b00; }
@@ -246,7 +248,7 @@
 .g-avatar {
     width: 72px; height: 72px; border-radius: 50%;
     display: grid; place-items: center; overflow: hidden; flex: none;
-    font-family: var(--g-fonte-titulo); font-size: 2rem; color: #fff;
+    font-family: var(--g-fonte-titulo); font-size: 32px; color: #fff;
     background: var(--g-folha);
 }
 .g-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -276,7 +278,7 @@
     padding: var(--g-e3) var(--g-e4); border-radius: var(--g-raio);
     background: var(--g-girassol-claro); color: #4a3b00;
 }
-.g-aviso .ti { font-size: 1.4rem; flex: none; }
+.g-aviso .ti { font-size: 22px; flex: none; }
 
 /* ---------- utilidades ---------- */
 .g-linha { display: flex; align-items: center; gap: var(--g-e3); flex-wrap: wrap; }

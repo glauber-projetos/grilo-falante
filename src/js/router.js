@@ -20,10 +20,14 @@ import { localStorageService } from './service/data/localStorageService';
 import { MainVue } from './vue/mainVue';
 import HelpView from '../vue-components/views/helpView.vue';
 import SetupWizardView from '../vue-components/wizard/setupWizardView.vue';
+import InicioView from '../vue-components/views/inicioView.vue';
 import { constants } from './util/constants.js';
 import { urlParamService } from './service/urlParamService';
 
 let NO_DB_VIEWS = ['#login', '#register', '#welcome', '#add', '#about', '#help', '#outdated'];
+// Grilo Falante: arriving at "#main" from one of these (or when the app opens) follows the opening rules,
+// see openingRoute(): child mode on -> the board, otherwise -> the adult home "#inicio".
+let ENTRY_VIEWS = ['#login', '#register', '#welcome', '#add'];
 
 let Router = {};
 let navigoInstance = null;
@@ -35,6 +39,7 @@ let _currentView = null;
 let _currentVueApp = null;
 let _gridHistory = [];
 let _locked = false;
+let _lastRoutedHash = null; // hash of the last resolved route, null before the first one
 
 Router.VIEWS = {
     ManageGridsView: ManageGridsView,
@@ -52,7 +57,14 @@ Router.init = function (injectIdParam, initialHash) {
     navigoInstance.on({
         main: function () {
             helpService.setHelpLocation('02_navigation', '#main-view');
+            if (isOpening()) {
+                return openingRoute();
+            }
             toMainInternal();
+        },
+        inicio: function () {
+            helpService.setHelpLocationIndex();
+            loadVueView(InicioView);
         },
         'grids/': function () {
             helpService.setHelpLocation('02_navigation', '#manage-grids-view');
@@ -120,6 +132,10 @@ Router.init = function (injectIdParam, initialHash) {
             //TODO add correct help location
             loadVueView(SettingsView);
         },
+        'settings/:aba': function (params) {
+            // e.g. "#settings/offline" from the "Sem internet" tile of the adult home
+            loadVueView(SettingsView, { abaInicial: params.aba });
+        },
         help: function () {
             loadVueView(HelpView);
         },
@@ -163,6 +179,7 @@ Router.init = function (injectIdParam, initialHash) {
             }
         },
         after: function (params) {
+            _lastRoutedHash = location.hash;
             $(document).trigger(constants.EVENT_NAVIGATED);
         },
         leave: function (params) {
@@ -202,6 +219,25 @@ Router.to = function (hash, options) {
 
 Router.toMain = function () {
     Router.to('#main' + '?date=' + new Date().getTime());
+};
+
+/**
+ * Grilo Falante: the adult home with the big tiles
+ */
+Router.toInicio = function () {
+    Router.to('#inicio');
+};
+
+/**
+ * Grilo Falante: where the app goes after opening or after choosing / creating a profile:
+ * no profile -> entry screens; child mode ("Modo Criança") on -> the board; otherwise -> the adult home.
+ * Router.toMain() called from the entry screens follows the same rules.
+ */
+Router.toAbertura = function () {
+    if (!databaseService.getCurrentUsedDatabase()) {
+        return Router.to(getValidHash());
+    }
+    return openingRoute();
 };
 
 Router.toRegister = function () {
@@ -345,8 +381,31 @@ function loadVueView(viewObject, properties, menuItemToHighlight) {
 }
 
 function setMenuItemSelected(hash) {
-    $('nav button').removeClass('selected');
-    $(`nav a[href='${hash}'] button`).addClass('selected');
+    // the sidebar of the original app was removed, nothing to highlight anymore
+}
+
+/**
+ * true, if "#main" is reached while opening the app or coming from an entry screen (login, new profile, ...)
+ */
+function isOpening() {
+    if (!_lastRoutedHash) {
+        return true;
+    }
+    let lastBase = _lastRoutedHash.split('?')[0];
+    return ENTRY_VIEWS.includes(lastBase);
+}
+
+function openingRoute() {
+    if (!routingEndabled) {
+        return;
+    }
+    _lastRoutedHash = '#main'; // only once, the next "#main" goes to the board
+    return dataService.getMetadata().then((metadata) => {
+        if (_locked || (metadata && metadata.locked)) {
+            return toMainInternal();
+        }
+        Router.to('#inicio', { noHistory: true });
+    });
 }
 
 function toMainInternal() {

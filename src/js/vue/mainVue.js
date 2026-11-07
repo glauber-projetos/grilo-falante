@@ -16,7 +16,6 @@ import SearchModal from "../../vue-components/modals/searchModal.vue";
 import PhraseHistoryModal from "../../vue-components/modals/phraseHistoryModal.vue";
 import MessageBox from "../../vue-components/modals/messageBox.vue";
 import { systemActionService } from '../service/systemActionService';
-import { stateService } from '../service/stateService';
 import '../service/voiceProfileService'; // applies the voice settings saved in the child's profile on this device
 
 let MainVue = {};
@@ -33,15 +32,66 @@ MainVue.setViewComponent = function (component, properties) {
     app.setComponent(component, properties);
 };
 
+/**
+ * Grilo Falante: the old sidebar of the original app was removed (navigation is the adult home "#inicio" and the
+ * top bar gTopo.vue). These two functions stay so that older code that still calls them keeps working.
+ */
 MainVue.isSidebarOpen = function () {
-    return app.showSidebar;
+    return false;
 };
 
-MainVue.restoreSidebar = function () {
-    if (stateService.getState(constants.STATE_SIDEBAR_DESIRED_OPEN)) {
-        $(document).trigger(constants.EVENT_SIDEBAR_OPEN);
-    }
+MainVue.restoreSidebar = function () {};
+
+/**
+ * Name, initial, photo and color of the child of the current profile, shown in the adult home and in the top bar.
+ * Reads the summary the entry screens save in localStorage "GRILO_PERFIS" ({usuario: {nome, foto}}), with the same
+ * rules as src/js/service/perfilNomes.js (display name, initial, fixed color per user), so the face is the same as in
+ * "Quem vai falar hoje?".
+ * @param username optional, defaults to the current user
+ * @return {{usuario: string, nome: string, inicial: string, foto: string|null, cor: string}}
+ */
+MainVue.getPerfil = function (username) {
+    return getPerfil(username || databaseService.getCurrentUsedDatabase());
 };
+
+/**
+ * trigger this jQuery event on document after changing the name or photo of the profile, so the top bar and the
+ * adult home update: $(document).trigger(MainVue.EVENT_PERFIL_ALTERADO)
+ */
+MainVue.EVENT_PERFIL_ALTERADO = 'grilo-perfil-alterado';
+
+// same lists as in perfilNomes.js
+const USUARIOS_SEM_NOME = ['default-user', 'default', 'local', 'user', 'usuario', 'teste-automatico', constants.LOCAL_DEMO_USERNAME];
+const CORES_AVATAR = ['#3f8a2a', '#c94a2c', '#12406e', '#3e2a85', '#7a3410', '#2f6b1f', '#9c3d6b', '#0f5c5a'];
+
+function getPerfil(username) {
+    let perfil = { usuario: username || '', nome: '', inicial: '', foto: null, cor: CORES_AVATAR[0] };
+    if (!username) {
+        return perfil;
+    }
+    let salvo = {};
+    try {
+        let todos = JSON.parse(window.localStorage.getItem('GRILO_PERFIS') || '{}') || {};
+        salvo = todos[username] || {};
+    } catch (e) {
+        salvo = {};
+    }
+    let nome = salvo.nome && String(salvo.nome).trim();
+    if (!nome && !USUARIOS_SEM_NOME.includes(username)) {
+        nome = String(username).replace(/[-_]+\d*$/, '').replace(/[-_]+/g, ' ').trim()
+            .toLocaleLowerCase('pt-BR')
+            .replace(/(^|\s)(\S)/g, (m, espaco, letra) => espaco + letra.toLocaleUpperCase('pt-BR'));
+    }
+    perfil.nome = nome || '';
+    perfil.inicial = perfil.nome ? perfil.nome.charAt(0).toLocaleUpperCase('pt-BR') : '';
+    perfil.foto = typeof salvo.foto === 'string' && salvo.foto ? salvo.foto : null;
+    let h = 0;
+    for (let i = 0; i < username.length; i++) {
+        h = (h * 31 + username.charCodeAt(i)) >>> 0;
+    }
+    perfil.cor = CORES_AVATAR[h % CORES_AVATAR.length];
+    return perfil;
+}
 
 MainVue.setTooltip = function (html, options) {
     if (!app) {
@@ -161,7 +211,6 @@ MainVue.searchModalOpened = function() {
 };
 
 MainVue.init = function () {
-    stateService.setState(constants.STATE_SIDEBAR_DESIRED_OPEN, true);
     Vue.use(VueI18n);
     return i18nService.getVueI18n().then((i18n) => {
         app = new Vue({
@@ -173,8 +222,8 @@ MainVue.init = function () {
                     component: null,
                     properties: null,
                     componentKey: 0,
-                    showSidebar: false,
                     currentUser: databaseService.getCurrentUsedDatabase(),
+                    perfil: getPerfil(databaseService.getCurrentUsedDatabase()),
                     isLocalUser: localStorageService.isSavedLocalUser(databaseService.getCurrentUsedDatabase()),
                     syncState: dataService.getSyncState(),
                     constants: constants,
@@ -194,20 +243,8 @@ MainVue.init = function () {
                     this.properties = properties;
                     this.componentKey++; //forces to update the view, even with same component (e.g. grid view, other page)
                 },
-                closeSidebar() {
-                    stateService.setState(constants.STATE_SIDEBAR_DESIRED_OPEN, false);
-                    $(document).trigger(constants.EVENT_SIDEBAR_CLOSE);
-                },
-                openSidebar() {
-                    $(document).trigger(constants.EVENT_SIDEBAR_OPEN);
-                },
                 openHelp() {
                     helpService.openHelp();
-                },
-                moreNavigation() {
-                    $.contextMenu('destroy');
-                    setupContextMenu();
-                    $('#moreNavigation').contextMenu();
                 },
                 toMain() {
                     Router.toMain();
@@ -215,42 +252,14 @@ MainVue.init = function () {
             },
             mounted() {
                 let thiz = this;
-                $(document).on(constants.EVENT_SIDEBAR_OPEN, () => {
-                    if (thiz.showSidebar) {
-                        return;
-                    }
-                    if (!databaseService.getCurrentUsedDatabase()) {
-                        thiz.showSidebar = true;
-                        this.$nextTick(() => {
-                            $(document).trigger(constants.EVENT_SIDEBAR_OPENED);
-                            $(document).trigger(constants.EVENT_GRID_RESIZE);
-                        });
-                        return;
-                    }
-                    dataService.getMetadata().then((metadata) => {
-                        if (!metadata.locked && !metadata.fullscreen) {
-                            thiz.showSidebar = true;
-                            this.$nextTick(() => {
-                                $(document).trigger(constants.EVENT_SIDEBAR_OPENED);
-                                $(document).trigger(constants.EVENT_GRID_RESIZE);
-                            });
-                        }
-                    });
-                });
-                $(document).on(constants.EVENT_SIDEBAR_CLOSE, () => {
-                    thiz.showSidebar = false;
-                    this.$nextTick(() => {
-                        $(document).trigger(constants.EVENT_GRID_RESIZE);
-                    });
-                });
-                $(document).on(constants.EVENT_DB_INITIALIZED, () => {
+                let updateUser = () => {
                     thiz.currentUser = databaseService.getCurrentUsedDatabase();
                     thiz.isLocalUser = localStorageService.isSavedLocalUser(thiz.currentUser);
-                });
-                $(document).on(constants.EVENT_DB_CLOSED, () => {
-                    thiz.currentUser = databaseService.getCurrentUsedDatabase();
-                    thiz.isLocalUser = localStorageService.isSavedLocalUser(thiz.currentUser);
-                });
+                    thiz.perfil = getPerfil(thiz.currentUser);
+                };
+                $(document).on(constants.EVENT_DB_INITIALIZED, updateUser);
+                $(document).on(constants.EVENT_DB_CLOSED, updateUser);
+                $(document).on(MainVue.EVENT_PERFIL_ALTERADO, updateUser);
                 $(document).on(constants.EVENT_DB_SYNC_STATE_CHANGE, (event, syncState) => {
                     thiz.syncState = syncState;
                 });
@@ -294,45 +303,10 @@ MainVue.init = function () {
                     .onExitFullscreen(systemActionService.exitFullscreen);
                 inputEventHandler.global.startListening();
                 $(document).on(constants.EVENT_SHOW_PHRASE_HISTORY, MainVue.showPhraseHistoryModal);
-                thiz.openSidebar();
             }
         });
         return Promise.resolve();
     });
 };
-
-function setupContextMenu() {
-    let CONTEXT_ADD_ONLINE = 'CONTEXT_ADD_ONLINE';
-    let CONTEXT_ADD_OFFLINE = 'CONTEXT_ADD_OFFLINE';
-    let CONTEXT_ABOUT = 'CONTEXT_ABOUT';
-    let menuItems = {
-        CONTEXT_ADD_ONLINE: { name: i18nService.t('addOnlineUser'), icon: 'fas fa-user-plus' },
-        CONTEXT_ADD_OFFLINE: { name: i18nService.t('addOfflineUser'), icon: 'fas fa-user-plus' },
-        CONTEXT_ABOUT: { name: i18nService.t('aboutAstericsGrid'), icon: 'fas fa-info-circle' }
-    };
-    $.contextMenu({
-        selector: '#moreNavigation',
-        callback: function (key, options) {
-            handleContextMenu(key);
-        },
-        items: menuItems,
-        trigger: 'left',
-        zIndex: 10
-    });
-
-    function handleContextMenu(key) {
-        switch (key) {
-            case CONTEXT_ADD_ONLINE:
-                Router.toRegister();
-                break;
-            case CONTEXT_ADD_OFFLINE:
-                Router.toAddOffline();
-                break;
-            case CONTEXT_ABOUT:
-                Router.toAbout();
-                break;
-        }
-    }
-}
 
 export { MainVue };

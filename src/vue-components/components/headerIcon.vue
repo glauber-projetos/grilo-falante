@@ -1,54 +1,87 @@
 <template>
-    <component :is="tag" v-if="!fullHeader || show">
-        <div>
-            <div v-if="show">
-                <a tabindex="20" href="javascript:void(0)" :aria-label="$t('openSidebar')" @click="openSidebar()" style="margin: 0.2em 1em 0 0.5em; color: #1D6B35;"><i class="fas fa-2x fa-bars inline"></i></a>
-                <a tabindex="21" aria-hidden="true" href="#main" class="hide-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/grilo/logo-horizontal.svg" height="40" alt="Grilo Falante"/></h1></a>
-            </div>
-            <a tabindex="22" aria-hidden="true" href="#main" class="show-mobile"><h1 class="inline"><img id="astericsIcon" src="app/img/grilo/logo-icone.svg" alt="Grilo Falante" style="margin: 0"/></h1></a>
-        </div>
-    </component>
+    <!-- full header: the new top bar of the adult screens -->
+    <g-topo v-if="fullHeader" marca-completa></g-topo>
+
+    <!-- inside an existing header of an older screen: the Grilo mark and the way back to the adult home -->
+    <div v-else class="casca-voltar">
+        <a v-if="temUsuario" href="#inicio" class="casca-voltar-btn" :title="$t('cascaVoltarInicio')" :aria-label="$t('cascaVoltarInicio')">
+            <img src="app/img/grilo/logo-icone.svg" alt="" class="casca-voltar-marca"/>
+            <i class="ti ti-home" aria-hidden="true"></i>
+            <span class="casca-voltar-texto">{{ $t('cascaInicio') }}</span>
+        </a>
+        <img v-else src="app/img/grilo/logo-icone.svg" alt="Grilo Falante" class="casca-voltar-marca"/>
+    </div>
 </template>
 
 <script>
-    import $ from '../../js/externals/jquery.js';
-    import {constants} from "../../js/util/constants";
-    import {MainVue} from "../../js/vue/mainVue";
-    import {stateService} from "../../js/service/stateService";
+    /**
+     * Grilo Falante: used by the screens of the original app that are not redesigned yet.
+     * The sidebar does not exist anymore, so this component now gives the way back to the adult home ("#inicio").
+     * New screens use gTopo.vue directly.
+     */
+    import GTopo from './gTopo.vue';
 
     export default {
+        components: { GTopo },
         props: ['fullHeader'], //if true this component is rendered as full header, otherwise as part of an already existing header
-        data() {
-            return {
-                show: !MainVue.isSidebarOpen(),
-                tag: 'div'
+        computed: {
+            temUsuario() {
+                return !!this.$root.currentUser;
             }
-        },
-        methods: {
-            openSidebar() {
-                stateService.setState(constants.STATE_SIDEBAR_DESIRED_OPEN, true);
-                $(document).trigger(constants.EVENT_SIDEBAR_OPEN);
-                this.show = false;
-            },
-            onOpenFn() {
-                this.show = false;
-            },
-            onCloseFn() {
-                this.show = true;
-            }
-        },
-        mounted() {
-            $(document).on(constants.EVENT_SIDEBAR_CLOSE, this.onCloseFn);
-            $(document).on(constants.EVENT_SIDEBAR_OPENED, this.onOpenFn);
-            if (this.fullHeader) {
-                this.tag = 'header';
-            }
-        },
-        beforeDestroy() {
-            $(document).off(constants.EVENT_SIDEBAR_CLOSE, document, this.onCloseFn);
         }
     }
 </script>
 
 <style scoped>
+    .casca-voltar {
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+        margin-right: 0.5em;
+    }
+
+    .casca-voltar-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 0 12px 0 4px;
+        border-radius: 999px;
+        border: 2px solid var(--g-borda, #e6dcc3);
+        background: var(--g-superficie, #fff);
+        color: var(--g-folha-escura, #2f6b1f);
+        font-family: var(--g-fonte, sans-serif);
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .casca-voltar-btn:hover {
+        border-color: var(--g-borda-forte, #cdbf9c);
+        color: var(--g-folha-escura, #2f6b1f);
+    }
+
+    .casca-voltar-btn:focus-visible {
+        outline: none;
+        box-shadow: var(--g-foco);
+    }
+
+    .casca-voltar-btn .ti {
+        font-size: 21px;
+    }
+
+    .casca-voltar-marca {
+        height: 34px;
+        width: 34px;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    @media (max-width: 600px) {
+        .casca-voltar-texto {
+            display: none;
+        }
+    }
 </style>
