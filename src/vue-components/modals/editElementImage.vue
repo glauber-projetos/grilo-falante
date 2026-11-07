@@ -35,7 +35,25 @@
                     <span class="hide-mobile"><i class="fas fa-arrow-down"/> <span>{{ $t('dropImageHere') }}</span></span>
                     <button @click="pasteImage()" :title="$t('pasteFromClipboard')" class="paste-btn"><i class="far fa-clipboard"/></button>
                 </div>
-                <img v-if="hasImage" id="imgPreview" :src="gridElement.image.data || gridElement.image.url"/>
+                <image-cropper v-if="hasImage && showCropper"
+                               :src="gridElement.image.data || gridElement.image.url"
+                               :cell-aspect="cellAspect"
+                               :output-width="cropOutputWidth"
+                               @apply="onCropApplied" @cancel="showCropper = false" @error="showCropper = false"/>
+                <div v-if="hasImage && !showCropper" class="img-preview-wrapper">
+                    <div class="img-preview-cell" :style="{'aspect-ratio': String(cellAspect)}">
+                        <img id="imgPreview" :class="{'cover': previewCover}" :src="gridElement.image.data || gridElement.image.url"/>
+                    </div>
+                    <div class="img-framing-controls">
+                        <button v-if="canCrop" class="u-full-width" @click="showCropper = true"><i class="fas fa-crop-alt"/> <span>{{ $t('cropImage') }}</span></button>
+                        <label for="imageFit">{{ $t('imageFit') }}</label>
+                        <select id="imageFit" class="u-full-width" :value="gridElement.image.fit || ''" @change="$set(gridElement.image, 'fit', $event.target.value)">
+                            <option value="">{{ $t('imageFitAuto') }}</option>
+                            <option :value="GridImage.FIT_COVER">{{ $t('imageFitCover') }}</option>
+                            <option :value="GridImage.FIT_CONTAIN">{{ $t('imageFitContain') }}</option>
+                        </select>
+                    </div>
+                </div>
                 <div v-if="gridElement.image.author">
                     {{ $t('by') }} <a :href="gridElement.image.authorURL" target="_blank">{{gridElement.image.author}}</a>
                 </div>
@@ -132,6 +150,8 @@
     import {util} from "../../js/util/util";
     import {constants} from "../../js/util/constants.js";
     import Accordion from "../components/accordion.vue";
+    import ImageCropper from "../components/imageCropper.vue";
+    import {dataService} from "../../js/service/data/dataService";
     import {openSymbolsService} from "../../js/service/pictograms/openSymbolsService.js";
     import {arasaacService} from "../../js/service/pictograms/arasaacService.js";
     import {globalSymbolsService} from "../../js/service/pictograms/globalSymbolsService.js";
@@ -144,10 +164,22 @@
 
     export default {
         props: ['gridElement', 'gridData', 'imageSearch'],
-        components: {Accordion},
+        components: {Accordion, ImageCropper},
         computed: {
             hasImage: function () {
                 return this.gridElement && this.gridElement.image && (this.gridElement.image.data || this.gridElement.image.url);
+            },
+            canCrop() {
+                // SVG symbols are vector graphics, cropping them makes no sense
+                let img = this.gridElement.image;
+                return img && !((img.data || '').startsWith('data:image/svg') || (img.url || '').toLowerCase().split('?')[0].endsWith('.svg'));
+            },
+            previewCover() {
+                return GridImage.shouldCover(this.gridElement.image, this.metadata);
+            },
+            cropOutputWidth() {
+                // enough resolution for sharp display on high-dpi tablets, but small enough for the database
+                return Math.min(900, Math.max(400, 2 * (this.elementW || 200)));
             }
         },
         data: function () {
@@ -160,6 +192,11 @@
                 searchLang: null,
                 searchError: false,
                 hasNextChunk: true,
+                showCropper: false,
+                elementW: 0,
+                cellAspect: 1,
+                metadata: null,
+                GridImage: GridImage,
                 constants: constants,
                 i18nService: i18nService,
                 localStorageService: localStorageService,
@@ -245,6 +282,11 @@
                     this.setValidatedBase64(base64);
                 }
             },
+            async onCropApplied(base64) {
+                await this.setBase64(base64);
+                this.$set(this.gridElement.image, 'fit', GridImage.FIT_COVER);
+                this.showCropper = false;
+            },
             setValidatedBase64(base64) {
                 this.clearImage();
                 this.gridElement.image.data = base64;
@@ -320,7 +362,16 @@
             this.searchLang = localStorageService.getJSON(EDIT_ELEM_SEARCH_LANG_PREFIX + this.searchProvider.name);
             helpService.setHelpLocation('03_appearance_layout', '#edit-modal');
             let maxElementX = Math.max(...this.gridData.gridElements.map(e => e.x + 1));
-            this.elementW = Math.round($('#grid-container')[0].getBoundingClientRect().width / maxElementX) * (this.gridElement.width || 1);
+            let containerRect = $('#grid-container')[0].getBoundingClientRect();
+            this.elementW = Math.round(containerRect.width / maxElementX) * (this.gridElement.width || 1);
+            let rowCount = Math.max(this.gridData.rowCount || 1, ...this.gridData.gridElements.map(e => e.y + (e.height || 1)));
+            let elementH = containerRect.height / rowCount * (this.gridElement.height || 1);
+            let hasLabel = this.gridElement.label && Object.values(this.gridElement.label).some(l => !!l);
+            let imageAreaH = elementH * (hasLabel ? 0.75 : 0.95); // part of the cell used by the label
+            this.cellAspect = imageAreaH > 0 ? Math.min(3, Math.max(0.33, (this.elementW * 0.95) / imageAreaH)) : 1;
+            dataService.getMetadata().then(metadata => {
+                this.metadata = metadata;
+            });
             if (this.imageSearch) {
                 this.search(this.imageSearch);
             }
@@ -347,8 +398,37 @@
       margin-bottom: 0;
     }
 
+    .img-preview-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+        align-items: flex-start;
+        margin-top: 1em;
+    }
+    .img-preview-cell {
+        position: relative;
+        width: 170px;
+        max-height: 260px;
+        border: 1px solid lightgray;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+    }
     #imgPreview {
-        width: 150px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    #imgPreview.cover {
+        object-fit: cover;
+        object-position: center 30%;
+    }
+    .img-framing-controls {
+        flex: 1;
+        min-width: 180px;
     }
 
     .img-result:hover {

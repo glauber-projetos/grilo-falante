@@ -29,7 +29,7 @@
                     <label class="three columns" for="inVoice">
                         <span>{{ $t('preferredVoice') }}</span>
                     </label>
-                    <select id="inVoice" class="five columns mb-2" v-model="userSettingsLocal.voiceConfig.preferredVoice" @change="resetVoiceProps(); saveUserSettings()">
+                    <select id="inVoice" class="five columns mb-2" v-model="userSettingsLocal.voiceConfig.preferredVoice" @change="resetVoiceProps(); saveUserSettings(true)">
                         <option :value="undefined">{{ $t('automatic') }}</option>
                         <option v-for="voice in selectVoices" :value="voice.id">
                             <span>{{ getVoiceDisplayText(voice, selectAllVoices) }}</span>
@@ -50,14 +50,14 @@
                 <div class="srow">
                     <accordion :acc-label="$t('advancedVoiceSettings')" class="eleven columns">
                         <div v-if="userSettingsLocal.voiceConfig.preferredVoice">
-                            <slider-input :label="$t('voicePitch')" id="voicePitch" min="0.1" max="2" step="0.1" decimals="1" v-model.number="userSettingsLocal.voiceConfig.voicePitch" @change="saveUserSettings()"/>
-                            <slider-input :label="$t('voiceRate')" id="voiceRate" min="0.1" max="10" step="0.1" decimals="1" v-model.number="userSettingsLocal.voiceConfig.voiceRate" @change="saveUserSettings()"/>
+                            <slider-input :label="$t('voicePitch')" id="voicePitch" min="0.1" max="2" step="0.1" decimals="1" v-model.number="userSettingsLocal.voiceConfig.voicePitch" @change="saveUserSettings(true)"/>
+                            <slider-input :label="$t('voiceRate')" id="voiceRate" min="0.1" max="10" step="0.1" decimals="1" v-model.number="userSettingsLocal.voiceConfig.voiceRate" @change="saveUserSettings(true)"/>
                         </div>
                         <div class="srow">
                             <label class="three columns" for="inVoice2">
                                 <span>{{ $t('secondVoice') }}</span>
                             </label>
-                            <select id="inVoice2" class="five columns mb-2" v-model="userSettingsLocal.voiceConfig.secondVoice" @change="saveUserSettings()">
+                            <select id="inVoice2" class="five columns mb-2" v-model="userSettingsLocal.voiceConfig.secondVoice" @change="saveUserSettings(true)">
                                 <option :value="undefined">{{ $t('noneSelected') }}</option>
                                 <option v-for="voice in voices" :value="voice.id">
                                     <span>{{ getVoiceDisplayText(voice, true) }}</span>
@@ -66,11 +66,11 @@
                             <button id="testVoice2" class="three columns" :disabled="!userSettingsLocal.voiceConfig.secondVoice" @click="speechService.testSpeak(userSettingsLocal.voiceConfig.secondVoice)">{{ $t('test') }}</button>
                         </div>
                         <div class="srow">
-                            <input id="voiceLangIsTextLang" type="checkbox" v-model="userSettingsLocal.voiceConfig.voiceLangIsTextLang" @change="saveUserSettings()"/>
+                            <input id="voiceLangIsTextLang" type="checkbox" v-model="userSettingsLocal.voiceConfig.voiceLangIsTextLang" @change="saveUserSettings(true)"/>
                             <label for="voiceLangIsTextLang">{{ $t('linkVoiceLanguageToTranslationLanguageOfSpokenText') }}</label>
                         </div>
                         <div class="srow">
-                            <input id="waitForSpeechToFinish" type="checkbox" v-model="userSettingsLocal.voiceConfig.waitForSpeechToFinish" @change="saveUserSettings()"/>
+                            <input id="waitForSpeechToFinish" type="checkbox" v-model="userSettingsLocal.voiceConfig.waitForSpeechToFinish" @change="saveUserSettings(true)"/>
                             <label for="waitForSpeechToFinish">{{ $t('waitForSpeechToFinish') }}</label>
                         </div>
                         <div class="srow" v-show="!!speechService.getExternalVoice(userSettingsLocal.voiceConfig.preferredVoice)">
@@ -108,6 +108,7 @@
 </template>
 
 <script>
+    import {voiceProfileService} from "../../../js/service/voiceProfileService";
     import {i18nService} from "../../../js/service/i18nService";
     import {dataService} from "../../../js/service/data/dataService";
     import {localStorageService} from "../../../js/service/data/localStorageService";
@@ -162,13 +163,21 @@
             }
         },
         methods: {
-            saveUserSettings() {
+            saveUserSettings(voiceChangedByUser) {
+                if (voiceChangedByUser) {
+                    this.voiceChangedByUser = true;
+                }
                 if (JSON.stringify(this.userSettingsLocal) === this.lastSavedSettingsString) {
                     return;
                 }
                 this.$emit("changing");
                 util.debounce(() => {
                     this.saveUserSettingsLocal(this.userSettingsLocal, 0); // method from mixin
+                    if (this.voiceChangedByUser) {
+                        // keep the voice in the child's profile, so it's the same on all devices
+                        this.voiceChangedByUser = false;
+                        voiceProfileService.saveToProfile(this.userSettingsLocal.voiceConfig);
+                    }
                     this.lastSavedSettingsString = JSON.stringify(this.userSettingsLocal);
                     this.selectVoices = this.getSelectVoices();
                     this.fixCurrentVoice(true);

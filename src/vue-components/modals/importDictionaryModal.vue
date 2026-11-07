@@ -91,6 +91,12 @@
                     downloadUrl: 'https://raw.githubusercontent.com/asterics/Asterics-AAC/master/app/dictionaries/default_en.json',
                     type: c.OPTION_TYPE_PREDEFINED,
                     lang: "en"
+                }, {
+                    // shipped with the app (works offline), 20.000 frequent Brazilian Portuguese words, filtered for children
+                    name: i18nService.t('astericsGridPortugueseDefault'),
+                    downloadUrl: 'app/dictionaries/default_pt.json',
+                    type: c.OPTION_TYPE_PREDEFINED,
+                    lang: "pt"
                 }],
                 selectedOption: null,
                 selectedFile: null,

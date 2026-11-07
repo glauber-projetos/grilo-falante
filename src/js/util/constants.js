@@ -52,6 +52,7 @@ constants.EVENT_USER_CHANGING = 'EVENT_USER_CHANGING';
 constants.EVENT_USER_CHANGED = 'EVENT_USER_CHANGED';
 constants.EVENT_USER_DELETED = 'EVENT_USER_DELETED';
 constants.EVENT_METADATA_UPDATED = 'EVENT_METADATA_UPDATED';
+constants.EVENT_SHOW_PHRASE_HISTORY = 'EVENT_SHOW_PHRASE_HISTORY';
 constants.EVENT_APPSETTINGS_UPDATED = 'EVENT_APPSETTINGS_UPDATED';
 constants.EVENT_USERSETTINGS_UPDATED = 'EVENT_USERSETTINGS_UPDATED';
 constants.EVENT_CONFIG_RESET = 'EVENT_CONFIG_RESET';
@@ -85,6 +86,9 @@ constants.IS_ENVIRONMENT_BETA = constants.ENVIRONMENT === 'BETA';
 constants.IS_ENVIRONMENT_PROD = !constants.IS_ENVIRONMENT_DEV && !constants.IS_ENVIRONMENT_BETA;
 constants.FORCE_USE_SW = false;
 constants.FORCE_CONNECT_DB = false;
+// login/sync server of a custom deployment (set at build time by scripts/deploy-fork.sh), empty = default server
+constants.LOGIN_SERVER_URL = '#ASTERICS_GRID_LOGIN_SERVER#';
+constants.HAS_CUSTOM_LOGIN_SERVER = constants.LOGIN_SERVER_URL !== '#ASTERICS_' + 'GRID_LOGIN_SERVER#' && !!constants.LOGIN_SERVER_URL;
 constants.ENABLE_REMOTE_DEBUGGING = false;
 constants.CURRENT_VERSION = '#ASTERICS_GRID_VERSION#';
 constants.IS_FIREFOX = navigator.userAgent.indexOf('Firefox') !== -1;
@@ -112,6 +116,7 @@ constants.BOARD_TYPE_SINGLE = "BOARD_TYPE_SINGLE";
 constants.BOARD_TYPES = [constants.BOARD_TYPE_SELFCONTAINED, constants.BOARD_TYPE_SINGLE];
 
 constants.MAX_BASE64_IMAGE_SIZE_KB = 200;
+constants.CLASS_UI_LOCKED = 'ui-locked';
 constants.MIME_TYPE_PNG = 'image/png';
 constants.MIME_TYPE_JPEG = 'image/jpeg';
 constants.MIME_TYPE_SVG = 'image/svg+xml';

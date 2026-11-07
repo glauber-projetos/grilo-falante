@@ -18,6 +18,9 @@ class MetaData extends Model({
     globalGridActive: [Boolean],
     globalGridHeightPercentage: [Number], // deprecated, was used before introducing dynamic grid placeholder
     firstRowHeightFactor: [Number],
+    voiceConfig: [Object], // VoiceConfig of the user, synced to all devices, see voiceProfileService
+    photosFillCell: [Boolean],
+    phraseHistory: [Array], // spoken and favorite sentences, see phraseHistoryService // photos (not symbols) fill the whole cell, if not set otherwise on the image
     locked: [Boolean],
     fullscreen: [Boolean],
     hashCodes: [Object], //object keys: model names of hashed objects, object values: another object with keys = hashcodes, values = object ids
@@ -72,6 +75,7 @@ MetaData.defaults({
     globalGridActive: false,
     globalGridHeightPercentage: 17,
     firstRowHeightFactor: 1,
+    photosFillCell: true,
     vocabularyLevel: null,
     integrations: new IntegrationConfigSync()
 });

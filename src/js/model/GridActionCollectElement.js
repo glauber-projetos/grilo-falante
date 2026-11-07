@@ -42,7 +42,8 @@ class GridActionCollectElement extends Model({
             GridActionCollectElement.COLLECT_ACTION_APPEND_CLIPBOARD,
             GridActionCollectElement.COLLECT_ACTION_CLEAR_CLIPBOARD,
             GridActionCollectElement.COLLECT_ACTION_TO_YOUTUBE,
-            GridActionCollectElement.COLLECT_ACTION_TOGGLE_TEXT_ROTATION
+            GridActionCollectElement.COLLECT_ACTION_TOGGLE_TEXT_ROTATION,
+            GridActionCollectElement.COLLECT_ACTION_PHRASE_HISTORY
         ];
     }
 }
@@ -63,6 +64,7 @@ GridActionCollectElement.COLLECT_ACTION_APPEND_CLIPBOARD = 'COLLECT_ACTION_APPEN
 GridActionCollectElement.COLLECT_ACTION_CLEAR_CLIPBOARD = 'COLLECT_ACTION_CLEAR_CLIPBOARD';
 GridActionCollectElement.COLLECT_ACTION_TO_YOUTUBE = 'COLLECT_ACTION_TO_YOUTUBE';
 GridActionCollectElement.COLLECT_ACTION_TOGGLE_TEXT_ROTATION = 'COLLECT_ACTION_TOGGLE_TEXT_ROTATION';
+GridActionCollectElement.COLLECT_ACTION_PHRASE_HISTORY = 'COLLECT_ACTION_PHRASE_HISTORY'; // open history / favorite sentences
 
 GridActionCollectElement.defaults({
     id: '', //will be replaced by constructor

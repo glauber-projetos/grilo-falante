@@ -25,6 +25,7 @@ import { liveElementService } from './liveElementService';
 import { MetaData } from '../model/MetaData';
 import { GridData } from '../model/GridData';
 import { gridUtil } from '../util/gridUtil';
+import { phraseHistoryService } from './phraseHistoryService';
 
 let collectElementService = {};
 
@@ -115,6 +116,14 @@ collectElementService.doCollectElementActions = async function (action, gridElem
     }
     let speakText = getPrintText({ dontIncludePronunciation: false });
     let speakArray = getSpeakArray();
+    // recordings of the family (audio actions) must always be heard in the sentence, also in text mode
+    // and with "speak continuous". In this case: play recordings and speak the words between them fluently.
+    let hasRecordings = speakArray.some(o => !!o.base64Sound);
+    let continuousArray = hasRecordings ? groupTextParts(speakArray) : null;
+    if (GridActionCollectElement.isSpeakAction(action) && speakText) {
+        let items = collectedElements.map(e => ({ id: e.id, text: getPrintTextOfElement(e), onlyText: !!e.onlyText }));
+        phraseHistoryService.addPhrase(items, speakText);
+    }
     switch (action) {
         case GridActionCollectElement.COLLECT_ACTION_SPEAK:
             if (isSeparateMode(collectMode)) {
@@ -122,22 +131,37 @@ collectElementService.doCollectElementActions = async function (action, gridElem
                     markedImageIndex = index;
                     updateCollectElements();
                 });
+            } else if (hasRecordings) {
+                speechService.speakArray(continuousArray);
             } else {
                 speechService.speak(speakText);
             }
             break;
         case GridActionCollectElement.COLLECT_ACTION_SPEAK_CONTINUOUS:
-            speechService.speak(speakText);
+            if (hasRecordings) {
+                speechService.speakArray(continuousArray);
+            } else {
+                speechService.speak(speakText);
+            }
             break;
         case GridActionCollectElement.COLLECT_ACTION_SPEAK_CONTINUOUS_CLEAR:
-            speechService.speak(speakText);
-            await speechService.waitForFinishedSpeaking();
-            clearAll();
+            if (hasRecordings) {
+                speechService.speakArray(continuousArray, (index, finished) => {
+                    if (finished) {
+                        clearAll();
+                    }
+                });
+            } else {
+                speechService.speak(speakText);
+                await speechService.waitForFinishedSpeaking();
+                clearAll();
+            }
             break;
         case GridActionCollectElement.COLLECT_ACTION_SPEAK_CLEAR:
-            if (isSeparateMode(collectMode)) {
-                speechService.speakArray(speakArray, (index, finished) => {
-                    markedImageIndex = index;
+            if (isSeparateMode(collectMode) || hasRecordings) {
+                let separate = isSeparateMode(collectMode);
+                speechService.speakArray(separate ? speakArray : continuousArray, (index, finished) => {
+                    markedImageIndex = separate ? index : null;
                     updateCollectElements();
                     if (finished) {
                         clearAll();
@@ -207,6 +231,9 @@ collectElementService.doCollectElementActions = async function (action, gridElem
             break;
         case GridActionCollectElement.COLLECT_ACTION_CLEAR_CLIPBOARD:
             util.copyToClipboard('');
+            break;
+        case GridActionCollectElement.COLLECT_ACTION_PHRASE_HISTORY:
+            $(document).trigger(constants.EVENT_SHOW_PHRASE_HISTORY);
             break;
         case GridActionCollectElement.COLLECT_ACTION_TO_YOUTUBE:
             youtubeService.setActionAfterNavigate(
@@ -314,6 +341,33 @@ async function applyGrammarCorrection(newText) {
     }
     return changedSomething;
 }
+
+/**
+ * puts a sentence from the history back into the sentence bar
+ * @param entry history entry, see phraseHistoryService
+ * @param elements resolved elements of the entry (same order as entry.items, null if not existing anymore)
+ * @param speak if true, the sentence is spoken
+ */
+collectElementService.restorePhrase = async function (entry, elements, speak) {
+    collectedElements = [];
+    (entry.items || []).forEach((item, index) => {
+        let element = elements && elements[index];
+        if (element) {
+            try {
+                collectedElements.push(new GridElement(element));
+            } catch (e) {
+                collectedElements.push(element);
+            }
+        } else if (item.text) {
+            addTextElem(item.text);
+        }
+    });
+    markedImageIndex = null;
+    await updateCollectElements();
+    if (speak) {
+        await collectElementService.doCollectElementActions(GridActionCollectElement.COLLECT_ACTION_SPEAK);
+    }
+};
 
 function clearAll() {
     collectedElements = [];
@@ -538,6 +592,24 @@ function getOutputObject(element, options) {
     return {
         text: text
     };
+}
+
+/**
+ * merges consecutive text parts of a speak array into one text, so that words between recordings
+ * are spoken fluently as one sentence part, e.g. [{text:"eu"},{text:"quero"},{base64Sound},{text:"agora"}]
+ * => [{text:"eu quero"},{base64Sound},{text:"agora"}]
+ */
+function groupTextParts(speakArray) {
+    let result = [];
+    for (let part of speakArray) {
+        let last = result[result.length - 1];
+        if (part.text && last && last.text) {
+            last.text = `${last.text} ${part.text}`;
+        } else if (part.text || part.base64Sound) {
+            result.push(Object.assign({}, part));
+        }
+    }
+    return result;
 }
 
 function getSpeakArray(options) {

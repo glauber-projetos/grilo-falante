@@ -393,6 +393,14 @@ speechService.reinit = async function () {
 function getVoicesByLang(lang) {
     let fullLangVoices = allVoices.filter((voice) => voice.langFull !== voice.lang && voice.langFull === lang);
     let langVoices = allVoices.filter((voice) => voice.lang === i18nService.getBaseLang(lang));
+    if (fullLangVoices.length === 0) {
+        // e.g. content language "pt" and app language "pt-br": prefer Brazilian voices over voices from Portugal
+        let appLang = (i18nService.getAppLang() || '').toLowerCase();
+        if (i18nService.getBaseLang(appLang) === i18nService.getBaseLang(lang) && appLang !== i18nService.getBaseLang(appLang)) {
+            let regional = langVoices.filter(voice => (voice.langFull || '').toLowerCase() === appLang);
+            langVoices = regional.concat(langVoices.filter(voice => !regional.includes(voice)));
+        }
+    }
     return fullLangVoices.length > 0 ? fullLangVoices : langVoices;
 }
 

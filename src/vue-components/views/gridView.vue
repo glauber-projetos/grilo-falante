@@ -8,6 +8,7 @@
             </div>
             <button tabindex="32" v-show="!metadata.locked" @click="lock()" class="small" :aria-label="$t('lock')"><i class="fas fa-lock"></i><span class="hide-mobile">{{ $t('lock') }}</span></button>
             <button tabindex="33" v-show="!metadata.locked" @click="MainVue.showSearchModal()" class="spaced small" :aria-label="$t('search')" :title="$t('searchBtnTitle')"><i class="fas fa-search"/> <span class="hide-mobile">{{ $t('search') }}</span></button>
+            <button tabindex="33" v-show="!metadata.locked" @click="MainVue.showPhraseHistoryModal()" class="spaced small" :aria-label="$t('phrasesTitle')"><i class="fas fa-comment-dots"/> <span class="hide-mobile">{{ $t('phrasesTitle') }}</span></button>
             <button tabindex="34" @click="systemActionService.enterFullscreen()" class="small" :aria-label="$t('fullscreen')"><i class="fas fa-expand"/> <span class="hide-mobile">{{ $t('fullscreen') }}</span></button>
         </header>
         <div v-if="metadata && metadata.locked && !metadata.fullscreen" class="floating-controls">
@@ -17,13 +18,6 @@
                     :aria-label="$t('SYS_ENTER_FULLSCREEN')"
                     :title="$t('SYS_ENTER_FULLSCREEN')">
                 <i class="fas fa-expand"></i>
-            </button>
-            <button tabindex="31"
-                    @click="MainVue.showSearchModal()"
-                    class="floating-control-button"
-                    :aria-label="$t('search')"
-                    :title="$t('searchBtnTitle')">
-                <i class="fas fa-search"></i>
             </button>
             <button tabindex="32"
                     @click="unlock()"
@@ -188,6 +182,7 @@
             setViewPropsLocked() {
                 $(document).trigger(constants.EVENT_SIDEBAR_CLOSE);
                 $(document).trigger(constants.EVENT_UI_LOCKED);
+                document.body.classList.add(constants.CLASS_UI_LOCKED);
 
                 // prevent zoom
                 $('#viewPortMeta').attr('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
@@ -198,7 +193,7 @@
 
                 //enable zoom
                 $('#viewPortMeta').attr('content', 'width=device-width, initial-scale=1');
-                $('body').attr('touch-action', '');
+                document.body.classList.remove(constants.CLASS_UI_LOCKED);
                 $('#gridView').off('touchmove', this.preventZoomHandler);
             },
             preventZoomHandler(event) {

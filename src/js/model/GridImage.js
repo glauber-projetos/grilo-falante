@@ -8,7 +8,8 @@ class GridImage extends Model({
     author: [String],
     authorURL: [String],
     searchProviderName: [String],
-    searchProviderOptions: [Array]
+    searchProviderOptions: [Array],
+    fit: [String] // GridImage.FIT_*, how the image is framed in the cell; empty = automatic (see MetaData.photosFillCell)
 }) {
     constructor(properties, elementToCopy) {
         properties = modelUtil.setDefaults(properties, elementToCopy, GridImage);
@@ -62,6 +63,46 @@ class GridImage extends Model({
         return 'grid-image';
     }
 }
+
+GridImage.FIT_AUTO = '';
+GridImage.FIT_COVER = 'cover';
+GridImage.FIT_CONTAIN = 'contain';
+
+/**
+ * true if the given image (GridImage or plain object) is a photo (jpeg/webp) and not a symbol/pictogram.
+ */
+GridImage.isPhoto = function (image) {
+    if (!image) {
+        return false;
+    }
+    if (image.data) {
+        return image.data.startsWith('data:image/jpeg') || image.data.startsWith('data:image/webp');
+    }
+    if (image.url) {
+        let url = image.url.toLowerCase().split('?')[0];
+        return url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.webp');
+    }
+    return false;
+};
+
+/**
+ * true if the image should fill the whole cell (object-fit: cover)
+ * @param image GridImage or plain object
+ * @param metadata current MetaData
+ */
+GridImage.shouldCover = function (image, metadata) {
+    if (!image) {
+        return false;
+    }
+    if (image.fit === GridImage.FIT_COVER) {
+        return true;
+    }
+    if (image.fit === GridImage.FIT_CONTAIN) {
+        return false;
+    }
+    let photosFill = !metadata || metadata.photosFillCell === undefined ? true : metadata.photosFillCell;
+    return photosFill && GridImage.isPhoto(image);
+};
 
 GridImage.IMAGE_TYPES = {
     PNG: 'PNG',

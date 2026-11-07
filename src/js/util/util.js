@@ -342,6 +342,13 @@ util.closeFullscreen = function () {
     }
 };
 
+/**
+ * true if the UI is currently locked ("child mode"), see gridView.setViewPropsLocked()
+ */
+util.isUILocked = function () {
+    return document.body.classList.contains(constants.CLASS_UI_LOCKED);
+};
+
 util.isFullscreen = function () {
     return !!(
         document.fullscreenElement ||

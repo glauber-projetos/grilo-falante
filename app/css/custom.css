@@ -13,6 +13,22 @@ body {
     touch-action: manipulation;
 }
 
+/* no pull-to-refresh / bounce of the whole page on Android and iOS */
+html,
+body {
+    overscroll-behavior: none;
+}
+
+/* "child mode": when locked, the grid must not pan, zoom or bounce, whatever the hand does */
+body.ui-locked,
+body.ui-locked #gridView,
+body.ui-locked #gridView * {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
 .grid-container {
     overflow: hidden;
 }

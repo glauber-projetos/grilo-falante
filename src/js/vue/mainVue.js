@@ -13,15 +13,18 @@ import { Router } from '../router';
 import NotificationBar from '../../vue-components/components/notificationBar.vue';
 import ProgressBarModal from '../../vue-components/modals/progressBarModal.vue';
 import SearchModal from "../../vue-components/modals/searchModal.vue";
+import PhraseHistoryModal from "../../vue-components/modals/phraseHistoryModal.vue";
 import MessageBox from "../../vue-components/modals/messageBox.vue";
 import { systemActionService } from '../service/systemActionService';
 import { stateService } from '../service/stateService';
+import '../service/voiceProfileService'; // applies the voice settings saved in the child's profile on this device
 
 let MainVue = {};
 let app = null;
 
 let modalTypes = {
     MODAL_SEARCH: 'MODAL_SEARCH',
+    MODAL_PHRASES: 'MODAL_PHRASES',
     MODAL_PROGRESSBAR: 'MODAL_PROGRESSBAR',
     MODAL_MESSAGEBOX: 'MODAL_MESSAGEBOX'
 };
@@ -93,6 +96,15 @@ MainVue.showProgressBar = function (percentage, options) {
  * @param options.searchText text to be pre-filled in search bar
  * @param options.searchCollectedText use text from collect element to be pre-filled in search bar, if true
  */
+/**
+ * show modal with favorite and recently spoken sentences
+ */
+MainVue.showPhraseHistoryModal = function () {
+    if (app) {
+        app.showModal = modalTypes.MODAL_PHRASES;
+    }
+};
+
 MainVue.showSearchModal = function (options) {
     app.showModal = modalTypes.MODAL_SEARCH;
     app.modalOptions = options || {};
@@ -155,7 +167,7 @@ MainVue.init = function () {
         app = new Vue({
             i18n: i18n,
             el: '#app',
-            components: { NotificationBar, ProgressBarModal, SearchModal, MessageBox },
+            components: { NotificationBar, ProgressBarModal, SearchModal, MessageBox, PhraseHistoryModal },
             data() {
                 return {
                     component: null,
@@ -270,10 +282,18 @@ MainVue.init = function () {
                     );
                 });
                 inputEventHandler.global
-                    .onSwipedDownFromTop(systemActionService.exitFullscreen)
+                    .onSwipedDownFromTop(() => {
+                        // when the UI is locked ("child mode"), an accidental swipe of the hand
+                        // must not leave fullscreen. Adults can still use the system back gesture or Esc.
+                        if (util.isUILocked()) {
+                            return;
+                        }
+                        systemActionService.exitFullscreen();
+                    })
                     .onEscape(systemActionService.exitFullscreen)
                     .onExitFullscreen(systemActionService.exitFullscreen);
                 inputEventHandler.global.startListening();
+                $(document).on(constants.EVENT_SHOW_PHRASE_HISTORY, MainVue.showPhraseHistoryModal);
                 thiz.openSidebar();
             }
         });

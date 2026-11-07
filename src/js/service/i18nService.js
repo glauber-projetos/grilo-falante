@@ -32,6 +32,7 @@ let appLanguages = [
     'ko',
     'pl',
     'pt',
+    'pt-br',
     'ro',
     'ru',
     'sl',
@@ -64,12 +65,20 @@ i18nService.getVueI18n = async function () {
     });
 };
 
+// app languages that are regional variants with an own translation file, e.g. 'pt-br' -> i18n.pt_BR.json
+let regionalAppLanguages = {
+    'pt-br': 'pt_BR'
+};
+
 i18nService.getBrowserLang = function () {
-    return navigator.language.substring(0, 2).toLowerCase();
+    let fullLang = (navigator.language || '').toLowerCase();
+    let regional = Object.keys(regionalAppLanguages).find(code => fullLang.startsWith(code));
+    return regional || fullLang.substring(0, 2);
 };
 
 i18nService.getContentLang = function () {
-    return currentContentLang || i18nService.getAppLang();
+    // content (labels of grid elements) is stored by base language, e.g. 'pt' also for app language 'pt-br'
+    return currentContentLang || i18nService.getBaseLang(i18nService.getAppLang());
 };
 
 /**
@@ -334,7 +343,7 @@ async function loadLanguage(useLang, secondTry) {
     if (!useLang || loadedLanguages.includes(useLang)) {
         return;
     }
-    let url = 'app/lang/i18n.' + useLang + '.json';
+    let url = 'app/lang/i18n.' + (regionalAppLanguages[useLang] || useLang) + '.json';
     try {
         let messages = await $.get(url);
         loadedLanguages.push(useLang);
@@ -378,6 +387,13 @@ async function getPredefinedActionTranslations(lang) {
         return data;
     } catch (e) {
         log.warn(`translation file ${translationFileName} not found.`);
+        let baseLang = i18nService.getBaseLang(lang);
+        if (baseLang !== lang) {
+            log.warn(`trying "${baseLang}" translation file.`);
+            let data = await getPredefinedActionTranslations(baseLang);
+            predefActionsI18nData[lang] = data;
+            return data;
+        }
         if (lang !== 'en') {
             log.warn(`trying "en" translation file.`);
             return getPredefinedActionTranslations('en');
