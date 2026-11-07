@@ -7,7 +7,7 @@
    "display": "standalone",
    "background_color": "#F3F8F0",
    "theme_color": "#1D6B35",
-   "description": "App gratuito de comunicação alternativa (CAA) que funciona sem internet, feito a partir do AsTeRICS Grid",
+   "description": "App gratuito de comunicação alternativa (CAA) que funciona sem internet",
    "icons": [
       {
          "purpose": "maskable",
