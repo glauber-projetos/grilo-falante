@@ -2,8 +2,9 @@
     <div v-if="element.type !== GridElement.ELEMENT_TYPE_UI_FILLER" role="button" class="element-container" ref="container" tabindex="40" :aria-label="getAriaLabel(element)" :data-empty="isEmpty(element)"
          :style="`margin: ${elementMarginPx}px; border-radius: ${borderRadiusPx}px; cursor: ${cursorType};
          border: ${borderWidthPx}px solid ${borderColor}; background-color: ${backgroundColor}; font-family: ${metadata.textConfig.fontFamily}; color: ${fontColor}`">
-        <grid-element-normal v-if="element.type === GridElement.ELEMENT_TYPE_NORMAL" :grid-element="element" :metadata="metadata" :container-size="calculatedSize" v-bind="$props" aria-hidden="true"/>
-        <grid-element-collect v-if="element.type === GridElement.ELEMENT_TYPE_COLLECT" :metadata="metadata" aria-hidden="true"/>
+        <grid-element-controle v-if="controle" :visual="controle" :container-size="calculatedSize" aria-hidden="true"/>
+        <grid-element-normal v-if="element.type === GridElement.ELEMENT_TYPE_NORMAL && !controle" :grid-element="element" :metadata="metadata" :container-size="calculatedSize" v-bind="$props" aria-hidden="true"/>
+        <grid-element-collect v-if="element.type === GridElement.ELEMENT_TYPE_COLLECT" :metadata="metadata" :container-size="calculatedSize" aria-hidden="true"/>
         <grid-element-youtube v-if="element.type === GridElement.ELEMENT_TYPE_YT_PLAYER" :grid-element="element" aria-hidden="true"/>
         <grid-element-predict v-if="element.type === GridElement.ELEMENT_TYPE_PREDICTION" :grid-element="element" :metadata="metadata" :container-size="calculatedSize" v-bind="$props" aria-hidden="true"/>
         <grid-element-live v-if="element.type === GridElement.ELEMENT_TYPE_LIVE" :grid-element="element" :metadata="metadata" :container-size="calculatedSize" v-bind="$props" aria-hidden="true"/>
@@ -41,9 +42,11 @@ import GridElementMatrixConversation from './grid-elements/gridElementMatrixConv
 import { gridUtil } from '../../js/util/gridUtil';
 import GridElementChildPlaceholder from './grid-elements/gridElementChildPlaceholder.vue';
 import {colorUtil} from "../../js/util/colorUtil";
+import GridElementControle from './grid-elements/gridElementControle.vue';
+import { faixaFrase } from './faixaFrase';
 
 export default {
-    components: { GridElementChildPlaceholder, GridElementMatrixConversation, GridElementLive, GridElementNormal, GridElementYoutube, GridElementCollect, GridElementHints, GridElementPredict },
+    components: { GridElementControle, GridElementChildPlaceholder, GridElementMatrixConversation, GridElementLive, GridElementNormal, GridElementYoutube, GridElementCollect, GridElementHints, GridElementPredict },
     props: ["element", "metadata", "showResizeHandle", "editable", "oneElementSize", "watchForChanges"],
     data() {
         return {
@@ -55,6 +58,9 @@ export default {
         }
     },
     computed: {
+        controle() {
+            return faixaFrase.getVisual(this.element); // phrase bar buttons (speak, delete, ...) in the new style
+        },
         calculatedSize() {
             return {
                 width: this.oneElementSize.width * this.element.width - 2 * this.getElementMargin() - 2 * this.getBorderWidth(),
@@ -82,6 +88,10 @@ export default {
             return false;
         },
         getAriaLabel(gridElem) {
+            let controle = faixaFrase.getVisual(gridElem);
+            if (controle) {
+                return i18nService.t(controle.texto);
+            }
             let label = i18nService.getTranslation(gridElem.label);
             let ariaLabel = label ? label + ', ' : '';
             let singleCharMapping = {

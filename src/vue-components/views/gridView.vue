@@ -1,37 +1,8 @@
 <template>
-    <div class="box" id="gridView" v-cloak>
-        <header class="srow header" role="toolbar" v-if="metadata" v-show="!metadata.fullscreen && !metadata.locked">
-            <header-icon class="left" v-show="!metadata.locked"></header-icon>
-            <div class="btn-group left">
-                <button tabindex="30" v-show="!metadata.locked" @click="toEditGrid()" class="spaced small" :aria-label="$t('editingOn')"><i class="fas fa-pencil-alt"/> <span class="hide-mobile">{{ $t('editingOn') }}</span></button>
-                <button tabindex="31" id="inputConfigButton" v-show="!metadata.locked" class="small" :aria-label="$t('inputOptions')"><i class="fas fa-cog"></i> <span class="hide-mobile">{{ $t('inputOptions') }}</span></button>
-            </div>
-            <button tabindex="32" v-show="!metadata.locked" @click="lock()" class="small" :aria-label="$t('lock')"><i class="fas fa-lock"></i><span class="hide-mobile">{{ $t('lock') }}</span></button>
-            <button tabindex="33" v-show="!metadata.locked" @click="MainVue.showSearchModal()" class="spaced small" :aria-label="$t('search')" :title="$t('searchBtnTitle')"><i class="fas fa-search"/> <span class="hide-mobile">{{ $t('search') }}</span></button>
-            <button tabindex="33" v-show="!metadata.locked" @click="MainVue.showPhraseHistoryModal()" class="spaced small" :aria-label="$t('phrasesTitle')"><i class="fas fa-comment-dots"/> <span class="hide-mobile">{{ $t('phrasesTitle') }}</span></button>
-            <button tabindex="34" @click="systemActionService.enterFullscreen()" class="small" :aria-label="$t('fullscreen')"><i class="fas fa-expand"/> <span class="hide-mobile">{{ $t('fullscreen') }}</span></button>
-        </header>
-        <div v-if="metadata && metadata.locked && !metadata.fullscreen" class="floating-controls">
-            <button tabindex="30"
-                    @click="systemActionService.enterFullscreen()"
-                    class="floating-control-button"
-                    :aria-label="$t('SYS_ENTER_FULLSCREEN')"
-                    :title="$t('SYS_ENTER_FULLSCREEN')">
-                <i class="fas fa-expand"></i>
-            </button>
-            <button v-if="hasPasscode" tabindex="32"
-                    @click="unlock()"
-                    class="floating-control-button"
-                    :aria-label="$t('unlock')"
-                    :title="$t('unlock')">
-                <i class="fas fa-unlock"></i>
-            </button>
-            <hold-to-unlock v-else tabindex="32" class="floating-control-button" :duration="unlockHoldMs" @unlock="unlock(true)"/>
-        </div>
-
-        <div class="srow content text-content" v-show="!renderGridData">
-            <div class="grid-container grid-mask">
-                <i class="fas fa-4x fa-spinner fa-spin" style="position: relative;"/>
+    <div class="box prancha" id="gridView" v-cloak>
+        <div class="prancha-area" v-show="!renderGridData">
+            <div class="prancha-carregando" role="status" :aria-label="$t('pranchaCarregando')">
+                <i class="ti ti-loader-2" aria-hidden="true"></i>
             </div>
         </div>
 
@@ -40,20 +11,37 @@
         <mouse-modal v-if="showModal === modalTypes.MODAL_MOUSE" @close="showModal = null; reloadInputMethods();"/>
         <scanning-modal v-if="showModal === modalTypes.MODAL_SCANNING" @close="showModal = null; reloadInputMethods();"/>
         <sequential-input-modal v-if="showModal === modalTypes.MODAL_SEQUENTIAL" @close="showModal = null; reloadInputMethods();"/>
-        <unlock-modal v-if="showModal === modalTypes.MODAL_UNLOCK" @unlock="unlock(true)" @close="showModal = null;"/>
-        <edit-element-quick v-if="quickEditElementId" :grid-ids="quickEditGridIds" :element-id="quickEditElementId" @close="closeQuickEdit()" @changed="rerenderGrid()"/>
+        <unlock-modal v-if="showModal === modalTypes.MODAL_UNLOCK" @unlock="onPasscodeOk()" @close="closeUnlockModal()"/>
+        <edit-element-quick v-if="quickEditElementId" :grid-ids="quickEditGridIds" :element-id="quickEditElementId" :inicio="quickEditStart" @close="closeQuickEdit()" @changed="rerenderGrid()"/>
 
-        <div class="srow content spaced" v-if="renderGridData && renderGridData.gridElements.length === 0">
-            <div style="margin-top: 2em">
-                <i18n path="noElementsClickToEnterEdit" tag="span">
-                    <template v-slot:link>
-                        <a :href="'#grid/edit/' + renderGridData.id">{{ $t('editingOn') }}</a>
-                    </template>
-                </i18n>
+        <div class="prancha-area prancha-vazia" v-if="renderGridData && renderGridData.gridElements.length === 0">
+            <div class="g-cartao prancha-vazia-cartao">
+                <i class="ti ti-layout-grid-add prancha-vazia-icone" aria-hidden="true"></i>
+                <h2 class="prancha-vazia-titulo">{{ $t('pranchaVaziaTitulo') }}</h2>
+                <p class="g-apoio">{{ $t('pranchaVaziaTexto') }}</p>
+                <button type="button" class="g-btn g-btn-principal g-btn-grande" @click="usePanelAction('editar')">
+                    <i class="ti ti-pencil" aria-hidden="true"></i>{{ $t('pranchaEditarPrancha') }}
+                </button>
             </div>
         </div>
-        <div class="srow content d-flex" v-if="showGrid && renderGridData && renderGridData.gridElements.length > 0" style="min-height: 0">
+        <div class="prancha-area" v-if="showGrid && renderGridData && renderGridData.gridElements.length > 0">
             <app-grid-display id="grid-container" :grid-data="renderGridData" :metadata="metadata" :elem-css-fn="(elem) => gridUtil.getElemBackgroundCss(elem, renderGridData, globalGridData, metadata.colorConfig.gridBackgroundColor) + (elem.hidden ? HIDDEN_ELEM_CSS : '')"/>
+        </div>
+
+        <div class="prancha-rodape" v-if="metadata">
+            <div v-if="choosingPhotoTarget" class="prancha-escolher-foto" role="status">
+                <i class="ti ti-camera" aria-hidden="true"></i>
+                <span class="prancha-escolher-foto-texto">{{ $t('pranchaToqueNoBotaoDaFoto') }}</span>
+                <button type="button" class="g-btn" @click="choosingPhotoTarget = false">{{ $t('cancel') }}</button>
+            </div>
+            <span class="prancha-rodape-dica" v-else-if="!metadata.locked">
+                <i class="ti ti-hand-click" aria-hidden="true"></i>
+                <span>{{ $t('pranchaDicaSegurarBotao') }}</span>
+            </span>
+            <span class="g-espaco"></span>
+            <painel-responsavel :aberto="panelOpen" :modo-crianca="!!metadata.locked" :segurar-ms="unlockHoldMs"
+                                :tela-cheia="!!metadata.fullscreen" :input-config="metadata.inputConfig"
+                                @quer-abrir="requestPanel()" @fechar="closePanel()" @escolher="usePanelAction"/>
         </div>
     </div>
 </template>
@@ -75,7 +63,6 @@
     import {DirectionInput} from "../../js/input/directionInput";
     import {SequentialInput} from "../../js/input/sequentialInput";
 
-    import HeaderIcon from '../../vue-components/components/headerIcon.vue'
     import {constants} from "../../js/util/constants";
     import {i18nService} from "../../js/service/i18nService";
     import {util} from "../../js/util/util";
@@ -89,9 +76,10 @@
     import {imageUtil} from "../../js/util/imageUtil";
     import {audioUtil} from "../../js/util/audioUtil.js";
     import UnlockModal from "../modals/unlockModal.vue";
-    import HoldToUnlock from "../components/holdToUnlock.vue";
+    import PainelResponsavel from "../components/painelResponsavel.vue";
     import EditElementQuick from "../modals/editElementQuick.vue";
     import {holdGesture} from "../../js/input/holdGesture";
+    import {unlockHoldService} from "../../js/service/unlockHoldService";
     import {MainVue} from "../../js/vue/mainVue.js";
     import {stateService} from "../../js/service/stateService.js";
     import { systemActionService } from '../../js/service/systemActionService';
@@ -104,9 +92,16 @@
 
     let vueApp = null;
     let UNLOCK_COUNT = 8;
-    let UNLOCK_HOLD_MS = 3000; // Grilo Falante: hold the lock 3 seconds to leave the child mode (if no PIN is set)
     let QUICK_EDIT_HOLD_MS = 1000; // Grilo Falante: hold a button 1 second in adult mode to open the quick edit panel
     let HIDDEN_ELEM_CSS = ' opacity: 0.35; filter: grayscale(1);'; // hidden buttons, only visible in adult mode
+    // targets of the tiles of the "Painel do Responsável" that open other screens
+    let PANEL_ROUTES = {
+        inicio: '#inicio',
+        trocar: '#welcome',
+        voz: '#settings?secao=voz',
+        aparencia: '#settings?secao=aparencia',
+        ajustes: '#settings'
+    };
     let modalTypes = {
         MODAL_SCANNING: 'MODAL_SCANNING',
         MODAL_MOUSE: 'MODAL_MOUSE',
@@ -139,10 +134,13 @@
                 modalTypes: modalTypes,
                 unlockCount: UNLOCK_COUNT,
                 unlockCounter: UNLOCK_COUNT,
-                unlockHoldMs: UNLOCK_HOLD_MS,
+                unlockHoldMs: unlockHoldService.getHoldMs(), // chosen in Ajustes > Modo Criança (default 3 s)
                 hasPasscode: !!localStorageService.getAppSettings().unlockPasscode,
                 quickEditElementId: null,
                 quickEditGridIds: [],
+                quickEditStart: null,
+                panelOpen: false,
+                choosingPhotoTarget: false,
                 suppressSelectionUntil: 0,
                 detachQuickEditHold: null,
                 HIDDEN_ELEM_CSS: HIDDEN_ELEM_CSS,
@@ -156,13 +154,13 @@
         components: {
             AppGridDisplay,
             UnlockModal,
-            HoldToUnlock,
+            PainelResponsavel,
             EditElementQuick,
             SequentialInputModal,
             HuffmanInputModal,
             DirectionInputModal,
             MouseModal,
-            ScanningModal, HeaderIcon
+            ScanningModal
         },
         methods: {
             openModal(modalType) {
@@ -174,16 +172,20 @@
                 thiz.metadata.locked = true;
                 thiz.unlockCounter = UNLOCK_COUNT;
                 thiz.hasPasscode = !!localStorageService.getAppSettings().unlockPasscode;
-                dataService.saveMetadata(thiz.metadata).then(() => {
+                return dataService.saveMetadata(thiz.metadata).then(() => {
                     this.setViewPropsLocked();
-                    this.rerenderGrid();
+                    return this.rerenderGrid();
                 });
             },
+            /**
+             * leaves the child mode. Without "force" a passcode (if set) is asked first.
+             * @return {Promise<void>}
+             */
             unlock(force) {
                 let thiz = this;
                 if (!force && localStorageService.getAppSettings().unlockPasscode) {
                     thiz.showModal = modalTypes.MODAL_UNLOCK;
-                    return;
+                    return Promise.resolve();
                 }
                 thiz.unlockCounter--;
                 util.debounce(function () {
@@ -191,12 +193,114 @@
                 }, 3000);
                 if (thiz.unlockCounter === 0 || force) {
                     thiz.metadata.locked = false;
-                    dataService.saveMetadata(thiz.metadata).then(() => {
-                        MainVue.restoreSidebar();
+                    return dataService.saveMetadata(thiz.metadata).then(() => {
+                        if (MainVue.restoreSidebar) {
+                            MainVue.restoreSidebar();
+                        }
                         this.setViewPropsUnlocked();
-                        this.rerenderGrid();
+                        return this.rerenderGrid();
                     });
                 }
+                return Promise.resolve();
+            },
+            /**
+             * the "Responsável" button was held (child mode) or tapped (adult mode):
+             * in child mode with a passcode, the passcode is asked before the panel opens.
+             */
+            requestPanel() {
+                this.choosingPhotoTarget = false;
+                this.hasPasscode = !!localStorageService.getAppSettings().unlockPasscode;
+                if (this.metadata && this.metadata.locked && this.hasPasscode) {
+                    this.openModal(modalTypes.MODAL_UNLOCK);
+                    return;
+                }
+                this.openPanel();
+            },
+            openPanel() {
+                stopInputMethods();
+                this.panelOpen = true;
+            },
+            closePanel(dontRestartInput) {
+                this.panelOpen = false;
+                if (dontRestartInput !== true) {
+                    this.initInputMethods({continueInputMethods: true});
+                }
+            },
+            onPasscodeOk() {
+                this.showModal = null;
+                this.openPanel();
+            },
+            closeUnlockModal() {
+                if (this.showModal === modalTypes.MODAL_UNLOCK) {
+                    this.showModal = null;
+                }
+                if (!this.panelOpen) {
+                    this.initInputMethods({continueInputMethods: true});
+                }
+            },
+            /**
+             * leaves the child mode without asking again (the adult already held the button / typed the passcode)
+             */
+            async leaveChildMode() {
+                if (this.metadata && this.metadata.locked) {
+                    await this.unlock(true);
+                }
+            },
+            async usePanelAction(action, extra) {
+                let gridId = this.renderGridData ? this.renderGridData.id : this.gridId;
+                switch (action) {
+                    case 'modo':
+                        if (this.metadata.locked) {
+                            await this.unlock(true);
+                        } else {
+                            await this.lock();
+                        }
+                        stopInputMethods(); // the grid was reloaded, but the panel stays open to show the new state
+                        return;
+                    case 'foto':
+                        this.closePanel();
+                        this.choosingPhotoTarget = true;
+                        return;
+                    case 'frases':
+                        this.closePanel();
+                        MainVue.showPhraseHistoryModal();
+                        return;
+                    case 'procurar':
+                        this.closePanel();
+                        MainVue.showSearchModal();
+                        return;
+                    case 'telaCheia':
+                        this.closePanel();
+                        if (this.metadata.fullscreen) {
+                            systemActionService.exitFullscreen();
+                        } else {
+                            systemActionService.enterFullscreen();
+                        }
+                        return;
+                    case 'entrada':
+                        this.panelOpen = false;
+                        if (extra && modalTypes[extra]) {
+                            this.openModal(modalTypes[extra]);
+                        } else {
+                            this.initInputMethods({continueInputMethods: true});
+                        }
+                        return;
+                }
+                let targets = {
+                    editar: () => Router.toEditGrid(gridId),
+                    pranchas: () => Router.toManageGrids(),
+                    voz: () => Router.to(PANEL_ROUTES.voz),
+                    aparencia: () => Router.to(PANEL_ROUTES.aparencia),
+                    ajustes: () => Router.to(PANEL_ROUTES.ajustes),
+                    trocar: () => Router.to(PANEL_ROUTES.trocar),
+                    inicio: () => Router.to(PANEL_ROUTES.inicio)
+                };
+                if (!targets[action]) {
+                    return;
+                }
+                this.closePanel(true);
+                await this.leaveChildMode(); // the router only allows the board in child mode
+                targets[action]();
             },
             setViewPropsLocked() {
                 $(document).trigger(constants.EVENT_SIDEBAR_CLOSE);
@@ -219,7 +323,7 @@
                 let elem = this.renderGridData ? this.renderGridData.gridElements.find(e => e.id === id) : null;
                 return !!(elem && elem.hidden);
             },
-            openQuickEdit(target) {
+            openQuickEdit(target, start) {
                 if (!target || !target.id || !this.renderGridData) {
                     return;
                 }
@@ -227,14 +331,19 @@
                 stopInputMethods();
                 let globalGridId = this.renderGridData.globalGridId || (this.globalGridData ? this.globalGridData.id : null);
                 this.quickEditGridIds = [this.renderGridData.id, globalGridId];
+                this.quickEditStart = start || null;
                 this.quickEditElementId = target.id;
             },
             closeQuickEdit() {
                 this.quickEditElementId = null;
+                this.quickEditStart = null;
                 this.suppressSelectionUntil = new Date().getTime() + 300;
                 this.initInputMethods({continueInputMethods: true});
             },
             preventZoomHandler(event) {
+                if (event.target && event.target.closest && event.target.closest('.g-painel, .modal')) {
+                    return; // panels of the adult can scroll
+                }
                 event.preventDefault();
             },
             reloadInputMethods() {
@@ -249,11 +358,15 @@
                 if (options.reload) {
                     let metadata = await dataService.getMetadata();
                     this.metadata = JSON.parse(JSON.stringify(metadata));
-                    initContextmenu(); //in order to update visualization of active input methods in context menu
                 }
                 let thiz = this;
                 let inputConfig = thiz.metadata.inputConfig;
                 let selectionListener = (item) => {
+                    if (this.choosingPhotoTarget) {
+                        this.choosingPhotoTarget = false; // "Foto nova" of the panel: this button gets the new photo
+                        this.openQuickEdit(item, 'foto');
+                        return;
+                    }
                     if (new Date().getTime() < this.suppressSelectionUntil || this.isHiddenElement(item.id)) {
                         return; // release after opening the quick edit panel, or hidden button (adult mode)
                     }
@@ -368,7 +481,6 @@
                 }
 
                 await this.$nextTick();
-                initContextmenu();
                 this.initInputMethods(options);
                 this.highlightElements();
                 await predictionService.initWithElements(this.renderGridData.gridElements);
@@ -438,7 +550,7 @@
                     if (this.updatedMetadataDoc && this.updatedMetadataDoc.fullscreen !== vueApp.metadata.fullscreen) {
                         if (this.updatedMetadataDoc.fullscreen) {
                             systemActionService.enterFullscreen(true);
-                        } else {
+                        } else if (MainVue.restoreSidebar) {
                             MainVue.restoreSidebar();
                         }
                     }
@@ -553,7 +665,7 @@
             this.detachQuickEditHold = holdGesture.attach(this.$el, {
                 selector: '.element-container',
                 duration: QUICK_EDIT_HOLD_MS,
-                enabled: () => !!this.metadata && !this.metadata.locked && !this.showModal && !this.quickEditElementId,
+                enabled: () => !!this.metadata && !this.metadata.locked && !this.showModal && !this.quickEditElementId && !this.panelOpen && !this.choosingPhotoTarget,
                 onStart: (target) => target.classList.add('gf-holding'),
                 onCancel: (target) => target.classList.remove('gf-holding'),
                 onDone: (target) => {
@@ -610,91 +722,88 @@
         vueApp.inputMethodsInitialized = false;
     }
 
-    function initContextmenu() {
-        $.contextMenu('destroy');
-        let CONTEXT_MOUSE = "CONTEXT_MOUSE";
-        let CONTEXT_SCANNING = "CONTEXT_SCANNING";
-        let CONTEXT_DIRECTION = "CONTEXT_DIRECTION";
-        let CONTEXT_HUFFMAN = "CONTEXT_HUFFMAN";
-        let CONTEXT_SEQUENTIAL = "CONTEXT_SEQUENTIAL";
-
-        function getName(i18nKey, isActive) {
-            let translated = i18nService.t(i18nKey);
-            let activeText = isActive ? ' ' + i18nService.t('activeBracket') : '';
-            return `${translated}${activeText}`;
-        }
-
-        let inputConfig = vueApp.metadata.inputConfig;
-        let mouseTouchEnabled = inputConfig.mouseclickEnabled || inputConfig.hoverEnabled;
-        let contextItems = {
-            CONTEXT_MOUSE: {
-                name: getName('mousetouchInput', mouseTouchEnabled),
-                icon: "fas fa-mouse-pointer",
-                className: mouseTouchEnabled ? 'boldFont' : ''
-            },
-            CONTEXT_SCANNING: {
-                name: getName('scanning', inputConfig.scanEnabled),
-                icon: "fas fa-sort-amount-down",
-                className: inputConfig.scanEnabled ? 'boldFont' : ''
-            },
-            CONTEXT_DIRECTION: {
-                name: getName('directionInput', inputConfig.dirEnabled),
-                icon: "fas fa-arrows-alt",
-                className: inputConfig.dirEnabled ? 'boldFont' : ''
-            },
-            CONTEXT_HUFFMAN: {
-                name: getName('huffmanInput', inputConfig.huffEnabled),
-                icon: "fas fa-ellipsis-h",
-                className: inputConfig.huffEnabled ? 'boldFont' : ''
-            },
-            CONTEXT_SEQUENTIAL: {
-                name: getName('sequentialInput', inputConfig.seqEnabled),
-                icon: "fas fa-arrow-right",
-                className: inputConfig.seqEnabled ? 'boldFont' : ''
-            }
-        };
-
-        $.contextMenu({
-            selector: '#inputConfigButton',
-            callback: function (key, options) {
-                handleContextMenu(key);
-            },
-            trigger: 'left',
-            items: contextItems,
-            zIndex: 10
-        });
-
-        function handleContextMenu(key, elementId) {
-            switch (key) {
-                case CONTEXT_MOUSE: {
-                    vueApp.openModal(modalTypes.MODAL_MOUSE);
-                    break;
-                }
-                case CONTEXT_SCANNING: {
-                    vueApp.openModal(modalTypes.MODAL_SCANNING);
-                    break;
-                }
-                case CONTEXT_DIRECTION: {
-                    vueApp.openModal(modalTypes.MODAL_DIRECTION);
-                    break;
-                }
-                case CONTEXT_HUFFMAN: {
-                    vueApp.openModal(modalTypes.MODAL_HUFFMAN);
-                    break;
-                }
-                case CONTEXT_SEQUENTIAL: {
-                    vueApp.openModal(modalTypes.MODAL_SEQUENTIAL);
-                    break;
-                }
-            }
-        }
-    }
-
     export default vueConfig;
 </script>
 
 <style scoped>
-    /* Grilo Falante: button held for the quick edit panel (adult mode) */
+    /* Grilo Falante: the board fills the screen; only a thin strip with the "Responsável" button below */
+    .prancha {
+        background: var(--g-fundo);
+        font-family: var(--g-fonte);
+    }
+
+    .prancha-area {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        position: relative;
+    }
+
+    .prancha-carregando {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        color: var(--g-folha);
+        font-size: 48px;
+    }
+    .prancha-carregando .ti { animation: prancha-girar 1s linear infinite; }
+    @keyframes prancha-girar { to { transform: rotate(360deg); } }
+
+    .prancha-vazia { align-items: center; justify-content: center; padding: var(--g-e4); }
+    .prancha-vazia-cartao {
+        max-width: 420px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--g-e3);
+    }
+    .prancha-vazia-icone { font-size: 64px; color: var(--g-folha); } /* no mascot on the child board */
+    .prancha-vazia-titulo { margin: 0; font-family: var(--g-fonte-titulo); font-size: var(--g-t-h2); color: var(--g-tinta); }
+    .prancha-vazia-cartao p { margin: 0; }
+
+    .prancha-rodape {
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: var(--g-e3);
+        min-height: calc(var(--g-alvo) + 8px);
+        padding: 4px var(--g-e2) calc(4px + env(safe-area-inset-bottom, 0px));
+        background: var(--g-fundo);
+    }
+    .prancha-rodape-dica {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--g-e2);
+        min-width: 0;
+        color: var(--g-tinta-3);
+        font-size: var(--g-t-legenda);
+        padding-left: var(--g-e2);
+    }
+    .prancha-rodape-dica span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prancha-rodape-dica .ti { font-size: 19.2px; flex: none; }
+
+    /* "Foto nova": choose the button that gets the photo (in the strip, so no button is covered) */
+    .prancha-escolher-foto {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--g-e3);
+        padding: 4px 4px 4px var(--g-e4);
+        border-radius: var(--g-raio-pilula);
+        background: var(--g-tinta);
+        color: #fff;
+        font-weight: 700;
+        font-size: var(--g-t-legenda);
+        animation: prancha-surgir var(--g-medio) var(--g-curva);
+    }
+    .prancha-escolher-foto > .ti { font-size: 22px; color: var(--g-girassol); flex: none; }
+    .prancha-escolher-foto-texto { flex: 1; min-width: 0; line-height: 1.2; }
+    .prancha-escolher-foto .g-btn { min-height: 40px; border-radius: var(--g-raio-pilula); flex: none; padding: 0 var(--g-e3); }
+    @keyframes prancha-surgir { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* button held for the quick edit panel (adult mode) */
     #gridView >>> .element-container {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -702,54 +811,23 @@
     }
 
     #gridView >>> .element-container.gf-holding {
-        outline: 4px solid var(--gf-sol, #FFC83D);
+        outline: 4px solid var(--g-girassol);
         outline-offset: -2px;
         transition: outline-color 1s;
     }
 
-    .floating-controls {
-        position: fixed;
-        top: 0.2em;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        display: inline-flex;
-        gap: 0.3em;
-    }
-
-    .floating-control-button {
-        height: 1.4em;
-        min-width: 2.5em;
-        padding: 0 0.55em;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25em;
-        line-height: 1;
-    }
-
-    .floating-control-button:focus {
+    /* keyboard and switch users: always see where the focus is */
+    #gridView >>> .element-container:focus-visible {
         outline: none;
+        box-shadow: var(--g-foco);
+        z-index: 2;
     }
 
-    .floating-control-button:focus:not(:hover):not(:active) {
-        border-color: transparent;
-        background-color: #f8f8f8;
+    @media (max-width: 480px) {
+        .prancha-rodape-dica { display: none; }
     }
 
-    @media (hover: none) {
-        .floating-control-button:focus:not(:active) {
-            border-color: transparent;
-            background-color: #f8f8f8;
-        }
-    }
-
-    .floating-control-button:focus-visible {
-        outline: 2px solid #1D6B35;
-        outline-offset: 2px;
-    }
-
-    .floating-control-button i {
-        font-size: 1em;
+    @media (prefers-reduced-motion: reduce) {
+        .prancha-carregando .ti, .prancha-escolher-foto { animation: none; }
     }
 </style>

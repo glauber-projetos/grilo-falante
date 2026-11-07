@@ -1,65 +1,67 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask quick-mask" @click.self="close()">
-            <div class="quick-sheet" role="dialog" aria-modal="true" aria-labelledby="quickEditTitle" @keydown.esc="close()">
-                <div v-if="!element" class="quick-loading"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i></div>
-                <template v-if="element">
-                    <div class="quick-top">
-                        <div class="quick-preview" :style="previewStyle" aria-hidden="true">
-                            <img v-if="imageSrc" :src="imageSrc" alt=""/>
-                            <span class="quick-preview-label">{{ label }}</span>
-                        </div>
-                        <div class="quick-title-box">
-                            <h1 id="quickEditTitle" class="quick-title">{{ label || $t('quickEditNoText') }}</h1>
-                            <span class="quick-subtitle">{{ view === VIEW_MAIN ? $t('quickEditWhatToChange') : viewTitle }}</span>
-                        </div>
-                        <button type="button" class="quick-close" @click="close()" :aria-label="$t('close')" :title="$t('close')"><i class="fas fa-times"></i></button>
+    <div class="quick-raiz">
+        <div class="g-veu" @click="close()"></div>
+        <div class="g-painel quick-sheet" role="dialog" aria-modal="true" aria-labelledby="quickEditTitle" @keydown.esc.stop="close()">
+            <div class="g-painel-alca" aria-hidden="true"></div>
+            <div v-if="!element" class="quick-loading" role="status"><i class="ti ti-loader-2" aria-hidden="true"></i></div>
+            <template v-if="element">
+                <div class="quick-top">
+                    <div class="quick-preview" :style="previewStyle" aria-hidden="true">
+                        <img v-if="imageSrc" :src="imageSrc" alt=""/>
+                        <span class="quick-preview-label">{{ label }}</span>
                     </div>
-
-                    <div v-if="view === VIEW_MAIN" class="quick-actions">
-                        <button type="button" class="quick-action" @click="view = VIEW_PHOTO">
-                            <i class="fas fa-camera" aria-hidden="true"></i><span>{{ $t('takePhoto') }}</span>
-                        </button>
-                        <button type="button" class="quick-action" @click="view = VIEW_VOICE">
-                            <i class="fas fa-microphone" aria-hidden="true"></i><span>{{ $t('recordVoice') }}</span>
-                            <small v-if="hasAudio" class="quick-badge">{{ $t('ownVoiceActive') }}</small>
-                        </button>
-                        <button type="button" class="quick-action" @click="openText()">
-                            <i class="fas fa-pen" aria-hidden="true"></i><span>{{ $t('changeText') }}</span>
-                        </button>
-                        <button type="button" class="quick-action" @click="toggleHidden()" :aria-pressed="String(!!element.hidden)">
-                            <i :class="element.hidden ? 'fas fa-eye' : 'fas fa-eye-slash'" aria-hidden="true"></i>
-                            <span>{{ element.hidden ? $t('showButton') : $t('hideButton') }}</span>
-                        </button>
+                    <div class="quick-title-box">
+                        <h2 id="quickEditTitle" class="quick-title">{{ label || $t('quickEditNoText') }}</h2>
+                        <span class="g-apoio">{{ view === VIEW_MAIN ? $t('quickEditWhatToChange') : viewTitle }}</span>
                     </div>
-                    <p v-if="view === VIEW_MAIN && element.hidden" class="quick-note">{{ $t('hiddenButtonKeepsPlace') }}</p>
+                    <button type="button" class="g-btn g-btn-icone g-btn-leve" @click="close()" :aria-label="$t('close')" :title="$t('close')"><i class="ti ti-x" aria-hidden="true"></i></button>
+                </div>
 
-                    <div v-if="view === VIEW_PHOTO" class="quick-sub">
-                        <photo-picker facing="environment" :cell-aspect="cellAspect" :output-width="400" @photo="onPhoto" @cancel="view = VIEW_MAIN"/>
+                <div v-if="view === VIEW_MAIN" class="quick-actions">
+                    <button type="button" class="g-ladrilho g-ladrilho-ceu quick-action" @click="view = VIEW_PHOTO">
+                        <i class="ti ti-camera" aria-hidden="true"></i><span>{{ $t('takePhoto') }}</span>
+                    </button>
+                    <button type="button" class="g-ladrilho g-ladrilho-pessego quick-action" @click="view = VIEW_VOICE">
+                        <i class="ti ti-microphone" aria-hidden="true"></i>
+                        <span>{{ $t('recordVoice') }}<small v-if="hasAudio">{{ $t('ownVoiceActive') }}</small></span>
+                    </button>
+                    <button type="button" class="g-ladrilho g-ladrilho-girassol quick-action" @click="openText()">
+                        <i class="ti ti-pencil" aria-hidden="true"></i><span>{{ $t('changeText') }}</span>
+                    </button>
+                    <button type="button" class="g-ladrilho g-ladrilho-lavanda quick-action" @click="toggleHidden()" :aria-pressed="String(!!element.hidden)">
+                        <i :class="element.hidden ? 'ti ti-eye' : 'ti ti-eye-off'" aria-hidden="true"></i>
+                        <span>{{ element.hidden ? $t('showButton') : $t('hideButton') }}</span>
+                    </button>
+                </div>
+                <p v-if="view === VIEW_MAIN && element.hidden" class="g-aviso quick-note"><i class="ti ti-eye-off" aria-hidden="true"></i><span>{{ $t('hiddenButtonKeepsPlace') }}</span></p>
+
+                <div v-if="view === VIEW_PHOTO" class="quick-sub">
+                    <photo-picker facing="environment" :cell-aspect="cellAspect" :output-width="400" @photo="onPhoto" @cancel="onPhotoCancel()"/>
+                </div>
+
+                <div v-if="view === VIEW_VOICE" class="quick-sub">
+                    <voice-recorder :recording="currentRecording" :max-ms="maxRecordMs" @recorded="onRecorded"/>
+                    <button v-if="hasAudio" type="button" class="g-btn g-btn-perigo quick-link-btn" @click="removeAudio()">
+                        <i class="ti ti-trash" aria-hidden="true"></i>{{ $t('useDeviceVoiceAgain') }}
+                    </button>
+                </div>
+
+                <div v-if="view === VIEW_TEXT" class="quick-sub">
+                    <div class="g-campo">
+                        <label for="quickEditText">{{ $t('textOfTheButton') }}</label>
+                        <input id="quickEditText" ref="textInput" type="text" v-model="textDraft" maxlength="60" @keydown.enter.prevent="saveText()"/>
                     </div>
+                    <button type="button" class="g-btn g-btn-principal g-btn-grande" @click="saveText()"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('save') }}</button>
+                </div>
 
-                    <div v-if="view === VIEW_VOICE" class="quick-sub">
-                        <voice-recorder :recording="currentRecording" :max-ms="maxRecordMs" @recorded="onRecorded"/>
-                        <button v-if="hasAudio" type="button" class="quick-link-btn" @click="removeAudio()">
-                            <i class="fas fa-trash-alt" aria-hidden="true"></i> {{ $t('useDeviceVoiceAgain') }}
-                        </button>
-                    </div>
+                <p v-if="savedMessage" class="quick-saved" role="status"><i class="ti ti-circle-check" aria-hidden="true"></i> {{ savedMessage }}</p>
 
-                    <div v-if="view === VIEW_TEXT" class="quick-sub">
-                        <label for="quickEditText" class="quick-label">{{ $t('textOfTheButton') }}</label>
-                        <input id="quickEditText" ref="textInput" type="text" class="quick-input" v-model="textDraft" maxlength="60" @keydown.enter.prevent="saveText()"/>
-                        <button type="button" class="quick-primary" @click="saveText()">{{ $t('save') }}</button>
-                    </div>
-
-                    <p v-if="savedMessage" class="quick-saved" role="status"><i class="fas fa-check" aria-hidden="true"></i> {{ savedMessage }}</p>
-
-                    <div class="quick-footer">
-                        <button v-if="view !== VIEW_MAIN" type="button" @click="view = VIEW_MAIN"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $t('back') }}</button>
-                        <button v-if="view === VIEW_MAIN" type="button" @click="moreOptions()"><i class="fas fa-sliders-h" aria-hidden="true"></i> {{ $t('moreOptions') }}</button>
-                        <button type="button" class="quick-primary" @click="close()">{{ $t('done') }}</button>
-                    </div>
-                </template>
-            </div>
+                <div class="quick-footer">
+                    <button v-if="view !== VIEW_MAIN" type="button" class="g-btn" @click="view = VIEW_MAIN"><i class="ti ti-arrow-left" aria-hidden="true"></i>{{ $t('back') }}</button>
+                    <button v-if="view === VIEW_MAIN" type="button" class="g-btn" @click="moreOptions()"><i class="ti ti-adjustments" aria-hidden="true"></i>{{ $t('moreOptions') }}</button>
+                    <button type="button" class="g-btn g-btn-principal" @click="close()"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('done') }}</button>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -67,16 +69,17 @@
 <script>
 /**
  * Quick edit panel (Grilo Falante): opens when an adult holds a button for 1 second in the grid view
- * (never in the locked child mode). Big, simple options: take photo, record voice, change text and
- * hide/show. Every change is saved immediately. "More options" opens the full editor.
+ * (never in the locked child mode), or after choosing a button for "Foto nova" in the Painel do Responsável.
+ * Big, simple options: take photo, record voice, change text and hide/show.
+ * Every change is saved immediately. "More options" opens the full editor.
  *
  * props:
  * - gridIds: ids of the grids the element can belong to (current grid, global grid)
  * - elementId: id of the held element
+ * - inicio: optional, "foto" opens the camera directly
  *
  * events: close, changed
  */
-import './../../css/modal.css';
 import PhotoPicker from '../components/photoPicker.vue';
 import VoiceRecorder from '../components/voiceRecorder.vue';
 import { dataService } from '../../js/service/data/dataService';
@@ -93,13 +96,14 @@ export default {
     components: { PhotoPicker, VoiceRecorder },
     props: {
         gridIds: { type: Array, required: true },
-        elementId: { type: String, required: true }
+        elementId: { type: String, required: true },
+        inicio: { type: String, default: null }
     },
     data() {
         return {
             gridData: null,
             element: null,
-            view: VIEW_MAIN,
+            view: this.inicio === 'foto' ? VIEW_PHOTO : VIEW_MAIN,
             textDraft: '',
             lang: i18nService.getContentLang(),
             cellAspect: 1,
@@ -167,6 +171,13 @@ export default {
             await this.save(this.$t('photoSaved'));
             this.view = VIEW_MAIN;
         },
+        onPhotoCancel() {
+            if (this.inicio === 'foto' && !this.changed) {
+                this.close(); // came directly from "Foto nova": cancel closes everything
+                return;
+            }
+            this.view = VIEW_MAIN;
+        },
         async onRecorded(recording) {
             quickEditUtil.setAudio(this.element, recording);
             await this.save(this.$t('voiceSaved'));
@@ -229,217 +240,77 @@ export default {
 </script>
 
 <style scoped>
-.quick-mask {
-    z-index: 9999;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
+.quick-raiz { position: relative; z-index: 9999; }
+.quick-raiz .g-veu { z-index: 9998; }
 .quick-sheet {
-    background: #FFFFFF;
-    color: var(--gf-tinta, #14261A);
-    width: 100%;
-    max-width: 44em;
-    max-height: 92vh;
-    overflow-y: auto;
-    border-radius: 1.2em 1.2em 0 0;
-    padding: 1em 1.2em 1.2em;
+    z-index: 9999;
+    font-family: var(--g-fonte);
+    color: var(--g-tinta);
     display: flex;
     flex-direction: column;
-    gap: 0.9em;
-    box-shadow: 0 -0.3em 1.5em rgba(20, 38, 26, 0.25);
+    gap: var(--g-e4);
+    max-height: 92vh;
+    padding-bottom: calc(var(--g-e5) + env(safe-area-inset-bottom, 0px));
 }
+.quick-sheet .g-painel-alca { margin-bottom: 0; }
 
-@media (min-height: 700px) and (min-width: 700px) {
-    .quick-mask {
-        align-items: center;
-    }
-    .quick-sheet {
-        border-radius: 1.2em;
-    }
-}
+.quick-loading { text-align: center; padding: var(--g-e6); font-size: 38.4px; color: var(--g-folha); }
+.quick-loading .ti { display: inline-block; animation: quick-girar 1s linear infinite; }
+@keyframes quick-girar { to { transform: rotate(360deg); } }
 
-.quick-loading {
-    text-align: center;
-    padding: 2em;
-    font-size: 1.5em;
-}
-
-.quick-top {
-    display: flex;
-    align-items: center;
-    gap: 0.9em;
-}
-
+.quick-top { display: flex; align-items: center; gap: var(--g-e4); }
 .quick-preview {
-    width: 4.5em;
-    height: 4.5em;
+    width: 76px;
+    height: 76px;
     flex: none;
-    border: 2px solid var(--gf-linha, #D3E0D0);
-    border-radius: 0.6em;
-    background: #FFFFFF;
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio);
+    background: var(--g-superficie);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     font-weight: 700;
-    font-size: 0.85em;
+    font-size: var(--g-t-legenda);
 }
-
-.quick-preview img {
-    max-width: 100%;
-    min-height: 0;
-    flex: 1;
-    object-fit: contain;
-}
-
-.quick-preview-label {
-    padding: 0 0.2em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.quick-title-box {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
+.quick-preview img { max-width: 100%; min-height: 0; flex: 1; object-fit: contain; }
+.quick-preview-label { padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.quick-title-box { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .quick-title {
-    font-size: 1.5em;
+    font-family: var(--g-fonte-titulo);
+    font-size: var(--g-t-h2);
+    font-weight: 700;
     margin: 0;
     line-height: 1.1;
     overflow-wrap: anywhere;
+    color: var(--g-tinta);
 }
 
-.quick-subtitle {
-    color: var(--gf-cinza, #4A5C4F);
-}
+.quick-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--g-e3); }
+.quick-action { min-height: 116px; }
+.quick-action:focus { outline: none; }
+.quick-action:focus-visible { box-shadow: var(--g-foco); }
+.quick-note { margin: 0; }
 
-.quick-close {
-    flex: none;
-    width: 2.8em;
-    height: 2.8em;
-    padding: 0;
-    margin: 0;
-    font-size: 1em;
-}
+.quick-sub { display: flex; flex-direction: column; gap: var(--g-e3); }
+.quick-sub .g-campo { margin-bottom: 0; }
+.quick-link-btn { align-self: flex-start; }
+.quick-saved { margin: 0; color: var(--g-folha-escura); font-weight: 700; display: flex; align-items: center; gap: var(--g-e2); }
+.quick-saved .ti { font-size: 22.4px; }
 
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.6em;
-}
+.quick-footer { display: flex; gap: var(--g-e3); }
+.quick-footer .g-btn { flex: 1; min-height: var(--g-alvo-g); }
 
-@media (max-width: 480px) {
-    .quick-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+@media (max-width: 600px) {
+    .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--g-e2); }
+    .quick-action { min-height: 96px; padding: var(--g-e3); }
+    .quick-title { font-size: var(--g-t-h3); }
+    .quick-preview { width: 60px; height: 60px; }
+    .quick-footer { gap: var(--g-e2); }
+    .quick-footer .g-btn { padding: 0 var(--g-e3); font-size: var(--g-t-legenda); }
 }
-
-.quick-action {
-    margin: 0;
-    height: auto;
-    min-height: 6em;
-    padding: 0.8em 0.4em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    text-transform: none;
-    letter-spacing: 0;
-    line-height: 1.2;
-    white-space: normal;
-    font-size: 1.05em;
-    position: relative;
-}
-
-.quick-action i {
-    font-size: 1.8em;
-    color: var(--gf-mata, #1D6B35);
-}
-
-.quick-badge {
-    font-size: 0.75em;
-    font-weight: 700;
-    background: var(--gf-folha, #E7F2E0);
-    color: var(--gf-mata, #1D6B35);
-    border-radius: 999px;
-    padding: 0.1em 0.6em;
-}
-
-.quick-note {
-    margin: 0;
-    background: var(--gf-folha, #E7F2E0);
-    border-radius: 0.6em;
-    padding: 0.6em 0.9em;
-}
-
-.quick-sub {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6em;
-}
-
-.quick-label {
-    font-weight: 700;
-}
-
-.quick-input {
-    width: 100%;
-    font-size: 1.3em;
-    min-height: 2.4em;
-    margin: 0;
-}
-
-.quick-link-btn {
-    align-self: flex-start;
-    margin: 0;
-    text-transform: none;
-    letter-spacing: 0;
-    color: var(--gf-coral, #B8391F);
-}
-
-.quick-saved {
-    margin: 0;
-    color: var(--gf-mata, #1D6B35);
-    font-weight: 700;
-}
-
-.quick-footer {
-    display: flex;
-    gap: 0.6em;
-}
-
-.quick-footer button {
-    flex: 1;
-    margin: 0;
-    min-height: 3em;
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: 1em;
-}
-
-.quick-primary {
-    background-color: var(--gf-mata, #1D6B35);
-    border-color: var(--gf-mata, #1D6B35);
-    color: #FFFFFF;
-    margin: 0;
-    min-height: 3em;
-    text-transform: none;
-    letter-spacing: 0;
-}
-
-.quick-primary:hover,
-.quick-primary:focus {
-    background-color: var(--gf-mata-escuro, #175A2C);
-    border-color: var(--gf-tinta, #14261A);
-    color: #FFFFFF;
+@media (prefers-reduced-motion: reduce) {
+    .quick-loading .ti { animation: none; }
 }
 </style>
