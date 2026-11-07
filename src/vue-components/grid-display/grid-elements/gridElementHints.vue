@@ -1,7 +1,7 @@
 <template>
     <div :style="`position: absolute; right: 0; color: ${hintsColor}; top: ${topPx}; bottom: ${bottomPx}; line-height: 1`">
-        <i v-if="gridElement.hidden" class="fas fa-eye-slash element-hint"></i>
-        <i v-if="hasNavigation" class="fas fa-sticky-note fa-rotate-180 fa-flip-vertical element-hint"></i>
+        <i v-if="gridElement.hidden" class="ti ti-eye-off element-hint" aria-hidden="true"></i>
+        <i v-if="hasNavigation" class="ti ti-folder element-hint" aria-hidden="true"></i>
         <span v-if="gridElement.vocabularyLevel && isOnEdit" class="element-hint d-inline-block"
               :style="`outline: 1px solid; padding-left: 0.25em; padding-right: 0.25em; border-radius: 2px; font-weight: ${elementLevelShown ? 'bold' : 'normal'}`">{{ gridElement.vocabularyLevel }}</span>
     </div>

@@ -10,7 +10,7 @@
                 <a class="d-block" v-if="tooltipOptions.actionLinkUrl" :href="tooltipOptions.actionLinkUrl" target="_blank" style="color: #44a8f1">{{actionLink | translate}}</a>
             </div>
         </div>
-        <button @click="clearTooltip()" style="position: absolute; top: 0; right: 10px; padding: 0 10px" :label="$t('close')">X</button>
+        <button class="g-btn g-btn-leve g-btn-icone" @click="clearTooltip()" style="position: absolute; top: 4px; right: 6px;" :aria-label="$t('close')"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
 </template>
 
@@ -65,13 +65,13 @@
                 }
                 switch (thiz.tooltipOptions.msgType) {
                     case 'warn':
-                        thiz.tooltipOptions.faIcon = 'fas fa-exclamation-triangle fa-2x';
+                        thiz.tooltipOptions.faIcon = 'ti ti-alert-triangle g-aviso-icone';
                         break;
                     case 'info':
-                        thiz.tooltipOptions.faIcon = 'fas fa-info-circle fa-2x';
+                        thiz.tooltipOptions.faIcon = 'ti ti-info-circle g-aviso-icone';
                         break;
                     case 'success':
-                        thiz.tooltipOptions.faIcon = 'fas fa-check-circle fa-2x';
+                        thiz.tooltipOptions.faIcon = 'ti ti-circle-check g-aviso-icone';
                         break;
                 }
                 this.tooltipHTML = options.translate ? i18nService.t(html, ...thiz.tooltipOptions.translateParams) : html;

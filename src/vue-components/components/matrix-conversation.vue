@@ -2,10 +2,10 @@
     <div class="row" :style="`max-height: 100%; overflow-y: scroll; font-size: ${fontSize}`" ref="messenger">
         <div v-if="loading">
             <span class="col">{{ $t('loading') }}...</span>
-            <i class="fas fa-spinner fa-spin"></i>
+            <i class="ti ti-loader-2 g-girar"></i>
         </div>
         <div v-if="!matrixRoom && !loading">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="ti ti-alert-triangle"></i>
             <span>{{ $t('matrixMessengerNotLoggedInOrNoRoom') }}</span>
             <div class="mt-5">{{ $t('goToMatrixSettingsToConfigure') }}</div>
         </div>
@@ -14,10 +14,10 @@
                 <h2 class="mb-2">{{ matrixRoom.name }}</h2>
                 <matrix-room-description :room="matrixRoom" :full="true" :logged-in-user="currentUser"/>
                 <div v-if="matrixRoom.hasEncryptionStateEvent()">
-                    <i class="fas fa-lock" style="color: darkgreen"></i> <span>{{ $t('endToEndEncrypted') }}</span>
+                    <i class="ti ti-lock" style="color: darkgreen"></i> <span>{{ $t('endToEndEncrypted') }}</span>
                 </div>
                 <div v-if="!matrixRoom.hasEncryptionStateEvent()">
-                    <i class="fas fa-lock-open" style="color: darkred"></i> <span>{{ $t('notEndToEndEncrypted') }}</span>
+                    <i class="ti ti-lock-open" style="color: darkred"></i> <span>{{ $t('notEndToEndEncrypted') }}</span>
                 </div>
             </div>
             <div class="row" v-if="!matrixMessages.length">
@@ -48,7 +48,7 @@
                         <div>
                             <strong>{{ currentUser }}</strong>
                         </div>
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <i class="ti ti-loader-2 g-girar"></i>
                     </div>
                 </div>
             </div>

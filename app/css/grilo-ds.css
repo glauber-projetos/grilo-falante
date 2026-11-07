@@ -286,3 +286,9 @@
 .g-coluna { display: flex; flex-direction: column; gap: var(--g-e3); }
 .g-espaco { flex: 1; }
 .g-oculto-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* small shared helpers used by older components */
+@keyframes g-girar-kf { to { transform: rotate(360deg); } }
+.g-girar { display: inline-block; animation: g-girar-kf 1s linear infinite; }
+.g-aviso-icone { font-size: 2em; vertical-align: middle; }
+@media (prefers-reduced-motion: reduce) { .g-girar { animation: none; } }

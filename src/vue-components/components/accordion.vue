@@ -1,8 +1,8 @@
 <template>
     <div>
         <button @click="toggleOpen" class="btn-accordion" style="margin-bottom: 0">
-            <i class="fas fa-chevron-down arrow" v-show="!isOpen"></i>
-            <i class="fas fa-chevron-up arrow" v-show="isOpen"></i>
+            <i class="ti ti-chevron-down arrow" aria-hidden="true" v-show="!isOpen"></i>
+            <i class="ti ti-chevron-up arrow" aria-hidden="true" v-show="isOpen"></i>
             <component :is="componentType" :style="`display: inline-block; margin: 0 0 0 2em;${accLabelStyle}`">{{accLabel}}</component>
         </button>
         <div v-show="isOpen" class="accordion-content" :style="'background-color:' + backgroundColor">
