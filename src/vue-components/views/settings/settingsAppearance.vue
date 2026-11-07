@@ -1,177 +1,188 @@
 <template>
-    <div>
-        <div class="srow">
-            <div class="nine columns settings-area">
-                <h3 class="mt-2">{{ $t('griloWordColorsTitle') }}</h3>
-                <div class="srow">
+    <div class="aj-aparencia">
+        <div class="aj-aparencia-grade">
+            <div class="aj-aparencia-campos">
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaTexto') }}</h3>
+                <ajuste-deslizar id="ajTamanhoTexto" :label="$t('ajustesAparenciaTamanhoTexto')" unit="%" min="0" max="100" step="1"
+                                 :rotulo-min="$t('ajustesAparenciaPequeno')" :rotulo-max="$t('ajustesAparenciaGrande')"
+                                 v-model.number="metadata.textConfig.fontSizePct" @change="saveMetadata(metadata)"/>
+                <ajuste-deslizar id="ajTamanhoSoTexto" :label="$t('ajustesAparenciaTamanhoSoTexto')" unit="%" min="0" max="100" step="1"
+                                 :rotulo-min="$t('ajustesAparenciaPequeno')" :rotulo-max="$t('ajustesAparenciaGrande')"
+                                 v-model.number="metadata.textConfig.onlyTextFontSizePct" @change="saveMetadata(metadata)"/>
+
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaCoresPalavras') }}</h3>
+                <label class="g-marcar">
                     <input id="griloWordColors" type="checkbox" :checked="griloColorsOn" @change="setGriloColors($event.target.checked)"/>
-                    <label for="griloWordColors">{{ $t('griloWordColors') }}</label>
-                </div>
-                <p class="gf-hint">{{ $t('griloWordColorsHint') }}</p>
-                <ul class="gf-legend" aria-hidden="true">
+                    <span>{{ $t('griloWordColors') }}</span>
+                </label>
+                <p class="g-dica">{{ $t('griloWordColorsHint') }}</p>
+                <ul class="aj-legenda" aria-hidden="true">
                     <li v-for="(cat, index) in constants.CS_GRILO_CATEGORIES" :style="`background-color: ${constants.CS_GRILO_FILLS[index]}; border-color: ${constants.CS_GRILO_EDGES[index]};`">{{ $t(cat) }}</li>
                 </ul>
-                <h3 class="mt-4">{{ $t('motionTitle') }}</h3>
-                <div class="srow">
-                    <input id="reduceMotion" type="checkbox" v-model="reduceMotion" @change="setReduceMotion"/>
-                    <label for="reduceMotion">{{ $t('reduceMotion') }}</label>
+
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaTema') }}</h3>
+                <div class="aj-escolha" role="group" :aria-label="$t('ajustesAparenciaTema')">
+                    <button class="g-btn" :aria-pressed="!temaEscuro ? 'true' : 'false'" @click="toLightMode"><i class="ti ti-sun" aria-hidden="true"></i>{{ $t('ajustesAparenciaClaro') }}</button>
+                    <button class="g-btn" :aria-pressed="temaEscuro ? 'true' : 'false'" @click="toDarkMode"><i class="ti ti-moon" aria-hidden="true"></i>{{ $t('ajustesAparenciaEscuro') }}</button>
                 </div>
-                <p class="gf-hint">{{ systemReducesMotion ? $t('reduceMotionSystemOn') : $t('reduceMotionHint') }}</p>
-                <h3 class="mt-4">{{ $t('quickSettings') }}</h3>
-                <div class="srow">
-                    <button @click="toDefault"><span class="fas fa-undo"/> {{ $t('setToDefaultSettings') }}</button>
-                    <button @click="toDefaultBgColored"><span class="fas fa-square"/> {{ $t('setToDefaultSettingsBgColored') }}</button>
-                    <button @click="toDefaultBorderColored"><span class="far fa-square"/> {{ $t('setToDefaultSettingsBorderColored') }}</button>
-                    <button @click="toDefaultBothColored"><span class="fas fa-square"/><span class="far fa-square"/> {{ $t('setToDefaultSettingsBothColored') }}</button>
-                    <button @click="toDarkMode"><span class="fas fa-moon"/> {{ $t('setToDarkMode') }}</button>
-                    <button @click="toLightMode"><span class="fas fa-sun"/> {{ $t('setToLightMode') }}</button>
+                <p class="g-dica">{{ $t('ajustesAparenciaTemaDica') }}</p>
+
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaEstilo') }}</h3>
+                <div class="aj-escolha" role="group" :aria-label="$t('ajustesAparenciaEstilo')">
+                    <button class="g-btn" :aria-pressed="metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BACKGROUND ? 'true' : 'false'" @click="toDefaultBgColored">
+                        <span class="aj-amostra aj-amostra-fundo" aria-hidden="true"></span>{{ $t('ajustesAparenciaEstiloFundo') }}
+                    </button>
+                    <button class="g-btn" :aria-pressed="metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BORDER ? 'true' : 'false'" @click="toDefaultBorderColored">
+                        <span class="aj-amostra aj-amostra-borda" aria-hidden="true"></span>{{ $t('ajustesAparenciaEstiloBorda') }}
+                    </button>
+                    <button class="g-btn" :aria-pressed="metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BOTH ? 'true' : 'false'" @click="toDefaultBothColored">
+                        <span class="aj-amostra aj-amostra-ambos" aria-hidden="true"></span>{{ $t('ajustesAparenciaEstiloAmbos') }}
+                    </button>
                 </div>
-                <h3 class="mt-2">{{ $t('textHeading') }}</h3>
-                <div class="srow">
-                    <label class="three columns" for="textPos">{{ $t('textPosition') }}</label>
-                    <select id="textPos" v-model="metadata.textConfig.textPosition" class="five columns" @change="saveMetadata(metadata)">
-                        <option :value="TextConfig.TEXT_POS_ABOVE">{{ $t('top') }}</option>
-                        <option :value="TextConfig.TEXT_POS_BELOW">{{ $t('bottom') }}</option>
-                    </select>
-                </div>
-                <div class="srow">
-                    <label class="three columns" for="fontFamily">{{ $t('fontFamily') }}</label>
-                    <select id="fontFamily" v-model="metadata.textConfig.fontFamily" class="five columns" @change="saveMetadata(metadata)">
-                        <option v-for="value in TextConfig.FONTS" :value="value">{{ value }}</option>
-                    </select>
-                </div>
-                <div class="srow">
-                    <label class="three columns" for="convertText">{{ $t('convertElementLabels') }}</label>
-                    <select id="convertText" v-model="metadata.textConfig.convertMode" class="five columns" @change="saveMetadata(metadata)">
-                        <option :value="null">{{ $t('dontConvertLabels') }}</option>
-                        <option :value="TextConfig.CONVERT_MODE_UPPERCASE">{{ $t('convertToUppercasse') }}</option>
-                        <option :value="TextConfig.CONVERT_MODE_LOWERCASE">{{ $t('convertToLowercase') }}</option>
-                    </select>
-                </div>
-                <div class="srow mb-0">
-                    <slider-input label="fontSizeTextAndImage" unit="%" id="fontSizeTextAndImage" min="0" max="100" step="1" v-model.number="metadata.textConfig.fontSizePct" @change="saveMetadata(metadata)"/>
-                </div>
-                <div class="srow">
-                    <slider-input label="onlyTextFontSize" unit="%" id="onlyTextFontSize" min="0" max="100" step="1" v-model.number="metadata.textConfig.onlyTextFontSizePct" @change="saveMetadata(metadata)"/>
-                </div>
-                <div class="srow mb-5">
-                    <accordion :acc-label="$t('advancedOptions')" class="eleven columns">
-                        <div class="srow">
-                            <label class="three columns" for="fittingMode">{{ $t('modeForHandlingTooLongTexts') }}</label>
-                            <select id="fittingMode" v-model="metadata.textConfig.fittingMode" class="five columns" @change="saveMetadata(metadata)">
-                                <option :value="TextConfig.TOO_LONG_AUTO">{{ $t('adaptAutomatically') }}</option>
-                                <option :value="TextConfig.TOO_LONG_TRUNCATE">{{ $t('truncate') }}</option>
-                                <option :value="TextConfig.TOO_LONG_ELLIPSIS">{{ $t('ellipsisDotDotDot') }}</option>
-                            </select>
-                        </div>
-                        <div class="srow">
-                            <label class="three columns" for="maxLines">{{ $t('maximumNumberOfLines') }}</label>
-                            <select id="maxLines" v-model="metadata.textConfig.maxLines" class="five columns" @change="saveMetadata(metadata)">
-                                <option :value="1">1</option>
-                                <option :value="2">2</option>
-                                <option :value="3">3</option>
-                            </select>
-                        </div>
-                        <div class="srow mt-3">
-                            <slider-input label="lineHeight" id="lineHeight" min="1" max="3" step="0.1" v-model.number="metadata.textConfig.lineHeight" @change="saveMetadata(metadata)"/>
-                        </div>
-                        <div class="srow mb-2">
-                            <slider-input label="onlyTextLineHeight" id="onlyTextLineHeight" min="1" max="3" step="0.1" v-model.number="metadata.textConfig.onlyTextLineHeight" @change="saveMetadata(metadata)"/>
-                        </div>
-                        <div class="srow">
-                            <label class="three columns" for="fontColor">
-                                <span>{{ $t('fontColor') }}</span>
-                            </label>
-                            <input id="fontColor" v-model="metadata.textConfig.fontColor" class="five columns" type="color" @change="saveMetadata(metadata)">
-                            <button class="three columns" @click="metadata.textConfig.fontColor = constants.DEFAULT_ELEMENT_FONT_COLOR; saveMetadata(metadata)">{{ $t('reset') }}</button>
-                        </div>
-                        <div class="srow">
-                            <input id="autoSizeKeyboardLetters" type="checkbox" v-model="metadata.textConfig.autoSizeKeyboardLetters" @change="saveMetadata(metadata)"/>
-                            <label for="autoSizeKeyboardLetters">{{ $t('autoSizeKeyboardLetters') }}</label>
-                        </div>
-                    </accordion>
-                </div>
-                <h3 class="mt-5">{{ $t('gridElement') }}</h3>
-                <div class="srow">
-                    <label class="three columns" for="elemColor">
-                        <span>{{ $t('defaultGridElementColor') }}</span>
-                    </label>
-                    <input id="elemColor" v-model="metadata.colorConfig.elementBackgroundColor" class="five columns" type="color" @change="saveMetadata(metadata)">
-                    <button class="three columns" @click="metadata.colorConfig.elementBackgroundColor = constants.DEFAULT_ELEMENT_BACKGROUND_COLOR; saveMetadata(metadata)">{{ $t('reset') }}</button>
-                </div>
-                <div class="srow">
-                    <label class="three columns" for="colorMode">{{ $t('colorMode') }}</label>
-                    <select id="colorMode" v-model="metadata.colorConfig.colorMode" class="five columns" @change="saveMetadata(metadata)">
-                        <option :value="ColorConfig.COLOR_MODE_BACKGROUND">{{ $t('colorModeBackground') }}</option>
-                        <option :value="ColorConfig.COLOR_MODE_BORDER">{{ $t('colorModeBorder') }}</option>
-                        <option :value="ColorConfig.COLOR_MODE_BOTH">{{ $t('colorModeBackgroundBorder') }}</option>
-                    </select>
-                </div>
-                <div class="srow mt-5">
-                    <accordion :acc-label="$t('advancedOptions')" class="eleven columns">
-                        <div class="srow">
-                            <label class="three columns" for="borderColor">
-                                <span>{{ $t('defaultGridElementBorderColor') }}</span>
-                            </label>
-                            <input id="borderColor" v-model="metadata.colorConfig.elementBorderColor" class="five columns" type="color" @change="saveMetadata(metadata)">
-                            <button class="three columns" @click="metadata.colorConfig.elementBorderColor = constants.DEFAULT_ELEMENT_BORDER_COLOR; saveMetadata(metadata)">{{ $t('reset') }}</button>
-                        </div>
-                        <div class="srow">
-                            <slider-input label="borderWidth" unit="%" id="borderWidth" min="0" max="2" step="0.05" :decimals="2" e v-model.number="metadata.colorConfig.borderWidth" @change="saveMetadata(metadata)"/>
-                        </div>
-                        <div class="srow">
-                            <slider-input label="elementMargin" unit="%" id="elementMargin" min="0" max="2" step="0.05" :decimals="2" v-model.number="metadata.colorConfig.elementMargin" @change="saveMetadata(metadata)"/>
-                        </div>
-                        <div class="srow">
-                            <slider-input label="borderRadius" unit="%" id="borderRadius" min="0" max="4" step="0.05" :decimals="2" v-model.number="metadata.colorConfig.borderRadius" @change="saveMetadata(metadata)"/>
-                        </div>
-                        <div class="srow">
-                            <label class="three columns" for="colorScheme">
-                                <span>{{ $t('colorSchemeForCategories') }}</span>
-                            </label>
-                            <select id="colorScheme" class="five columns" v-model="metadata.colorConfig.activeColorScheme" @change="saveMetadata(metadata)">
-                                <option v-for="scheme in constants.DEFAULT_COLOR_SCHEMES" :value="scheme.name">{{scheme.name | translate}}</option>
-                            </select>
-                        </div>
-                        <div class="srow">
-                            <div class="five columns offset-by-three d-flex" style="height: 1.5em">
-                                <div class="flex-grow-1" v-for="(color, index) in colorUtil.getActiveColorScheme(metadata).colors" :title="$t(colorUtil.getActiveColorScheme(metadata).categories[index])" :style="`background-color: ${color};`"></div>
-                            </div>
-                        </div>
-                        <div class="srow">
-                            <input id="colorSchemeActive" type="checkbox" v-model="metadata.colorConfig.colorSchemesActivated" @change="saveMetadata(metadata)"/>
-                            <label for="colorSchemeActive">
-                                <span>{{ $t('activateColorCategoriesOfGridElements') }}</span>
-                            </label>
-                        </div>
-                    </accordion>
-                </div>
-                <h3 class="mt-5">{{ $t('grid') }}</h3>
-                <div class="srow">
-                    <label class="three columns" for="appColor">
-                        <span>{{ $t('defaultGridBackgroundColor') }}</span>
-                    </label>
-                    <input id="appColor" v-model="metadata.colorConfig.gridBackgroundColor" class="five columns" type="color" @change="saveMetadata(metadata)">
-                    <button class="three columns" @click="metadata.colorConfig.gridBackgroundColor = constants.DEFAULT_GRID_BACKGROUND_COLOR; saveMetadata(metadata)">{{ $t('reset') }}</button>
-                </div>
-                <div class="srow">
+
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaFotosMovimento') }}</h3>
+                <label class="g-marcar">
                     <input id="photosFillCell" type="checkbox" :checked="metadata.photosFillCell !== false" @change="$set(metadata, 'photosFillCell', $event.target.checked); saveMetadata(metadata)"/>
-                    <label for="photosFillCell">{{ $t('photosFillCell') }}</label>
-                </div>
-                <div class="srow">
-                    <label for="firstRowHeightFactor" class="three columns">{{ $t('firstRowHeightFactor') }}</label>
-                    <input id="firstRowHeightFactor" type="number" class="five columns" v-model.number="metadata.firstRowHeightFactor" min="0.1" max="5" step="0.1" @change="saveMetadata(metadata)"/>
-                </div>
+                    <span>{{ $t('photosFillCell') }}</span>
+                </label>
+                <label class="g-marcar">
+                    <input id="reduceMotion" type="checkbox" v-model="reduceMotion" @change="setReduceMotion"/>
+                    <span>{{ $t('reduceMotion') }}</span>
+                </label>
+                <p class="g-dica">{{ systemReducesMotion ? $t('reduceMotionSystemOn') : $t('reduceMotionHint') }}</p>
             </div>
-            <div class="three columns">
-                <h3 class="mt-3">{{ $t('appearanceDemo') }}</h3>
-                <div class="srow">
-                    <label for="testElementLabel" class="me-2 u-full-width">{{ $t('testElementLabel') }}</label>
-                    <input id="testElementLabel" class="u-full-width" type="text" v-model="testElementLabel" @input="resetTestGrid"/>
+
+            <aside class="aj-previa" :aria-label="$t('ajustesAparenciaPrevia')">
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaPrevia') }}</h3>
+                <div class="g-campo">
+                    <label for="testElementLabel">{{ $t('ajustesAparenciaPreviaPalavra') }}</label>
+                    <input id="testElementLabel" type="text" v-model="testElementLabel" @input="resetTestGrid"/>
                 </div>
-                <app-grid-display v-if="testGridData" style="max-width: 200px; height: 500px;" :grid-data="testGridData" :metadata="metadata" :watch-for-changes="true"/>
-            </div>
+                <div class="aj-previa-prancha">
+                    <app-grid-display v-if="testGridData" :grid-data="testGridData" :metadata="metadata" :watch-for-changes="true"/>
+                </div>
+            </aside>
         </div>
+
+        <details class="aj-mais" @toggle="maisAberto = $event.target.open">
+            <summary><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>{{ $t('ajustesAparenciaMais') }}</summary>
+            <div class="aj-mais-corpo" v-if="maisAberto">
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaTextoBotoes') }}</h3>
+                <div class="aj-duas">
+                    <div class="g-campo">
+                        <label for="textPos">{{ $t('textPosition') }}</label>
+                        <select id="textPos" v-model="metadata.textConfig.textPosition" @change="saveMetadata(metadata)">
+                            <option :value="TextConfig.TEXT_POS_ABOVE">{{ $t('top') }}</option>
+                            <option :value="TextConfig.TEXT_POS_BELOW">{{ $t('bottom') }}</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="fontFamily">{{ $t('fontFamily') }}</label>
+                        <select id="fontFamily" v-model="metadata.textConfig.fontFamily" @change="saveMetadata(metadata)">
+                            <option v-for="value in TextConfig.FONTS" :value="value">{{ value }}</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="convertText">{{ $t('convertElementLabels') }}</label>
+                        <select id="convertText" v-model="metadata.textConfig.convertMode" @change="saveMetadata(metadata)">
+                            <option :value="null">{{ $t('dontConvertLabels') }}</option>
+                            <option :value="TextConfig.CONVERT_MODE_UPPERCASE">{{ $t('convertToUppercasse') }}</option>
+                            <option :value="TextConfig.CONVERT_MODE_LOWERCASE">{{ $t('convertToLowercase') }}</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="fittingMode">{{ $t('modeForHandlingTooLongTexts') }}</label>
+                        <select id="fittingMode" v-model="metadata.textConfig.fittingMode" @change="saveMetadata(metadata)">
+                            <option :value="TextConfig.TOO_LONG_AUTO">{{ $t('adaptAutomatically') }}</option>
+                            <option :value="TextConfig.TOO_LONG_TRUNCATE">{{ $t('truncate') }}</option>
+                            <option :value="TextConfig.TOO_LONG_ELLIPSIS">{{ $t('ellipsisDotDotDot') }}</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="maxLines">{{ $t('maximumNumberOfLines') }}</label>
+                        <select id="maxLines" v-model="metadata.textConfig.maxLines" @change="saveMetadata(metadata)">
+                            <option :value="1">1</option>
+                            <option :value="2">2</option>
+                            <option :value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="fontColor">{{ $t('fontColor') }}</label>
+                        <div class="aj-cor">
+                            <input id="fontColor" v-model="metadata.textConfig.fontColor" type="color" @change="saveMetadata(metadata)">
+                            <button class="g-btn g-btn-leve" @click="metadata.textConfig.fontColor = constants.DEFAULT_ELEMENT_FONT_COLOR; saveMetadata(metadata)">{{ $t('ajustesRestaurar') }}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="aj-duas">
+                    <ajuste-deslizar id="lineHeight" :label="$t('lineHeight')" min="1" max="3" step="0.1" decimals="1" v-model.number="metadata.textConfig.lineHeight" @change="saveMetadata(metadata)"/>
+                    <ajuste-deslizar id="onlyTextLineHeight" :label="$t('onlyTextLineHeight')" min="1" max="3" step="0.1" decimals="1" v-model.number="metadata.textConfig.onlyTextLineHeight" @change="saveMetadata(metadata)"/>
+                </div>
+                <label class="g-marcar">
+                    <input id="autoSizeKeyboardLetters" type="checkbox" v-model="metadata.textConfig.autoSizeKeyboardLetters" @change="saveMetadata(metadata)"/>
+                    <span>{{ $t('autoSizeKeyboardLetters') }}</span>
+                </label>
+
+                <h3 class="aj-sub">{{ $t('ajustesAparenciaCoresBotoes') }}</h3>
+                <div class="aj-duas">
+                    <div class="g-campo">
+                        <label for="elemColor">{{ $t('defaultGridElementColor') }}</label>
+                        <div class="aj-cor">
+                            <input id="elemColor" v-model="metadata.colorConfig.elementBackgroundColor" type="color" @change="saveMetadata(metadata)">
+                            <button class="g-btn g-btn-leve" @click="metadata.colorConfig.elementBackgroundColor = constants.DEFAULT_ELEMENT_BACKGROUND_COLOR; saveMetadata(metadata)">{{ $t('ajustesRestaurar') }}</button>
+                        </div>
+                    </div>
+                    <div class="g-campo">
+                        <label for="borderColor">{{ $t('defaultGridElementBorderColor') }}</label>
+                        <div class="aj-cor">
+                            <input id="borderColor" v-model="metadata.colorConfig.elementBorderColor" type="color" @change="saveMetadata(metadata)">
+                            <button class="g-btn g-btn-leve" @click="metadata.colorConfig.elementBorderColor = constants.DEFAULT_ELEMENT_BORDER_COLOR; saveMetadata(metadata)">{{ $t('ajustesRestaurar') }}</button>
+                        </div>
+                    </div>
+                    <div class="g-campo">
+                        <label for="appColor">{{ $t('defaultGridBackgroundColor') }}</label>
+                        <div class="aj-cor">
+                            <input id="appColor" v-model="metadata.colorConfig.gridBackgroundColor" type="color" @change="saveMetadata(metadata)">
+                            <button class="g-btn g-btn-leve" @click="metadata.colorConfig.gridBackgroundColor = constants.DEFAULT_GRID_BACKGROUND_COLOR; saveMetadata(metadata)">{{ $t('ajustesRestaurar') }}</button>
+                        </div>
+                    </div>
+                    <div class="g-campo">
+                        <label for="colorMode">{{ $t('colorMode') }}</label>
+                        <select id="colorMode" v-model="metadata.colorConfig.colorMode" @change="saveMetadata(metadata)">
+                            <option :value="ColorConfig.COLOR_MODE_BACKGROUND">{{ $t('colorModeBackground') }}</option>
+                            <option :value="ColorConfig.COLOR_MODE_BORDER">{{ $t('colorModeBorder') }}</option>
+                            <option :value="ColorConfig.COLOR_MODE_BOTH">{{ $t('colorModeBackgroundBorder') }}</option>
+                        </select>
+                    </div>
+                    <div class="g-campo">
+                        <label for="colorScheme">{{ $t('colorSchemeForCategories') }}</label>
+                        <select id="colorScheme" v-model="metadata.colorConfig.activeColorScheme" @change="saveMetadata(metadata)">
+                            <option v-for="scheme in constants.DEFAULT_COLOR_SCHEMES" :value="scheme.name">{{ scheme.name | translate }}</option>
+                        </select>
+                        <div class="aj-faixa-cores" aria-hidden="true">
+                            <span v-for="(color, index) in colorUtil.getActiveColorScheme(metadata).colors" :title="$t(colorUtil.getActiveColorScheme(metadata).categories[index])" :style="`background-color: ${color};`"></span>
+                        </div>
+                    </div>
+                    <div class="g-campo">
+                        <label for="firstRowHeightFactor">{{ $t('firstRowHeightFactor') }}</label>
+                        <input id="firstRowHeightFactor" type="number" v-model.number="metadata.firstRowHeightFactor" min="0.1" max="5" step="0.1" @change="saveMetadata(metadata)"/>
+                    </div>
+                </div>
+                <label class="g-marcar">
+                    <input id="colorSchemeActive" type="checkbox" v-model="metadata.colorConfig.colorSchemesActivated" @change="saveMetadata(metadata)"/>
+                    <span>{{ $t('activateColorCategoriesOfGridElements') }}</span>
+                </label>
+                <div class="aj-duas">
+                    <ajuste-deslizar id="borderWidth" :label="$t('borderWidth')" unit="%" min="0" max="2" step="0.05" decimals="2" v-model.number="metadata.colorConfig.borderWidth" @change="saveMetadata(metadata)"/>
+                    <ajuste-deslizar id="elementMargin" :label="$t('elementMargin')" unit="%" min="0" max="2" step="0.05" decimals="2" v-model.number="metadata.colorConfig.elementMargin" @change="saveMetadata(metadata)"/>
+                    <ajuste-deslizar id="borderRadius" :label="$t('borderRadius')" unit="%" min="0" max="4" step="0.05" decimals="2" v-model.number="metadata.colorConfig.borderRadius" @change="saveMetadata(metadata)"/>
+                </div>
+
+                <div class="aj-restaurar">
+                    <button class="g-btn g-btn-perigo" @click="toDefault"><i class="ti ti-restore" aria-hidden="true"></i>{{ $t('ajustesAparenciaPadrao') }}</button>
+                </div>
+            </div>
+        </details>
     </div>
 </template>
 
@@ -179,8 +190,7 @@
     import { TextConfig } from '../../../js/model/TextConfig';
     import { constants } from '../../../js/util/constants';
     import { settingsSaveMixin } from './settingsSaveMixin';
-    import SliderInput from '../../modals/input/sliderInput.vue';
-    import Accordion from '../../components/accordion.vue';
+    import AjusteDeslizar from './ajusteDeslizar.vue';
     import AppGridDisplay from '../../grid-display/appGridDisplay.vue';
     import { GridElement } from '../../../js/model/GridElement';
     import { i18nService } from '../../../js/service/i18nService';
@@ -188,11 +198,15 @@
     import { GridData } from '../../../js/model/GridData';
     import { util } from '../../../js/util/util';
     import { ColorConfig } from '../../../js/model/ColorConfig';
-    import {colorUtil} from "../../../js/util/colorUtil";
+    import { colorUtil } from "../../../js/util/colorUtil";
     import { motionService } from '../../../js/service/motionService';
 
+    /**
+     * Ajustes > Aparência. Same fields as the old appearance tab (metadata.textConfig / metadata.colorConfig),
+     * with the family choices first and the rest in "Mais opções".
+     */
     export default {
-        components: { AppGridDisplay, Accordion, SliderInput },
+        components: { AppGridDisplay, AjusteDeslizar },
         props: ["metadata", "userSettingsLocal"],
         mixins: [settingsSaveMixin],
         data() {
@@ -202,15 +216,19 @@
                 colorUtil: colorUtil,
                 constants: constants,
                 testGridData: null,
-                testElementLabel: i18nService.t("testElement"),
+                testElementLabel: i18nService.t("ajustesAparenciaPreviaTexto"),
                 reduceMotion: motionService.isReduceMotionSetting(),
-                systemReducesMotion: !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+                systemReducesMotion: !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+                maisAberto: false
             }
         },
         computed: {
             griloColorsOn() {
                 let colorConfig = this.metadata.colorConfig;
                 return !!colorConfig.colorSchemesActivated && (colorConfig.activeColorScheme || '').startsWith(constants.COLOR_SCHEME_GRILO_PREFIX);
+            },
+            temaEscuro() {
+                return this.metadata.colorConfig.elementBackgroundColor === constants.DEFAULT_ELEMENT_BACKGROUND_COLOR_DARK;
             }
         },
         methods: {
@@ -230,13 +248,16 @@
                 motionService.setReduceMotionSetting(this.reduceMotion);
             },
             toDefault() {
+                if (!window.confirm(this.$t('ajustesAparenciaPadraoConfirmar'))) {
+                    return;
+                }
                 this.metadata.textConfig = JSON.parse(JSON.stringify(new TextConfig()));
                 this.metadata.colorConfig = JSON.parse(JSON.stringify(new ColorConfig()));
                 this.saveMetadata(this.metadata);
             },
             toDefaultBgColored() {
                 this.metadata.colorConfig.colorMode = ColorConfig.COLOR_MODE_BACKGROUND;
-                this.metadata.colorConfig.borderWidth = ColorConfig.BORDER_WIDTH_BG_COLORED
+                this.metadata.colorConfig.borderWidth = ColorConfig.BORDER_WIDTH_BG_COLORED;
                 this.metadata.colorConfig.activeColorScheme = this.getColorScheme();
                 this.saveMetadata(this.metadata);
             },
@@ -267,7 +288,7 @@
                 this.saveMetadata(this.metadata);
             },
             getColorScheme() {
-                let originalScheme = this.metadata.colorConfig.activeColorScheme;
+                let originalScheme = this.metadata.colorConfig.activeColorScheme || '';
                 let borderColored = this.metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BORDER;
                 let backgroundColored = this.metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BACKGROUND;
                 let darkMode = this.metadata.colorConfig.elementBackgroundColor === constants.DEFAULT_ELEMENT_BACKGROUND_COLOR_DARK;
@@ -276,56 +297,53 @@
                 }
                 if (originalScheme.startsWith(constants.COLOR_SCHEME_FITZGERALD_PREFIX)) {
                     if (backgroundColored) {
-                        return darkMode ? constants.COLOR_SCHEME_FITZGERALD_DARK: constants.COLOR_SCHEME_FITZGERALD_LIGHT;
+                        return darkMode ? constants.COLOR_SCHEME_FITZGERALD_DARK : constants.COLOR_SCHEME_FITZGERALD_LIGHT;
                     }
                     if (borderColored) {
                         return constants.COLOR_SCHEME_FITZGERALD_MEDIUM;
                     }
-                    // both colored
                     return darkMode ? constants.COLOR_SCHEME_FITZGERALD_DARK : constants.COLOR_SCHEME_FITZGERALD_VERY_LIGHT;
                 } else if (originalScheme.startsWith(constants.COLOR_SCHEME_GOOSENS_PREFIX)) {
                     if (backgroundColored) {
-                        return darkMode ? constants.COLOR_SCHEME_GOOSENS_DARK: constants.COLOR_SCHEME_GOOSENS_LIGHT;
+                        return darkMode ? constants.COLOR_SCHEME_GOOSENS_DARK : constants.COLOR_SCHEME_GOOSENS_LIGHT;
                     }
                     if (borderColored) {
                         return constants.COLOR_SCHEME_GOOSENS_MEDIUM;
                     }
-                    // both colored
                     return darkMode ? constants.COLOR_SCHEME_GOOSENS_DARK : constants.COLOR_SCHEME_GOOSENS_VERY_LIGHT;
                 } else if (originalScheme.startsWith(constants.COLOR_SCHEME_MONTESSORI_PREFIX)) {
                     if (backgroundColored) {
-                        return darkMode ? constants.COLOR_SCHEME_MONTESSORI_DARK: constants.COLOR_SCHEME_MONTESSORI_LIGHT;
+                        return darkMode ? constants.COLOR_SCHEME_MONTESSORI_DARK : constants.COLOR_SCHEME_MONTESSORI_LIGHT;
                     }
                     if (borderColored) {
                         return constants.COLOR_SCHEME_MONTESSORI_MEDIUM;
                     }
-                    // both colored
-                    return darkMode ? constants.COLOR_SCHEME_MONTESSORI_DARK: constants.COLOR_SCHEME_MONTESSORI_VERY_LIGHT;
+                    return darkMode ? constants.COLOR_SCHEME_MONTESSORI_DARK : constants.COLOR_SCHEME_MONTESSORI_VERY_LIGHT;
                 }
+                return this.metadata.colorConfig.activeColorScheme;
             },
             getElement(x, y, label, imgUrl, colorCategory) {
                 return new GridElement({
                     x: x,
                     y: y,
                     label: i18nService.getTranslationObject(label),
-                    image: new GridImage({
-                        url: imgUrl
-                    }),
+                    image: new GridImage({ url: imgUrl }),
                     colorCategory: colorCategory
                 });
             },
             resetTestGrid() {
                 util.debounce(() => {
                     this.testGridData = new GridData({
+                        rowCount: 2,
+                        minColumnCount: 2,
                         gridElements: [
                             this.getElement(0, 0, this.testElementLabel, "https://api.arasaac.org/api/pictograms/2648?download=false&plural=false&color=true"),
-                            this.getElement(0, 1, i18nService.t("CC_VERB"), "https://api.arasaac.org/api/pictograms/4887?download=false&plural=false&color=true", "CC_VERB"),
-                            this.getElement(0, 2, i18nService.t("CC_NOUN"), "https://api.arasaac.org/api/pictograms/2808?download=false&plural=false&color=true", "CC_NOUN"),
-                            this.getElement(0, 3, this.testElementLabel),
+                            this.getElement(1, 0, i18nService.t("CC_VERB"), "https://api.arasaac.org/api/pictograms/4887?download=false&plural=false&color=true", "CC_VERB"),
+                            this.getElement(0, 1, i18nService.t("CC_NOUN"), "https://api.arasaac.org/api/pictograms/2808?download=false&plural=false&color=true", "CC_NOUN"),
+                            this.getElement(1, 1, this.testElementLabel)
                         ]
                     });
                 }, 200, "RESET_TEST_GRD");
-
             }
         },
         async mounted() {
@@ -335,44 +353,81 @@
 </script>
 
 <style scoped>
-    h2 {
-        margin-bottom: 0.5em;
+    .aj-aparencia-grade {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: var(--g-e5);
+        align-items: start;
     }
-    h3 {
-        margin-bottom: 0.5em;
+    @media (max-width: 860px) {
+        .aj-aparencia-grade { grid-template-columns: minmax(0, 1fr); }
     }
-    .srow {
-        margin-bottom: 1.5em;
+    .aj-previa {
+        background: var(--g-superficie-2);
+        border-radius: var(--g-raio);
+        padding: var(--g-e4);
+        position: sticky;
+        top: 140px;
     }
-    .settings-area {
-        border-right: 1px solid lightgray;
+    @media (max-width: 860px) {
+        .aj-previa { position: static; }
     }
-    @media (max-width: 849px) {
-        .settings-area {
-            border-right: 0;
-        }
+    .aj-previa-prancha {
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        border-radius: var(--g-raio-p);
+        overflow: hidden;
+        position: relative;
     }
-    .gf-hint {
-        font-size: 0.85em;
-        color: #4A5C4F;
-        margin-top: -1em;
-        margin-bottom: 1em;
-    }
-    .gf-legend {
+    .aj-legenda {
         list-style: none;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4em;
-        margin: 0 0 1.5em 0;
+        gap: var(--g-e2);
+        margin: 0 0 var(--g-e4);
         padding: 0;
     }
-    .gf-legend li {
+    .aj-legenda li {
         margin: 0;
-        padding: 0.2em 0.7em;
+        padding: 2px 10px;
         border: 3px solid;
-        border-radius: 10px;
-        color: #14261A;
-        font-size: 0.8em;
-        font-weight: bold;
+        border-radius: var(--g-raio-p);
+        color: var(--g-tinta);
+        font-size: var(--g-t-legenda);
+        font-weight: 700;
     }
+    .aj-amostra {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        flex: none;
+    }
+    .aj-amostra-fundo { background: var(--g-girassol-claro); border: 2px solid var(--g-borda); }
+    .aj-amostra-borda { background: var(--g-superficie); border: 4px solid var(--g-girassol); }
+    .aj-amostra-ambos { background: var(--g-girassol-claro); border: 4px solid var(--g-girassol); }
+    .aj-cor {
+        display: flex;
+        gap: var(--g-e3);
+        align-items: center;
+    }
+    .aj-cor input[type="color"] {
+        width: 72px;
+        min-height: var(--g-alvo);
+        padding: 4px;
+        border: 2px solid var(--g-borda);
+        border-radius: var(--g-raio-p);
+        background: var(--g-superficie);
+        cursor: pointer;
+        margin: 0;
+    }
+    .aj-faixa-cores {
+        display: flex;
+        height: 20px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: var(--g-e2);
+    }
+    .aj-faixa-cores span { flex: 1; }
+    .aj-restaurar { margin-top: var(--g-e4); }
 </style>

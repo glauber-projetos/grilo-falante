@@ -1,47 +1,39 @@
 <template>
     <div class="offline-voice-helper">
-        <div class="srow" aria-live="polite">
-            <span v-if="loading" class="fas fa-spin fa-spinner"></span>
-            <template v-else>
-                <span :class="statusIcon" aria-hidden="true"></span>
-                <span class="break-word"> {{ statusText }}</span>
-            </template>
+        <div class="ovh-estado" :class="'ovh-' + nivel" aria-live="polite">
+            <i :class="'ti ti-' + (loading ? 'loader-2' : statusIcon)" aria-hidden="true"></i>
+            <span>{{ loading ? $t('ajustesOfflineConferindo') : statusText }}</span>
         </div>
-        <div class="srow" v-if="!loading">
-            <button id="offlineVoiceSample" class="four columns" @click="listenSample" :disabled="testing || !testVoice">
-                <span class="fas fa-volume-up" aria-hidden="true"></span> {{ $t('offlineVoiceListenSample') }}
+        <div class="ovh-acoes" v-if="!loading">
+            <button id="offlineVoiceSample" class="g-btn g-btn-falar" @click="listenSample" :disabled="testing || !testVoice">
+                <i class="ti ti-volume" aria-hidden="true"></i>{{ $t('offlineVoiceListenSample') }}
             </button>
-            <button v-if="canSelect && testVoice && testVoice.id !== currentVoiceId" class="four columns" @click="$emit('use-voice', testVoice.id)">
-                {{ $t('offlineVoiceUseThisVoice') }}
+            <button v-if="canSelect && testVoice && testVoice.id !== currentVoiceId" class="g-btn g-btn-principal" @click="$emit('use-voice', testVoice.id)">
+                <i class="ti ti-check" aria-hidden="true"></i>{{ $t('offlineVoiceUseThisVoice') }}
             </button>
-            <button class="four columns" @click="reload" :disabled="testing">
-                <span class="fas fa-sync" aria-hidden="true"></span> {{ $t('offlineVoiceSearchAgain') }}
+            <button class="g-btn" @click="reload" :disabled="testing">
+                <i class="ti ti-refresh" aria-hidden="true"></i>{{ $t('offlineVoiceSearchAgain') }}
             </button>
         </div>
-        <div class="srow" v-if="testVoice && !loading">
-            <span class="break-word">{{ $t('offlineVoiceTestedVoice', { name: testVoice.name }) }}</span>
-        </div>
-        <div class="srow" v-if="sampleMessage" aria-live="polite">
-            <strong class="break-word">{{ sampleMessage }}</strong>
-        </div>
-        <div class="srow" v-if="!loading">
-            <accordion :acc-label="platform === 'android' ? $t('offlineVoiceHowToInstallAndroid') : $t('offlineVoiceHowToInstall')" :acc-open="showWizardOpen" ref="wizard">
-                <div class="wizard">
-                    <ol v-if="platform === 'android' || platform === 'other'">
-                        <li>{{ $t('offlineVoiceAndroidStep1') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep2') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep3') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep4') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep5') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep6') }}</li>
-                        <li>{{ $t('offlineVoiceAndroidStep7') }}</li>
-                    </ol>
-                    <p v-if="platform === 'other'" class="break-word">{{ $t('offlineVoiceStepsAreForAndroid') }}</p>
-                    <p v-if="platform === 'ios'" class="break-word">{{ $t('offlineVoiceIosHint') }}</p>
-                    <p v-if="platform === 'windows'" class="break-word">{{ $t('offlineVoiceWindowsHint') }}</p>
-                </div>
-            </accordion>
-        </div>
+        <p class="g-dica" v-if="testVoice && !loading">{{ $t('offlineVoiceTestedVoice', { name: testVoice.name }) }}</p>
+        <p class="ovh-mensagem" v-if="sampleMessage" aria-live="polite"><strong>{{ sampleMessage }}</strong></p>
+        <details v-if="!loading" class="aj-mais" :open="wizardOpen" @toggle="wizardOpen = $event.target.open">
+            <summary><i class="ti ti-download" aria-hidden="true"></i>{{ platform === 'android' ? $t('offlineVoiceHowToInstallAndroid') : $t('offlineVoiceHowToInstall') }}</summary>
+            <div class="aj-mais-corpo">
+                <ol v-if="platform === 'android' || platform === 'other'" class="ovh-passos">
+                    <li>{{ $t('offlineVoiceAndroidStep1') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep2') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep3') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep4') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep5') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep6') }}</li>
+                    <li>{{ $t('offlineVoiceAndroidStep7') }}</li>
+                </ol>
+                <p v-if="platform === 'other'">{{ $t('offlineVoiceStepsAreForAndroid') }}</p>
+                <p v-if="platform === 'ios'">{{ $t('offlineVoiceIosHint') }}</p>
+                <p v-if="platform === 'windows'">{{ $t('offlineVoiceWindowsHint') }}</p>
+            </div>
+        </details>
     </div>
 </template>
 
@@ -49,10 +41,12 @@
     import { speechService } from '../../../js/service/speechService';
     import { offlineVoiceService } from '../../../js/service/offlineVoiceService';
     import { constants } from '../../../js/util/constants';
-    import Accordion from '../../components/accordion.vue';
 
+    /**
+     * Checks if a Brazilian voice works without internet. Used in Ajustes > Sem internet and in the setup wizard.
+     * Props/events unchanged: canSelect, currentVoiceId, emits "use-voice" with the voice id.
+     */
     export default {
-        components: { Accordion },
         props: {
             canSelect: { type: Boolean, default: false }, // show "use this voice" (emits 'use-voice')
             currentVoiceId: { type: String, default: undefined }
@@ -63,8 +57,8 @@
                 testing: false,
                 voiceStatus: null,
                 sampleMessage: '',
-                online: navigator.onLine,
-                platform: offlineVoiceService.getPlatform()
+                platform: offlineVoiceService.getPlatform(),
+                wizardOpen: false
             };
         },
         computed: {
@@ -93,17 +87,17 @@
                         return this.$t('offlineVoiceStatusMissing');
                 }
             },
-            statusIcon() {
+            nivel() {
+                if (this.loading) {
+                    return 'neutro';
+                }
                 if (this.status === offlineVoiceService.STATUS_CONFIRMED) {
-                    return 'fas fa-check-circle';
+                    return 'ok';
                 }
-                if (this.status === offlineVoiceService.STATUS_PROBABLY_OFFLINE) {
-                    return 'fas fa-info-circle';
-                }
-                return 'fas fa-exclamation-triangle';
+                return this.status === offlineVoiceService.STATUS_PROBABLY_OFFLINE ? 'neutro' : 'aviso';
             },
-            showWizardOpen() {
-                return this.status !== offlineVoiceService.STATUS_CONFIRMED && this.status !== offlineVoiceService.STATUS_PROBABLY_OFFLINE;
+            statusIcon() {
+                return { ok: 'circle-check', neutro: 'info-circle', aviso: 'alert-triangle' }[this.nivel];
             }
         },
         methods: {
@@ -113,6 +107,10 @@
                     nativeType: constants.VOICE_TYPE_NATIVE,
                     deviceDefaultId: constants.VOICE_DEVICE_DEFAULT
                 });
+                if (this.loading) {
+                    // open the install steps when no good voice was found
+                    this.wizardOpen = this.status !== offlineVoiceService.STATUS_CONFIRMED && this.status !== offlineVoiceService.STATUS_PROBABLY_OFFLINE;
+                }
                 this.loading = false;
             },
             async reload() {
@@ -143,40 +141,49 @@
                         offlineVoiceService.forgetVoice(voice.id);
                     }
                     this.sampleMessage = this.$t('offlineVoiceSampleFailed');
-                    if (this.$refs.wizard) {
-                        this.$refs.wizard.open();
-                    }
+                    this.wizardOpen = true;
                 }
                 this.testing = false;
                 await this.loadStatus();
-            },
-            onOnlineChange() {
-                this.online = navigator.onLine;
             }
         },
         async mounted() {
-            window.addEventListener('online', this.onOnlineChange);
-            window.addEventListener('offline', this.onOnlineChange);
             await this.loadStatus();
-        },
-        beforeDestroy() {
-            window.removeEventListener('online', this.onOnlineChange);
-            window.removeEventListener('offline', this.onOnlineChange);
         }
     };
 </script>
 
 <style scoped>
-    .srow {
-        margin-bottom: 1em;
+    .ovh-estado {
+        display: flex;
+        gap: var(--g-e3);
+        align-items: flex-start;
+        padding: var(--g-e3) var(--g-e4);
+        border-radius: var(--g-raio);
+        background: var(--g-superficie-2);
+        color: var(--g-tinta);
+        margin-bottom: var(--g-e3);
     }
-    .wizard {
-        padding: 0.5em 1em;
+    .ovh-estado .ti { font-size: 1.5rem; flex: none; }
+    .ovh-ok { background: var(--g-folha-clara); color: var(--g-folha-escura); }
+    .ovh-aviso { background: var(--g-girassol-claro); color: #4a3b00; }
+    .ovh-acoes {
+        display: flex;
+        gap: var(--g-e3);
+        flex-wrap: wrap;
+        margin-bottom: var(--g-e3);
     }
-    .wizard li {
-        margin-bottom: 0.5em;
+    .ovh-mensagem { margin: 0 0 var(--g-e3); }
+    .ovh-passos { padding-left: 1.4em; margin: 0; }
+    .ovh-passos li { margin-bottom: var(--g-e2); }
+    /* same look as Ajustes "Mais opções", also when used in the setup wizard */
+    .aj-mais { border: 2px solid var(--g-borda); border-radius: var(--g-raio); background: var(--g-superficie); }
+    .aj-mais > summary {
+        display: flex; align-items: center; gap: var(--g-e2);
+        min-height: var(--g-alvo); padding: 0 var(--g-e4);
+        font-weight: 700; cursor: pointer; list-style: none;
     }
-    button .fas {
-        margin-right: 0.25em;
-    }
+    .aj-mais > summary::-webkit-details-marker { display: none; }
+    .aj-mais > summary .ti { font-size: 1.3rem; color: var(--g-folha-escura); }
+    .aj-mais-corpo { padding: 0 var(--g-e4) var(--g-e4); }
 </style>

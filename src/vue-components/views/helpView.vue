@@ -1,99 +1,180 @@
 <template>
-    <div class="overflow-content">
-        <header-icon full-header="true"></header-icon>
-        <div class="container px-3 px-md-5 ms-0 col-12 col-md-10 col-xl-9 pt-4 pt-lg-5">
-            <div class="row">
-                <h1>{{ $t('help') }}</h1>
-                <div>
-                    <span>{{ $t('theFollowingRessourcesForHelpOnAstericsGrid') }}</span>:
+    <div class="overflow-content g-tela ajuda-tela">
+        <g-topo :titulo="$t('ajudaTitulo')"></g-topo>
+        <main class="g-conteudo ajuda-conteudo">
+            <div class="ajuda-intro">
+                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="ajuda-grilo"/>
+                <p class="g-apoio">{{ $t('ajudaIntro') }}</p>
+            </div>
+
+            <nav :aria-label="$t('ajudaGuias')">
+                <ul class="ajuda-indice">
+                    <li v-for="(guia, i) in guias" :key="guia.id">
+                        <a :href="'#help'" class="ajuda-indice-item" :class="'ajuda-cor-' + (i % cores.length)" @click.prevent="irPara(guia.id)">
+                            <i :class="'ti ti-' + guia.icone" aria-hidden="true"></i>
+                            <span>{{ $t(guia.prefixo + 'Titulo') }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <article v-for="(guia, i) in guias" :key="guia.id" :id="'ajuda-' + guia.id" class="g-cartao ajuda-guia" :aria-labelledby="'ajuda-' + guia.id + '-titulo'">
+                <div class="ajuda-guia-topo">
+                    <span class="ajuda-guia-icone" :class="'ajuda-cor-' + (i % cores.length)" aria-hidden="true"><i :class="'ti ti-' + guia.icone"></i></span>
+                    <div>
+                        <h2 :id="'ajuda-' + guia.id + '-titulo'">{{ $t(guia.prefixo + 'Titulo') }}</h2>
+                        <p class="g-apoio">{{ $t(guia.prefixo + 'Resumo') }}</p>
+                    </div>
                 </div>
-                <ul>
-                    <li><a href="https://www.asterics.eu/manuals/asterics-grid/" target="_blank">{{ $t('userManual') }} <span>({{ 'lang.en' | translate }})</span></a></li>
-                    <li v-if="currentLang !== 'es'"><a href="https://aulaabierta.arasaac.org/en/asterics-aac_home" target="_blank">{{ $t('arasaacTutorial') }} <span>({{ 'lang.en' | translate }})</span></a></li>
-                    <li v-if="currentLang === 'es'"><a href="https://aulaabierta.arasaac.org/asterics-aac_inicio" target="_blank">{{ $t('arasaacTutorial') }} <span>({{ 'lang.es' | translate }})</span></a></li>
-                    <li><a href="https://www.youtube.com/playlist?list=PL0UXHkT03dGrIHldlEKR0ZWfNMkShuTNz" target="_blank"><span>{{ $t('tutorialVideosOnYoutube') }}</span> <span>({{ 'lang.de' | translate }})</span></a></li>
-                    <li><a href="https://www.youtube.com/channel/UCVIQETg6tIMu3SdEHaIftIw/videos" target="_blank"><span>{{ $t('tutorialVideosOnYoutube') }}</span> <span>(Jim Luther, {{ 'lang.en' | translate }})</span></a></li>
-                </ul>
-            </div>
-            <div class="row">
-                <h2>{{ $t('contactAndFeedback') }}</h2>
-                <span>{{ $t('ifYouEncounterAnErrorHaveSuggestions') }}</span>
-                <ul>
-                    <li>
-                        <i18n path="arasaacSupportSocialMedia" tag="span">
-                            <template v-slot:instagramLink>
-                                <a href="https://www.instagram.com/asterics_aac/" target="_blank">{{ $t('instagramAstericsGridPage') }}</a>
-                            </template>
-                            <template v-slot:facebookLink>
-                                <a href="https://www.facebook.com/asterics.aac.y.arasaac" target="_blank">{{ $t('facebookAstericsGridPage') }}</a>
-                            </template>
-                        </i18n>
-                        <span>({{ $t('lang.es') }}, {{ $t('lang.en') }}, {{ $t('lang.pt') }})</span>
-                    </li>
-                    <li>
-                        <i18n path="communityOnFacebookGroup" tag="span">
-                            <template v-slot:astericsGridFacebookGroup>
-                                <a href="https://www.facebook.com/groups/1550700782223677/" target="_blank">{{ $t('astericsGridFacebookGroup') }}</a>
-                            </template>
-                        </i18n>
-                        <span>({{ $t('lang.en') }})</span>
-                    </li>
-                    <li>
-                        <i18n path="foundBugReportGithubIssue" tag="span">
-                            <template v-slot:githubLink>
-                                <a href="https://github.com/asterics/Asterics-AAC/issues/new" target="_blank">{{ $t('createAnIssueOnGithub') }}</a>
-                            </template>
-                        </i18n>
-                        <span>({{ $t('lang.en') }})</span>
-                    </li>
-                    <li>
-                        <i18n path="specialRequestsSendEmail" tag="span">
-                            <template v-slot:foundationEmail>
-                                <a href="mailto:office@asterics-foundation.org">office@asterics-foundation.org</a>
-                            </template>
-                        </i18n>
-                        <span>({{ $t('lang.en') }}, {{ $t('lang.de') }})</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="bottom-spacer"></div>
+                <ol class="ajuda-passos">
+                    <li v-for="n in guia.passos" :key="n">{{ $t(guia.prefixo + 'Passo' + n) }}</li>
+                </ol>
+                <p class="g-aviso ajuda-dica"><i class="ti ti-bulb" aria-hidden="true"></i><span>{{ $t(guia.prefixo + 'Dica') }}</span></p>
+            </article>
+
+            <p class="g-dica ajuda-manual">
+                <a href="https://www.asterics.eu/manuals/asterics-grid/" target="_blank" rel="noopener">{{ $t('ajudaManualTecnico') }}</a>
+            </p>
+        </main>
     </div>
 </template>
 
 <script>
-    import HeaderIcon from '../../vue-components/components/headerIcon.vue'
-    import {i18nService} from "../../js/service/i18nService.js";
+    import GTopo from '../components/gTopo.vue';
+
+    /**
+     * Grilo Falante: own help in Portuguese, short guides with 3-5 steps each (texts: i18n keys "ajuda…").
+     * Each guide has the element id "ajuda-<id>".
+     */
+    const GUIAS = [
+        { id: 'primeiros-passos', icone: 'rocket', prefixo: 'ajudaPrimeirosPassos', passos: 4 },
+        { id: 'montar-frase', icone: 'message-circle', prefixo: 'ajudaMontarFrase', passos: 5 },
+        { id: 'botao-foto-voz', icone: 'camera', prefixo: 'ajudaBotaoFoto', passos: 5 },
+        { id: 'sem-internet', icone: 'wifi-off', prefixo: 'ajudaSemInternet', passos: 5 },
+        { id: 'modo-crianca', icone: 'lock', prefixo: 'ajudaModoCrianca', passos: 5 },
+        { id: 'arquivo-copia', icone: 'file-import', prefixo: 'ajudaArquivoCopia', passos: 4 },
+        { id: 'instalar', icone: 'device-mobile', prefixo: 'ajudaInstalar', passos: 4 }
+    ];
 
     export default {
-        components: {HeaderIcon},
-        props: [],
+        components: { GTopo },
         data() {
             return {
-                currentLang: i18nService.getAppLang()
-            }
+                guias: GUIAS,
+                cores: [0, 1, 2, 3, 4]
+            };
         },
         methods: {
-        },
-        mounted() {
+            irPara(id) {
+                let el = document.getElementById('ajuda-' + id);
+                if (el) {
+                    let reduzir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    el.scrollIntoView({ behavior: reduzir ? 'auto' : 'smooth', block: 'start' });
+                    el.setAttribute('tabindex', '-1');
+                    el.focus({ preventScroll: true });
+                }
+            }
         }
     }
 </script>
 
 <style scoped>
-    h2, h1 {
-        margin-bottom: 0.5em;
+    .ajuda-conteudo {
+        max-width: 960px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e4);
     }
-    h3 {
-        margin-bottom: 0.5em;
-        margin-top: 1.5em;
+    .ajuda-intro { display: flex; align-items: center; gap: var(--g-e4); }
+    .ajuda-intro p { margin: 0; font-size: var(--g-t-grande); }
+    .ajuda-grilo { width: 72px; height: 72px; flex: none; }
+    .ajuda-indice {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--g-e3);
     }
-    li {
-        margin-top: 0.5em;
+    .ajuda-indice li { margin: 0; }
+    .ajuda-indice-item {
+        display: flex;
+        align-items: center;
+        gap: var(--g-e3);
+        box-sizing: border-box;
+        min-height: 64px;
+        height: 100%;
+        padding: var(--g-e3) var(--g-e4);
+        border-radius: var(--g-raio);
+        font-weight: 700;
+        text-decoration: none;
+        line-height: 1.25;
     }
-    ul {
-        list-style-position: outside;
-        padding-left: 2em;
-        margin-top: 1em;
+    .ajuda-indice-item:focus-visible { outline: none; box-shadow: var(--g-foco); }
+    .ajuda-indice-item .ti { font-size: 1.75rem; flex: none; }
+    .ajuda-cor-0 { background: var(--g-folha-clara); color: var(--g-folha-escura); }
+    .ajuda-cor-1 { background: var(--g-girassol-claro); color: #4a3b00; }
+    .ajuda-cor-2 { background: var(--g-ceu); color: var(--g-ceu-escuro); }
+    .ajuda-cor-3 { background: var(--g-lavanda); color: var(--g-lavanda-escura); }
+    .ajuda-cor-4 { background: var(--g-pessego); color: var(--g-pessego-escuro); }
+    a.ajuda-indice-item:hover { filter: brightness(0.97); }
+    .ajuda-guia { scroll-margin-top: 80px; padding: var(--g-e5); }
+    .ajuda-guia:focus { outline: none; }
+    .ajuda-guia-topo { display: flex; gap: var(--g-e4); align-items: flex-start; margin-bottom: var(--g-e3); }
+    .ajuda-guia-topo h2 { font-size: var(--g-t-h2); margin: 4px 0 2px !important; }
+    .ajuda-guia-topo p { margin: 0; }
+    .ajuda-guia-icone {
+        flex: none;
+        width: 52px;
+        height: 52px;
+        border-radius: var(--g-raio);
+        display: grid;
+        place-items: center;
+        font-size: 1.75rem;
+    }
+    .ajuda-passos {
+        counter-reset: passo;
+        list-style: none;
+        margin: 0 0 var(--g-e4);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e3);
+    }
+    .ajuda-passos li {
+        counter-increment: passo;
+        display: flex;
+        gap: var(--g-e3);
+        align-items: flex-start;
+        margin: 0;
+        font-size: var(--g-t-grande);
+        line-height: 1.45;
+    }
+    .ajuda-passos li::before {
+        content: counter(passo);
+        flex: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--g-folha);
+        color: #fff;
+        font-family: var(--g-fonte-titulo);
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        line-height: 1;
+        margin-top: 1px;
+    }
+    .ajuda-dica { margin: 0; }
+    .ajuda-manual { text-align: center; margin: var(--g-e3) 0 0; }
+    .ajuda-manual a { color: var(--g-tinta-2); }
+    @media (max-width: 480px) {
+        .ajuda-guia { padding: var(--g-e4); border-radius: var(--g-raio); }
+        .ajuda-guia-icone { width: 44px; height: 44px; font-size: 1.5rem; }
+        .ajuda-guia-topo h2 { font-size: var(--g-t-h3); }
+        .ajuda-passos li { font-size: var(--g-t-corpo); }
+        .ajuda-indice { grid-template-columns: 1fr 1fr; }
+        .ajuda-indice-item { padding: var(--g-e2) var(--g-e3); gap: var(--g-e2); font-size: var(--g-t-legenda); }
+        .ajuda-indice-item .ti { font-size: 1.4rem; }
     }
 </style>

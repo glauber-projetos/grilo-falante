@@ -1,80 +1,53 @@
 <template>
-    <div>
-        <div class="srow">
-            <div class="eleven columns">
-                <h3 class="mt-2">{{ $t('offlineImagesTitle') }}</h3>
-                <div class="srow break-word">{{ $t('offlineImagesExplanation') }}</div>
+    <div class="aj-offline">
+        <h3 class="aj-sub">{{ $t('offlineImagesTitle') }}</h3>
+        <p class="g-apoio">{{ $t('offlineImagesExplanation') }}</p>
 
-                <div class="srow" aria-live="polite">
-                    <span v-if="loading" class="fas fa-spin fa-spinner"></span>
-                    <template v-else>
-                        <div v-if="!supported">
-                            <span class="fas fa-exclamation-triangle" aria-hidden="true"></span>
-                            {{ $t('offlineImagesNotSupported') }}
-                        </div>
-                        <div v-else-if="status.total === 0">
-                            <span class="fas fa-check-circle" aria-hidden="true"></span>
-                            {{ $t('offlineImagesNoWebImages') }}
-                        </div>
-                        <div v-else-if="status.cached === status.total">
-                            <span class="fas fa-check-circle" aria-hidden="true"></span>
-                            <strong>{{ $t('offlineImagesAllSaved', { total: status.total }) }}</strong>
-                        </div>
-                        <div v-else>
-                            <span class="fas fa-exclamation-triangle" aria-hidden="true"></span>
-                            <strong>{{ $t('offlineImagesSomeSaved', { cached: status.cached, total: status.total }) }}</strong>
-                        </div>
-                        <div v-if="embeddedCount > 0" class="mt-2">{{ $t('offlineImagesEmbeddedPhotos', { count: embeddedCount }) }}</div>
-                    </template>
-                </div>
-
-                <div class="srow" v-if="supported && !loading">
-                    <button id="downloadOfflineImages" class="six columns" @click="download" :disabled="downloading || !online || status.total === 0">
-                        <span class="fas fa-download" aria-hidden="true"></span>
-                        {{ $t('offlineImagesDownloadButton') }}
-                    </button>
-                    <button v-if="downloading" class="three columns" @click="stopRequested = true">{{ $t('offlineImagesStop') }}</button>
-                </div>
-                <div class="srow" v-if="!online && !downloading">
-                    <span class="fas fa-wifi" aria-hidden="true"></span> {{ $t('offlineImagesNoInternetNow') }}
-                </div>
-
-                <div class="srow" v-if="progress" aria-live="polite">
-                    <progress class="eleven columns" :value="progress.done" :max="progress.total || 1"></progress>
-                    <div>{{ $t('offlineImagesProgress', { done: progress.done, total: progress.total }) }}</div>
-                </div>
-                <div class="srow" v-if="resultMessage" aria-live="polite">
-                    <strong class="break-word">{{ resultMessage }}</strong>
-                </div>
-
-                <div class="srow" v-if="!loading && supported">
-                    <div v-if="!hasServiceWorker" class="mb-2">
-                        <span class="fas fa-exclamation-triangle" aria-hidden="true"></span>
-                        {{ $t('offlineImagesServiceWorkerMissing') }}
-                    </div>
-                    <div v-if="storage.persisted" class="mb-2">
-                        <span class="fas fa-lock" aria-hidden="true"></span> {{ $t('offlineImagesStoragePersistent') }}
-                    </div>
-                    <div v-else class="mb-2">
-                        <span class="fas fa-info-circle" aria-hidden="true"></span> {{ $t('offlineImagesStorageHint') }}
-                    </div>
-                    <div v-if="storage.usage !== null">{{ $t('offlineImagesSpaceUsed', { size: formatBytes(storage.usage) }) }}</div>
-                    <div class="mt-2">{{ $t('offlineImagesAddNewHint') }}</div>
-                </div>
-
-                <div class="srow license break-word">
-                    <span class="fas fa-info-circle" aria-hidden="true"></span>
-                    {{ $t('offlineImagesLicense') }}
-                    <a href="https://arasaac.org/terms-of-use" target="_blank" rel="noopener">arasaac.org/terms-of-use</a>
-                </div>
+        <div class="aj-estado" :class="'aj-estado-' + estado" aria-live="polite">
+            <span class="aj-estado-icone" aria-hidden="true"><i :class="'ti ti-' + iconeEstado"></i></span>
+            <div class="aj-estado-textos">
+                <strong class="aj-estado-titulo">{{ tituloEstado }}</strong>
+                <span v-if="textoEstado" class="aj-estado-texto">{{ textoEstado }}</span>
+                <span v-if="!loading && embeddedCount > 0" class="aj-estado-texto">{{ $t('offlineImagesEmbeddedPhotos', { count: embeddedCount }) }}</span>
             </div>
         </div>
-        <div class="srow">
-            <div class="eleven columns">
-                <h3 class="mt-2">{{ $t('offlineVoiceTitle') }}</h3>
-                <offline-voice-helper :current-voice-id="userSettingsLocal && userSettingsLocal.voiceConfig ? userSettingsLocal.voiceConfig.preferredVoice : undefined"/>
-            </div>
+
+        <div v-if="supported && !loading && (faltam > 0 || downloading)" class="aj-offline-acoes">
+            <button id="downloadOfflineImages" class="g-btn g-btn-principal g-btn-grande" @click="download"
+                    :disabled="downloading || !online || status.total === 0 || faltam === 0">
+                <i :class="downloading ? 'ti ti-loader-2' : 'ti ti-cloud-download'" aria-hidden="true"></i>
+                {{ faltam > 0 ? $t('ajustesOfflineGuardar', { count: faltam }) : $t('ajustesOfflineGuardarTudo') }}
+            </button>
+            <button v-if="downloading" class="g-btn g-btn-grande" @click="stopRequested = true">
+                <i class="ti ti-player-stop" aria-hidden="true"></i>{{ $t('offlineImagesStop') }}
+            </button>
         </div>
+        <p v-if="!online && !downloading" class="g-aviso aj-offline-aviso">
+            <i class="ti ti-wifi-off" aria-hidden="true"></i><span>{{ $t('offlineImagesNoInternetNow') }}</span>
+        </p>
+
+        <div v-if="progress" class="aj-progresso" aria-live="polite">
+            <progress :value="progress.done" :max="progress.total || 1"></progress>
+            <span class="g-dica">{{ $t('offlineImagesProgress', { done: progress.done, total: progress.total }) }}</span>
+        </div>
+        <p v-if="resultMessage" class="aj-resultado" aria-live="polite"><strong>{{ resultMessage }}</strong></p>
+
+        <ul v-if="!loading && supported" class="aj-detalhes">
+            <li v-if="!hasServiceWorker"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span>{{ $t('offlineImagesServiceWorkerMissing') }}</span></li>
+            <li v-if="storage.persisted"><i class="ti ti-lock" aria-hidden="true"></i><span>{{ $t('offlineImagesStoragePersistent') }}</span></li>
+            <li v-else><i class="ti ti-info-circle" aria-hidden="true"></i><span>{{ $t('offlineImagesStorageHint') }}</span></li>
+            <li v-if="storage.usage !== null"><i class="ti ti-database" aria-hidden="true"></i><span>{{ $t('offlineImagesSpaceUsed', { size: formatBytes(storage.usage) }) }}</span></li>
+            <li><i class="ti ti-photo" aria-hidden="true"></i><span>{{ $t('offlineImagesAddNewHint') }}</span></li>
+        </ul>
+
+        <p class="g-dica aj-licenca">
+            {{ $t('offlineImagesLicense') }}
+            <a href="https://arasaac.org/terms-of-use" target="_blank" rel="noopener">arasaac.org/terms-of-use</a>
+        </p>
+
+        <h3 class="aj-sub" id="ajustes-voz-sem-internet">{{ $t('offlineVoiceTitle') }}</h3>
+        <offline-voice-helper :can-select="true" :current-voice-id="userSettingsLocal && userSettingsLocal.voiceConfig ? userSettingsLocal.voiceConfig.preferredVoice : undefined"
+                              @use-voice="id => $emit('use-voice', id)"/>
     </div>
 </template>
 
@@ -83,6 +56,10 @@
     import { offlineService } from '../../../js/service/offlineService';
     import OfflineVoiceHelper from './offlineVoiceHelper.vue';
 
+    /**
+     * Ajustes > Sem internet: save the pictures of the boards on the device (offlineService) and check the voice.
+     * Emits "use-voice" when the adult picks the voice found by the voice check.
+     */
     export default {
         components: { OfflineVoiceHelper },
         props: ['userSettingsLocal', 'metadata'],
@@ -101,6 +78,40 @@
                 online: navigator.onLine,
                 hasServiceWorker: !!(navigator.serviceWorker && navigator.serviceWorker.controller)
             };
+        },
+        computed: {
+            faltam() {
+                return Math.max(0, (this.status.total || 0) - (this.status.cached || 0));
+            },
+            estado() {
+                if (this.loading) {
+                    return 'carregando';
+                }
+                if (!this.supported) {
+                    return 'aviso';
+                }
+                return this.faltam === 0 ? 'pronto' : 'falta';
+            },
+            iconeEstado() {
+                return { carregando: 'loader-2', aviso: 'alert-triangle', pronto: 'circle-check', falta: 'cloud-download' }[this.estado];
+            },
+            tituloEstado() {
+                switch (this.estado) {
+                    case 'carregando': return this.$t('ajustesOfflineConferindo');
+                    case 'aviso': return this.$t('offlineImagesNotSupported');
+                    case 'pronto': return this.$t('ajustesOfflineTudoPronto');
+                    default: return this.$t('ajustesOfflineFaltam', { count: this.faltam });
+                }
+            },
+            textoEstado() {
+                if (this.estado === 'pronto') {
+                    return this.status.total === 0 ? this.$t('offlineImagesNoWebImages') : this.$t('offlineImagesAllSaved', { total: this.status.total });
+                }
+                if (this.estado === 'falta') {
+                    return this.$t('offlineImagesSomeSaved', { cached: this.status.cached, total: this.status.total });
+                }
+                return '';
+            }
         },
         methods: {
             formatBytes: offlineService.formatBytes,
@@ -156,16 +167,56 @@
 </script>
 
 <style scoped>
-    .srow {
-        margin-bottom: 1.5em;
+    .aj-estado {
+        display: flex;
+        align-items: center;
+        gap: var(--g-e4);
+        padding: var(--g-e4) var(--g-e5);
+        border-radius: var(--g-raio);
+        margin: var(--g-e3) 0 var(--g-e4);
+        background: var(--g-superficie-2);
     }
-    h3 {
-        margin-bottom: 0.5em;
+    .aj-estado-icone {
+        flex: none;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        background: var(--g-superficie);
     }
-    button .fas, .srow > div > .fas {
-        margin-right: 0.25em;
+    .aj-estado-pronto { background: var(--g-folha-clara); color: var(--g-folha-escura); }
+    .aj-estado-falta { background: var(--g-girassol-claro); color: #4a3b00; }
+    .aj-estado-aviso { background: var(--g-perigo-claro); color: var(--g-perigo); }
+    .aj-estado-textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .aj-estado-titulo { font-family: var(--g-fonte-titulo); font-size: var(--g-t-h3); line-height: 1.2; }
+    .aj-estado-carregando .aj-estado-icone .ti, .aj-offline-acoes .ti-loader-2 { animation: aj-girar 1s linear infinite; }
+    @keyframes aj-girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+        .aj-estado-carregando .aj-estado-icone .ti, .aj-offline-acoes .ti-loader-2 { animation: none; }
     }
-    progress {
-        height: 1.5em;
+    .aj-offline-acoes {
+        display: flex;
+        gap: var(--g-e3);
+        flex-wrap: wrap;
+        margin-bottom: var(--g-e4);
     }
+    .aj-offline-acoes .g-btn-principal { flex: 1 1 280px; }
+    .aj-offline-aviso { margin: 0 0 var(--g-e4); }
+    .aj-progresso { display: flex; flex-direction: column; gap: var(--g-e1); margin-bottom: var(--g-e3); }
+    .aj-progresso progress { width: 100%; height: 16px; accent-color: var(--g-folha); }
+    .aj-resultado { margin: 0 0 var(--g-e3); }
+    .aj-detalhes {
+        list-style: none;
+        margin: 0 0 var(--g-e3);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e2);
+        color: var(--g-tinta-2);
+    }
+    .aj-detalhes li { display: flex; gap: var(--g-e2); align-items: flex-start; margin: 0; }
+    .aj-detalhes .ti { font-size: 1.25rem; flex: none; margin-top: 1px; }
+    .aj-licenca { margin-bottom: var(--g-e5); }
 </style>

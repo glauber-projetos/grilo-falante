@@ -1,185 +1,206 @@
 <template>
-    <div class="overflow-content">
-        <header-icon full-header="true"></header-icon>
-        <div class="srow content spaced" style="max-width: 900px">
-            <h2 class="twelve columns">{{ $t('aboutAstericsGrid') }}</h2>
-            <div>
-                <div class="srow gf-about">
-                    <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="gf-about-grilo"/>
-                    <div>
-                        <p>{{ $t('griloFalanteIntro') }}</p>
-                        <a target="_blank" href="https://github.com/glauber-projetos/grilo-falante">{{ $t('griloFalanteOnGithub') }}</a>
+    <div class="overflow-content g-tela sobre-tela">
+        <g-topo :titulo="$t('sobreTitulo')"></g-topo>
+        <main class="g-conteudo sobre-conteudo">
+            <section class="sobre-heroi" aria-labelledby="sobre-nome">
+                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="sobre-grilo"/>
+                <div>
+                    <h2 id="sobre-nome" class="sobre-nome">Grilo Falante</h2>
+                    <p class="sobre-lema">{{ $t('sobreLema') }}</p>
+                    <div class="g-linha sobre-pilulas">
+                        <span class="g-pilula g-pilula-ok"><i class="ti ti-heart" aria-hidden="true"></i>{{ $t('sobrePilulaGratis') }}</span>
+                        <span class="g-pilula g-pilula-ok"><i class="ti ti-wifi-off" aria-hidden="true"></i>{{ $t('sobrePilulaSemInternet') }}</span>
+                        <span class="g-pilula g-pilula-ok"><i class="ti ti-device-mobile" aria-hidden="true"></i>{{ $t('sobrePilulaAparelho') }}</span>
                     </div>
                 </div>
-                <div class="srow">
-                    <h3 class="mt-2">{{ $t('aboutOriginalProject') }}</h3>
-                    <div>
-                        {{ $t('astericsGridIsFreeAndOpenSource') }}<br/>
-                        <a target="_blank" href="https://github.com/asterics/Asterics-AAC">{{ $t('astericsGridOnGithub') }}</a><br/><br/>
-                    </div>
-                    <div>
-                        <span>{{ $t('astericsGridWasFundedWithinProjects') }}</span>:
-                        <ul class="mt-3 mb-2" style="list-style-type: none">
-                            <project-acknowledgement name-link="https://embsys.technikum-wien.at/projects/torades/index.php" name-label="Toolbox for Rapid Design of Smart Homes and Assistive Technologies (ToRaDes)"
-                                                     host-link="https://www.technikum-wien.at/" host-label="UAS Technikum Wien // FH Technikum Wien"
-                                                     fund-link="https://www.wien.gv.at/kontakte/ma23/index.html" fund-label="City of Vienna // Stadt Wien"
-                                                     timespan="2018-2019" additional-info="Project 18-04 // Projekt 18-04"/>
-                            <project-acknowledgement name-link="https://embsys.technikum-wien.at/projects/khat/index.php" name-label="Knowledge Hub for Accessible Technologies (WBT) // Wissensdrehscheibe für Barrierefreie Technologien (WBT)"
-                                                     host-link="https://www.technikum-wien.at/" host-label="UAS Technikum Wien // FH Technikum Wien"
-                                                     fund-link="https://www.wien.gv.at/kontakte/ma23/index.html" fund-label="City of Vienna // Stadt Wien"
-                                                     timespan="2019-2023" additional-info="Project 26-02 // Projekt 26-02"/>
-                            <project-acknowledgement name-link="https://www.technikum-wien.at/forschungsprojekte/inclusion-international/" name-label="Inclusion International (In2)"
-                                                     host-link="https://www.technikum-wien.at/" host-label="UAS Technikum Wien // FH Technikum Wien"
-                                                     fund-link="https://www.wien.gv.at/kontakte/ma23/index.html" fund-label="City of Vienna // Stadt Wien"
-                                                     timespan="2022-2025" additional-info="Project 33-02 // Projekt 33-02"/>
-                            <project-acknowledgement name-link="https://www.netidee.at/asterics-grid" name-label="netidee project funding // netidee Projektförderung"
-                                                     fund-link="https://www.internetstiftung.at/" fund-label="Internet Foundation Austria // Internet Privatstiftung Austria"
-                                                     timespan="2024-2025" additional-info="Call 18"/>
-                            <project-acknowledgement name-link="https://www.technikum-wien.at/forschungsprojekte/indiko/" name-label="Inclusion via digital augmentative and alternative communication (InDiKo) // Inklusion durch Digital Unterstützte Kommunikation (InDiKo)"
-                                                     host-link="https://www.technikum-wien.at/" host-label="UAS Technikum Wien // FH Technikum Wien"
-                                                     fund-link="https://www.wien.gv.at/kontakte/ma23/index.html" fund-label="City of Vienna // Stadt Wien"
-                                                     timespan="2024-2028" additional-info="Project 38-09 // Projekt 38-09"/>
-                        </ul>
-                    </div>
-                    <div>
-                        <div class="d-block d-lg-flex justify-content-between align-items-center">
-                            <div class="mt-3"><a href="https://www.technikum-wien.at/" target="_blank" title="UAS Technikum Wien"><img src="app/img/fhtw.svg" height="90"></a></div>
-                            <div class="mt-3"><a href="https://www.wien.gv.at/kontakte/ma23/" target="_blank" :title="$t('ma23CityOfVienna')"><img src="app/img/ma23_logo_neu.jpg" height="90"></a></div>
-                            <div class="mt-3"><a href="https://www.netidee.at/asterics-grid" target="_blank" title="netidee"><img src="app/img/netidee.svg" height="50"></a></div>
-                        </div>
+            </section>
 
-                        <i18n path="arasaacCollaboration" tag="div" class="mb-3 mt-5">
-                            <template v-slot:arasaacLink>
-                                <a href="https://arasaac.org/" target="_blank">{{ $t('aragoneseCenterOfAAC') }}</a>
-                            </template>
-                        </i18n>
-                        <a href="https://arasaac.org/" title="ARASAAC" aria-hidden="true" target="_blank"><img src="app/img/arasaac.png" width="250px"></a>
-                    </div>
-                </div>
-                <div class="srow">
-                    <h3>{{ $t('termsOfServiceAndPrivacyPolicy') }}</h3>
-                    <div>
-                        <i18n path="astericsGridLicenseInfo" tag="p">
-                            <template v-slot:agplLink>
-                                <a href="https://github.com/asterics/Asterics-AAC/blob/master/LICENSE" target="_blank">AGPLv3</a>
-                            </template>
-                        </i18n>
-                        <i18n path="ytTermsInfo" tag="p">
-                            <template v-slot:ytTerms>
-                                <a href="https://www.youtube.com/t/terms" target="_blank">{{ $t('youtubeTermsOfService') }}</a>
-                            </template>
-                            <template v-slot:googleTerms>
-                                <a href="https://policies.google.com/privacy" target="_blank">{{ $t('googlePrivacyPolicy') }}</a>
-                            </template>
-                            <template v-slot:ytAPI>
-                                <a href="https://developers.google.com/youtube/v3" target="_blank">{{ $t('youtubeDataApi') }}</a>
-                            </template>
-                        </i18n>
-                        <i18n path="privacyPolicyInfo" tag="span">
-                            <template v-slot:privacyPolicy>
-                                <a href="app/privacy_en.html?back=about">{{ $t('privacyPolicy') }}</a>
-                            </template>
-                            <template v-slot:privacyPolicyDe>
-                                <a href="app/privacy_de.html?back=about">{{ $t('privacyPolicy') }}</a>
-                            </template>
-                        </i18n>
-                    </div>
-                </div>
-                <div class="srow">
-                    <h3>{{ $t('supportUs') }}</h3>
-                    <span>{{ $t('ifYouWantToSupportAstericsGrid') }}</span>:
-                    <div>
-                        <a :title="$t('donateWithPaypal')" target="_blank" href="https://www.paypal.com/donate/?hosted_button_id=38AJJNS427MJ2" class="me-3">
-                            <img class="mt-4" style="border:0px; max-width: 75vw" alt="" src="app/img/donate-paypal.png" width="250">
-                        </a>
-                        <a :title="$t('donateAtOpencollective')" target="_blank" href="https://opencollective.com/asterics-foundation/projects/asterics-grid">
-                            <img class="mt-4" style="border:0px; max-width: 75vw" alt="" src="app/img/donate-open-collective.png" width="250">
-                        </a>
-                    </div>
-                </div>
-                <div class="srow">
-                    <h3>{{ $t('acknowledgements') }}</h3>
-                    <i18n path="thankBrowserstack" tag="div" class="mb-3">
-                        <template v-slot:browserstackUrl>
-                            <a target="_blank" href="https://www.browserstack.com//">browserstack.com</a>
-                        </template>
-                    </i18n>
-                    <i18n path="thankResponsiveVoice" tag="div">
-                        <template v-slot:responsiveVoiceUrl>
-                            <a target="_blank" href="https://responsivevoice.org">ResponsiveVoice.org</a>
-                        </template>
-                    </i18n>
-                    <div class="mb-3"><a href="https://responsivevoice.org">ResponsiveVoice-NonCommercial</a> {{ $t('licensedUnder') }} <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/"><img title="ResponsiveVoice Text To Speech" src="app/img/responsive-voice-license.png" alt="95x15" width="95" height="15" /></a></div>
-                    <div>
-                        {{ $t('thanksToEduardoLleidaSolanoProfessorAtDepartment') }}
-                    </div>
-                </div>
-                <div class="srow" style="margin-top: 3em">
-                    <i18n path="youreUsingAstericsGridVersion" tag="div">
-                        <template v-slot:gridVersion>
-                            <a target="_blank" href="https://github.com/glauber-projetos/grilo-falante">#ASTERICS_GRID_VERSION#</a>
-                        </template>
-                    </i18n>
-                </div>
+            <div class="sobre-grade">
+                <section class="g-cartao sobre-cartao" aria-labelledby="sobre-o-que">
+                    <h3 id="sobre-o-que"><i class="ti ti-message-circle" aria-hidden="true"></i>{{ $t('sobreOQueTitulo') }}</h3>
+                    <p>{{ $t('sobreOQueTexto') }}</p>
+                </section>
+                <section class="g-cartao sobre-cartao" aria-labelledby="sobre-quem">
+                    <h3 id="sobre-quem"><i class="ti ti-users" aria-hidden="true"></i>{{ $t('sobreParaQuemTitulo') }}</h3>
+                    <p>{{ $t('sobreParaQuemTexto') }}</p>
+                </section>
             </div>
-        </div>
-        <div class="bottom-spacer"></div>
+
+            <section class="g-cartao sobre-cartao sobre-historia" aria-labelledby="sobre-porque">
+                <h3 id="sobre-porque"><i class="ti ti-heart" aria-hidden="true"></i>{{ $t('sobrePorQueTitulo') }}</h3>
+                <p>{{ $t('sobrePorQueTexto1') }}</p>
+                <p>{{ $t('sobrePorQueTexto2') }}</p>
+            </section>
+
+            <section class="g-cartao sobre-cartao" aria-labelledby="sobre-diferente">
+                <h3 id="sobre-diferente"><i class="ti ti-sparkles" aria-hidden="true"></i>{{ $t('sobreDiferenteTitulo') }}</h3>
+                <ul class="sobre-lista">
+                    <li v-for="item in diferenciais" :key="item.chave">
+                        <span class="sobre-lista-icone" aria-hidden="true"><i :class="'ti ti-' + item.icone"></i></span>
+                        <span><strong>{{ $t(item.chave + 'Titulo') }}</strong> {{ $t(item.chave + 'Texto') }}</span>
+                    </li>
+                </ul>
+            </section>
+
+            <div class="sobre-grade">
+                <section class="g-cartao sobre-cartao" aria-labelledby="sobre-versao">
+                    <h3 id="sobre-versao"><i class="ti ti-brand-github" aria-hidden="true"></i>{{ $t('sobreCodigoTitulo') }}</h3>
+                    <p><strong>{{ $t('sobreVersao') }}:</strong> {{ versao }}</p>
+                    <p>{{ $t('sobreCodigoTexto') }}</p>
+                    <div class="sobre-links">
+                        <a class="g-btn" target="_blank" rel="noopener" href="https://github.com/glauber-projetos/grilo-falante">
+                            <i class="ti ti-brand-github" aria-hidden="true"></i>{{ $t('sobreCodigoLink') }}
+                        </a>
+                        <a class="g-btn g-btn-leve" target="_blank" rel="noopener" href="https://www.gnu.org/licenses/agpl-3.0.html">
+                            <i class="ti ti-license" aria-hidden="true"></i>{{ $t('sobreLicencaLink') }}
+                        </a>
+                    </div>
+                </section>
+                <section class="g-cartao sobre-cartao" aria-labelledby="sobre-contato">
+                    <h3 id="sobre-contato"><i class="ti ti-mail" aria-hidden="true"></i>{{ $t('sobreContatoTitulo') }}</h3>
+                    <p>{{ $t('sobreContatoTexto') }}</p>
+                </section>
+            </div>
+
+            <section class="sobre-creditos" aria-labelledby="sobre-creditos">
+                <h3 id="sobre-creditos"><i class="ti ti-scale" aria-hidden="true"></i>{{ $t('sobreCreditosTitulo') }}</h3>
+                <ul>
+                    <li>
+                        <i18n path="sobreCreditoAsterics" tag="span">
+                            <template v-slot:projeto><a target="_blank" rel="noopener" href="https://github.com/asterics/Asterics-AAC">AsTeRICS Grid</a></template>
+                        </i18n>
+                    </li>
+                    <li>
+                        <i18n path="sobreCreditoArasaac" tag="span">
+                            <template v-slot:arasaac><a target="_blank" rel="noopener" href="https://arasaac.org">ARASAAC</a></template>
+                            <template v-slot:licenca><a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br">CC BY-NC-SA</a></template>
+                        </i18n>
+                    </li>
+                    <li>
+                        <i18n path="sobreCreditoTabler" tag="span">
+                            <template v-slot:tabler><a target="_blank" rel="noopener" href="https://tabler.io/icons">Tabler Icons</a></template>
+                        </i18n>
+                    </li>
+                    <li>{{ $t('sobreCreditoFontes') }}</li>
+                    <li>
+                        <i18n path="sobreCreditoResponsiveVoice" tag="span">
+                            <template v-slot:rv><a target="_blank" rel="noopener" href="https://responsivevoice.org">ResponsiveVoice</a></template>
+                            <template v-slot:licenca><a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a></template>
+                        </i18n>
+                    </li>
+                    <li>
+                        <i18n path="sobreCreditoYoutube" tag="span">
+                            <template v-slot:termos><a target="_blank" rel="noopener" href="https://www.youtube.com/t/terms">{{ $t('sobreTermosYoutube') }}</a></template>
+                            <template v-slot:privacidade><a target="_blank" rel="noopener" href="https://policies.google.com/privacy">{{ $t('sobrePrivacidadeGoogle') }}</a></template>
+                        </i18n>
+                    </li>
+                    <li>
+                        <i18n path="sobreCreditoBibliotecas" tag="span">
+                            <template v-slot:lista><a target="_blank" rel="noopener" href="https://github.com/glauber-projetos/grilo-falante/blob/HEAD/package.json">{{ $t('sobreListaCompleta') }}</a></template>
+                        </i18n>
+                    </li>
+                </ul>
+            </section>
+        </main>
     </div>
 </template>
 
 <script>
-    import {Router} from "../../js/router";
-    import HeaderIcon from '../../vue-components/components/headerIcon.vue'
-    import ProjectAcknowledgement from '../components/projectAcknowledgement.vue';
+    import GTopo from '../components/gTopo.vue';
+    import { constants } from '../../js/util/constants';
 
+    /**
+     * Grilo Falante: "Sobre" tells the story of the Grilo Falante. The original project (AsTeRICS Grid, AGPL-3.0)
+     * is credited in "Licenças e créditos", together with the other licenses (ARASAAC must be cited).
+     */
     export default {
-        components: { ProjectAcknowledgement, HeaderIcon},
-        props: [],
+        components: { GTopo },
         data() {
+            let versao = constants.CURRENT_VERSION;
             return {
-            }
-        },
-        methods: {
-            toMain() {
-                Router.toMain();
-            },
-            toRegister() {
-                Router.toRegister();
-            }
-        },
-        mounted() {
+                versao: !versao || versao.includes('#') ? this.$t('sobreVersaoDesenvolvimento') : versao,
+                diferenciais: [
+                    { icone: 'wifi-off', chave: 'sobreDifSemInternet' },
+                    { icone: 'camera', chave: 'sobreDifFotos' },
+                    { icone: 'lock', chave: 'sobreDifModoCrianca' },
+                    { icone: 'language', chave: 'sobreDifPortugues' },
+                    { icone: 'device-mobile', chave: 'sobreDifAparelho' },
+                    { icone: 'heart', chave: 'sobreDifGratis' }
+                ]
+            };
         }
     }
 </script>
 
 <style scoped>
-    .content {
+    .sobre-conteudo {
+        max-width: 960px;
         display: flex;
         flex-direction: column;
-        flex: 1 0 auto;
+        gap: var(--g-e4);
     }
-
-    h2 {
-        margin-bottom: 0.5em;
-    }
-    h3 {
-        margin-bottom: 0.5em;
-        margin-top: 1.5em;
-    }
-    .srow {
-        margin-bottom: 1.5em;
-    }
-    .gf-about {
+    .sobre-heroi {
         display: flex;
         align-items: center;
-        gap: 1em;
+        gap: var(--g-e5);
+        padding: var(--g-e5);
+        border-radius: var(--g-raio-g);
+        background: var(--g-girassol-claro);
     }
-    .gf-about p {
-        margin-bottom: 0.5em;
+    .sobre-grilo { width: 120px; height: 120px; flex: none; }
+    .sobre-nome { font-size: var(--g-t-h1); margin: 0 0 var(--g-e1) !important; }
+    .sobre-lema { font-size: var(--g-t-grande); margin: 0 0 var(--g-e3); }
+    .sobre-pilulas { gap: var(--g-e2); }
+    .sobre-grade {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--g-e4);
     }
-    .gf-about-grilo {
-        width: 6em;
-        height: 6em;
+    .sobre-cartao h3, .sobre-creditos h3 {
+        display: flex;
+        align-items: center;
+        gap: var(--g-e2);
+    }
+    .sobre-cartao h3 .ti, .sobre-creditos h3 .ti { color: var(--g-folha-escura); font-size: 1.5rem; }
+    .sobre-cartao p:last-child { margin-bottom: 0; }
+    .sobre-historia { background: var(--g-folha-clara); border-color: transparent; }
+    .sobre-lista {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: var(--g-e3) var(--g-e5);
+    }
+    .sobre-lista li { display: flex; gap: var(--g-e3); align-items: flex-start; margin: 0; }
+    .sobre-lista-icone {
         flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--g-raio-p);
+        background: var(--g-ceu);
+        color: var(--g-ceu-escuro);
+        display: grid;
+        place-items: center;
+        font-size: 1.3rem;
+    }
+    .sobre-links { display: flex; flex-wrap: wrap; gap: var(--g-e2); }
+    .sobre-links .g-btn { text-decoration: none; padding: 0 var(--g-e4); }
+    .sobre-creditos {
+        padding: var(--g-e4) var(--g-e2) 0;
+        color: var(--g-tinta-2);
+        font-size: var(--g-t-legenda);
+        border-top: 1px solid var(--g-borda);
+    }
+    .sobre-creditos h3 { font-size: var(--g-t-grande); }
+    .sobre-creditos ul { margin: 0; padding-left: 1.2em; }
+    .sobre-creditos li { margin-bottom: var(--g-e2); }
+    .sobre-tela a { color: var(--g-folha-escura); }
+    .sobre-tela a.g-btn { color: var(--g-tinta); }
+    .sobre-tela a.g-btn-leve { color: var(--g-folha-escura); }
+    @media (max-width: 560px) {
+        .sobre-heroi { flex-direction: column; text-align: center; padding: var(--g-e4); }
+        .sobre-pilulas { justify-content: center; }
+        .sobre-grilo { width: 96px; height: 96px; }
     }
 </style>
