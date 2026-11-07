@@ -236,36 +236,44 @@ header {
     overflow: hidden;
 }
 
-/* o Grilo aparece um instante quando a frase é falada */
+/* o Grilo (mascote novo) aparece quando a frase é falada e fica tempo para a criança ver */
 #gf-grilo-reacao {
     position: fixed;
-    right: max(12px, env(safe-area-inset-right, 0px));
-    bottom: max(12px, env(safe-area-inset-bottom, 0px));
-    width: 96px;
-    height: 96px;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* acima do botão Responsável */
+    width: 150px;
+    height: 150px;
     z-index: 10000;
     pointer-events: none;
     opacity: 0;
     transform: translateY(40px) scale(0.6);
+    filter: drop-shadow(0 6px 12px rgba(38, 59, 28, 0.25));
 }
 
 #gf-grilo-reacao img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
 }
 
 #gf-grilo-reacao.gf-show {
-    animation: gf-grilo-fala 1.8s ease-out forwards;
+    animation: gf-grilo-fala 3.6s ease-out forwards;
 }
 
 @keyframes gf-grilo-fala {
     0% { opacity: 0; transform: translateY(40px) scale(0.6); }
-    14% { opacity: 1; transform: translateY(-8px) scale(1.05); }
-    22% { transform: translateY(0) scale(1); }
-    40% { transform: translateY(-6px) rotate(-4deg); }
-    55% { transform: translateY(0) rotate(3deg); }
-    70% { opacity: 1; transform: translateY(0) rotate(0); }
-    100% { opacity: 0; transform: translateY(20px) scale(0.8); }
+    8% { opacity: 1; transform: translateY(-10px) scale(1.06); }
+    13% { transform: translateY(0) scale(1); }
+    25% { transform: translateY(-6px) rotate(-4deg); }
+    37% { transform: translateY(0) rotate(3deg); }
+    49% { transform: translateY(-6px) rotate(-3deg); }
+    61% { transform: translateY(0) rotate(2deg); }
+    85% { opacity: 1; transform: translateY(0) rotate(0); }
+    100% { opacity: 0; transform: translateY(20px) scale(0.85); }
+}
+
+@media (max-width: 600px) {
+    #gf-grilo-reacao { width: 110px; height: 110px; }
 }
 
 /* tudo parado: pedido do sistema ou chave "Reduzir movimentos" */
