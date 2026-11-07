@@ -210,3 +210,127 @@ header {
 .fa-li .fa-check {
     color: var(--gf-mata);
 }
+
+/* ---------- cores por tipo de palavra (esquema "Grilo Falante") ---------- */
+:root {
+    --gf-cat-pessoas: #FFE38C;     --gf-cat-pessoas-borda: #A87700;
+    --gf-cat-acoes: #C6EAA9;       --gf-cat-acoes-borda: #3D8A2E;
+    --gf-cat-descricao: #C2DDF8;   --gf-cat-descricao-borda: #2B6CB8;
+    --gf-cat-sentimentos: #B5EBE0; --gf-cat-sentimentos-borda: #1D7F6E;
+    --gf-cat-perguntas: #DED0F4;   --gf-cat-perguntas-borda: #7451C0;
+    --gf-cat-social: #F9C9DF;      --gf-cat-social-borda: #B83F78;
+    --gf-cat-coisas: #FFD0AA;      --gf-cat-coisas-borda: #C25A12;
+}
+
+/* ---------- animações leves (desligadas por "Reduzir movimentos" ou pelo sistema) ---------- */
+
+/* a célula "afunda" enquanto é tocada */
+#gridView #grid-container .element-container {
+    transition: transform 0.09s ease-out, filter 0.09s ease-out;
+}
+
+#gridView #grid-container .element-container.gf-pressed {
+    transform: scale(0.95);
+    filter: brightness(0.94);
+}
+
+/* a palavra "voa" para a barra de frases */
+.gf-flyer {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #FFFFFF;
+    box-shadow: 0 6px 18px rgba(20, 38, 26, 0.25);
+    will-change: transform, opacity;
+}
+
+.gf-flyer img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.gf-flyer-text {
+    font-family: var(--gf-texto);
+    font-weight: 700;
+    font-size: 1.2em;
+    color: var(--gf-tinta);
+    padding: 0.2em 0.4em;
+    overflow: hidden;
+}
+
+/* o Grilo aparece um instante quando a frase é falada */
+#gf-grilo-reacao {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right, 0px));
+    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    width: 96px;
+    height: 96px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+}
+
+#gf-grilo-reacao img {
+    width: 100%;
+    height: 100%;
+}
+
+#gf-grilo-reacao.gf-show {
+    animation: gf-grilo-fala 1.8s ease-out forwards;
+}
+
+@keyframes gf-grilo-fala {
+    0% { opacity: 0; transform: translateY(40px) scale(0.6); }
+    14% { opacity: 1; transform: translateY(-8px) scale(1.05); }
+    22% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-6px) rotate(-4deg); }
+    55% { transform: translateY(0) rotate(3deg); }
+    70% { opacity: 1; transform: translateY(0) rotate(0); }
+    100% { opacity: 0; transform: translateY(20px) scale(0.8); }
+}
+
+/* tudo parado: pedido do sistema ou chave "Reduzir movimentos" */
+body.gf-reduce-motion #gridView #grid-container .element-container,
+body.gf-reduce-motion .gf-flyer,
+body.gf-reduce-motion #gf-grilo-reacao {
+    transition: none !important;
+    animation: none !important;
+}
+
+body.gf-reduce-motion #gridView #grid-container .element-container.gf-pressed {
+    transform: none;
+    filter: none;
+}
+
+body.gf-reduce-motion .gf-flyer,
+body.gf-reduce-motion #gf-grilo-reacao {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #gridView #grid-container .element-container,
+    .gf-flyer,
+    #gf-grilo-reacao {
+        transition: none !important;
+        animation: none !important;
+    }
+    #gridView #grid-container .element-container.gf-pressed {
+        transform: none;
+        filter: none;
+    }
+    .gf-flyer,
+    #gf-grilo-reacao {
+        display: none !important;
+    }
+}
+
+body.gf-reduce-motion .phrase-main {
+    transition: none !important;
+    transform: none !important;
+}

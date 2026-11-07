@@ -1372,5 +1372,20 @@
   "griloFalanteIntro": "Grilo Falante is a free app for augmentative and alternative communication (AAC), made for families who need it. It is a version of AsTeRICS Grid, created by UAS Technikum Wien (FH Technikum Wien), and keeps the same AGPL-3.0 license.",
   "griloFalanteOnGithub": "Grilo Falante source code on GitHub",
   "aboutOriginalProject": "The original project: AsTeRICS Grid",
-  "griloFalanteHello": "Hi! I am Grilo."
+  "griloFalanteHello": "Hi! I am Grilo.",
+  "CC_FEELING": "Feeling",
+  "CC_QUESTION": "Question",
+  "CS_GRILO_FALANTE": "Grilo Falante (light fill and strong border)",
+  "CS_GRILO_FALANTE_BORDER": "Grilo Falante (border only)",
+  "griloWordColorsTitle": "Colors by word type",
+  "griloWordColors": "Color the cells by word type",
+  "griloWordColorsHint": "Each word type gets a light background and a strong border with good contrast. The color comes from the “color category” of each cell, chosen when editing the cell.",
+  "motionTitle": "Motion",
+  "reduceMotion": "Reduce motion",
+  "reduceMotionHint": "Turns off the animations: the cell that sinks when touched, the word that flies into the sentence bar and the Grilo that appears when the sentence is spoken. Applies to this device only.",
+  "reduceMotionSystemOn": "This device already asks for less motion, so the animations are off.",
+  "phrasesRecentShort": "Recent",
+  "phrasesHintPlay": "Touch a sentence to say it again.",
+  "phrasesHintStar": "Touch the star to add or remove a favorite.",
+  "phrasesFavoritesEmpty": "No favorite sentences yet. In “Recent”, touch the star of a sentence to keep it here."
 }

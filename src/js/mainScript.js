@@ -16,6 +16,7 @@ import { printService } from './service/printService';
 import { notificationService } from './service/notificationService.js';
 import { dataService } from './service/data/dataService';
 import { consoleReService } from './service/consoleReService';
+import { motionService } from './service/motionService';
 
 let SERVICE_WORKER_UPDATE_CHECK_INTERVAL = 1000 * 60 * 15; // 15 Minutes
 
@@ -28,6 +29,7 @@ async function init() {
             constants.CURRENT_VERSION
     );
     consoleReService.init();
+    motionService.init();
     checkAppVersion();
     initServiceWorker();
     initMatomoAnalytics();

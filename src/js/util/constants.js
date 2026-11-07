@@ -244,6 +244,40 @@ constants.CC_ADJECTIVE = 'CC_ADJECTIVE';
 constants.CC_ADVERB = 'CC_ADVERB';
 constants.CC_CONJUNCTION = 'CC_CONJUNCTION';
 constants.CC_INTERJECTION = 'CC_INTERJECTION';
+constants.CC_FEELING = 'CC_FEELING';
+constants.CC_QUESTION = 'CC_QUESTION';
+
+// Grilo Falante: word-type colors (Fitzgerald/Goossens style) with WCAG AA contrast.
+// Light fills keep dark text at 10:1 or more; strong borders reach 3:1 or more against white.
+constants.COLOR_SCHEME_GRILO_PREFIX = 'CS_GRILO_FALANTE';
+constants.COLOR_SCHEME_GRILO = 'CS_GRILO_FALANTE';
+constants.COLOR_SCHEME_GRILO_BORDER = 'CS_GRILO_FALANTE_BORDER';
+constants.CS_GRILO_CATEGORIES = [
+    constants.CC_PRONOUN_PERSON_NAME, // pessoas
+    constants.CC_VERB, // ações
+    constants.CC_DESCRIPTOR, // descrições
+    constants.CC_FEELING, // sentimentos
+    constants.CC_QUESTION, // perguntas
+    constants.CC_SOCIAL_EXPRESSIONS, // social
+    constants.CC_NOUN // coisas
+];
+constants.CS_MAPPING_TO_GRILO = {
+    CC_ADJECTIVE: constants.CC_DESCRIPTOR,
+    CC_ADVERB: constants.CC_DESCRIPTOR,
+    CC_INTERJECTION: constants.CC_SOCIAL_EXPRESSIONS,
+    CC_QUESTION_NEGATION_PRONOUN: constants.CC_QUESTION,
+    CC_PLACE: constants.CC_NOUN
+};
+constants.CS_GRILO_FILLS = ['#FFE38C', '#C6EAA9', '#C2DDF8', '#B5EBE0', '#DED0F4', '#F9C9DF', '#FFD0AA'];
+constants.CS_GRILO_EDGES = ['#A87700', '#3D8A2E', '#2B6CB8', '#1D7F6E', '#7451C0', '#B83F78', '#C25A12'];
+constants.CS_GRILO_CUSTOM_BORDERS = (function () {
+    let borders = {};
+    constants.CS_GRILO_CATEGORIES.forEach((cat, i) => (borders[cat] = constants.CS_GRILO_EDGES[i]));
+    Object.keys(constants.CS_MAPPING_TO_GRILO).forEach((cat) => {
+        borders[cat] = borders[constants.CS_MAPPING_TO_GRILO[cat]];
+    });
+    return borders;
+})();
 constants.CS_FITZGERALD_CATEGORIES = [
     constants.CC_PRONOUN_PERSON_NAME,
     constants.CC_NOUN,
@@ -442,6 +476,19 @@ constants.DEFAULT_COLOR_SCHEMES = [
             '#807351',
             '#747474'
         ]
+    },
+    {
+        name: constants.COLOR_SCHEME_GRILO,
+        categories: constants.CS_GRILO_CATEGORIES,
+        mappings: constants.CS_MAPPING_TO_GRILO,
+        colors: constants.CS_GRILO_FILLS,
+        customBorders: constants.CS_GRILO_CUSTOM_BORDERS
+    },
+    {
+        name: constants.COLOR_SCHEME_GRILO_BORDER,
+        categories: constants.CS_GRILO_CATEGORIES,
+        mappings: constants.CS_MAPPING_TO_GRILO,
+        colors: constants.CS_GRILO_EDGES
     }
 ];
 

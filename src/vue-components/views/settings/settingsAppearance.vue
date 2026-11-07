@@ -2,7 +2,22 @@
     <div>
         <div class="srow">
             <div class="nine columns settings-area">
-                <h3 class="mt-2">{{ $t('quickSettings') }}</h3>
+                <h3 class="mt-2">{{ $t('griloWordColorsTitle') }}</h3>
+                <div class="srow">
+                    <input id="griloWordColors" type="checkbox" :checked="griloColorsOn" @change="setGriloColors($event.target.checked)"/>
+                    <label for="griloWordColors">{{ $t('griloWordColors') }}</label>
+                </div>
+                <p class="gf-hint">{{ $t('griloWordColorsHint') }}</p>
+                <ul class="gf-legend" aria-hidden="true">
+                    <li v-for="(cat, index) in constants.CS_GRILO_CATEGORIES" :style="`background-color: ${constants.CS_GRILO_FILLS[index]}; border-color: ${constants.CS_GRILO_EDGES[index]};`">{{ $t(cat) }}</li>
+                </ul>
+                <h3 class="mt-4">{{ $t('motionTitle') }}</h3>
+                <div class="srow">
+                    <input id="reduceMotion" type="checkbox" v-model="reduceMotion" @change="setReduceMotion"/>
+                    <label for="reduceMotion">{{ $t('reduceMotion') }}</label>
+                </div>
+                <p class="gf-hint">{{ systemReducesMotion ? $t('reduceMotionSystemOn') : $t('reduceMotionHint') }}</p>
+                <h3 class="mt-4">{{ $t('quickSettings') }}</h3>
                 <div class="srow">
                     <button @click="toDefault"><span class="fas fa-undo"/> {{ $t('setToDefaultSettings') }}</button>
                     <button @click="toDefaultBgColored"><span class="fas fa-square"/> {{ $t('setToDefaultSettingsBgColored') }}</button>
@@ -174,6 +189,7 @@
     import { util } from '../../../js/util/util';
     import { ColorConfig } from '../../../js/model/ColorConfig';
     import {colorUtil} from "../../../js/util/colorUtil";
+    import { motionService } from '../../../js/service/motionService';
 
     export default {
         components: { AppGridDisplay, Accordion, SliderInput },
@@ -187,9 +203,32 @@
                 constants: constants,
                 testGridData: null,
                 testElementLabel: i18nService.t("testElement"),
+                reduceMotion: motionService.isReduceMotionSetting(),
+                systemReducesMotion: !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+            }
+        },
+        computed: {
+            griloColorsOn() {
+                let colorConfig = this.metadata.colorConfig;
+                return !!colorConfig.colorSchemesActivated && (colorConfig.activeColorScheme || '').startsWith(constants.COLOR_SCHEME_GRILO_PREFIX);
             }
         },
         methods: {
+            setGriloColors(on) {
+                if (on) {
+                    this.metadata.colorConfig.colorSchemesActivated = true;
+                    this.metadata.colorConfig.colorMode = ColorConfig.COLOR_MODE_BOTH;
+                    this.metadata.colorConfig.borderWidth = ColorConfig.BORDER_WIDTH_BORDER_COLORED;
+                    this.metadata.colorConfig.activeColorScheme = constants.COLOR_SCHEME_GRILO;
+                } else {
+                    this.metadata.colorConfig.colorSchemesActivated = false;
+                }
+                this.saveMetadata(this.metadata);
+                this.resetTestGrid();
+            },
+            setReduceMotion() {
+                motionService.setReduceMotionSetting(this.reduceMotion);
+            },
             toDefault() {
                 this.metadata.textConfig = JSON.parse(JSON.stringify(new TextConfig()));
                 this.metadata.colorConfig = JSON.parse(JSON.stringify(new ColorConfig()));
@@ -232,6 +271,9 @@
                 let borderColored = this.metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BORDER;
                 let backgroundColored = this.metadata.colorConfig.colorMode === ColorConfig.COLOR_MODE_BACKGROUND;
                 let darkMode = this.metadata.colorConfig.elementBackgroundColor === constants.DEFAULT_ELEMENT_BACKGROUND_COLOR_DARK;
+                if (originalScheme.startsWith(constants.COLOR_SCHEME_GRILO_PREFIX)) {
+                    return borderColored ? constants.COLOR_SCHEME_GRILO_BORDER : constants.COLOR_SCHEME_GRILO;
+                }
                 if (originalScheme.startsWith(constants.COLOR_SCHEME_FITZGERALD_PREFIX)) {
                     if (backgroundColored) {
                         return darkMode ? constants.COLOR_SCHEME_FITZGERALD_DARK: constants.COLOR_SCHEME_FITZGERALD_LIGHT;
@@ -309,5 +351,28 @@
         .settings-area {
             border-right: 0;
         }
+    }
+    .gf-hint {
+        font-size: 0.85em;
+        color: #4A5C4F;
+        margin-top: -1em;
+        margin-bottom: 1em;
+    }
+    .gf-legend {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4em;
+        margin: 0 0 1.5em 0;
+        padding: 0;
+    }
+    .gf-legend li {
+        margin: 0;
+        padding: 0.2em 0.7em;
+        border: 3px solid;
+        border-radius: 10px;
+        color: #14261A;
+        font-size: 0.8em;
+        font-weight: bold;
     }
 </style>
