@@ -2,7 +2,7 @@
     <div class="overflow-content g-tela wz-page">
         <div class="wz-wrap">
             <header class="wz-header">
-                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="wz-grilo"/>
+                <img src="app/img/grilo/mascote/grilo-orientando.webp" alt="" aria-hidden="true" class="wz-grilo"/>
                 <div class="wz-header-text">
                     <span class="wz-step-label">{{ $t('wizardStepOf', {step: step, total: TOTAL}) }}</span>
                     <div class="wz-dots" aria-hidden="true">
@@ -361,7 +361,7 @@ export default {
 }
 
 .wz-grilo {
-    width: 64px;
+    width: 80px;
     height: auto;
     flex: none;
 }
@@ -805,7 +805,7 @@ export default {
 }
 
 @media (max-width: 480px) {
-    .wz-grilo { width: 48px; }
+    .wz-grilo { width: 56px; }
     .wz-footer .g-btn { flex: 1 1 40%; min-width: 0; }
 }
 </style>

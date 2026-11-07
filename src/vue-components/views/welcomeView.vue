@@ -4,7 +4,7 @@
 
         <template v-else>
             <header class="entrada-topo">
-                <img src="app/img/grilo/logo-icone.svg" alt="" aria-hidden="true" class="entrada-marca"/>
+                <img src="app/img/grilo/icone-app.png" alt="" aria-hidden="true" class="entrada-marca"/>
                 <span class="entrada-nome-app">Grilo Falante</span>
                 <span class="g-espaco"></span>
                 <button type="button" class="g-btn g-btn-leve" @click="abrirAjuda()">
@@ -13,7 +13,7 @@
             </header>
 
             <main class="entrada-centro">
-                <img src="app/img/grilo/grilo-acenando.svg" alt="" aria-hidden="true" class="entrada-grilo"/>
+                <img src="app/img/grilo/mascote/grilo-feliz.webp" alt="" aria-hidden="true" class="entrada-grilo"/>
                 <h1 class="entrada-titulo">{{ perfis.length ? $t('entradaQuemVaiFalar') : $t('entradaBoasVindas') }}</h1>
                 <p v-if="!perfis.length" class="g-apoio entrada-lead">{{ $t('entradaComeceAqui') }}</p>
                 <p v-else-if="gerenciando" class="g-apoio entrada-lead">{{ $t('entradaGerenciarDica') }}</p>
@@ -105,7 +105,7 @@
 
                 <template v-else-if="importacao.etapa === 'importando'">
                     <div class="entrada-progresso">
-                        <img src="app/img/grilo/grilo-pensando.svg" alt="" aria-hidden="true" class="entrada-grilo-p"/>
+                        <img src="app/img/grilo/mascote/grilo-pensando.webp" alt="" aria-hidden="true" class="entrada-grilo-p"/>
                         <h2 id="entradaImportTitulo">{{ $t('entradaPreparandoPerfil', {nome: importacao.nome || $t('wizardTheChild')}) }}</h2>
                         <p class="g-apoio" aria-live="polite">{{ textoProgresso }}</p>
                         <div class="entrada-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="importacao.progresso"
@@ -118,7 +118,7 @@
 
                 <template v-else-if="importacao.etapa === 'pronto'">
                     <div class="entrada-progresso">
-                        <img src="app/img/grilo/grilo-comemorando.svg" alt="" aria-hidden="true" class="entrada-grilo-p"/>
+                        <img src="app/img/grilo/mascote/grilo-festa.webp" alt="" aria-hidden="true" class="entrada-grilo-p"/>
                         <h2 id="entradaImportTitulo" role="status">{{ $t('entradaPerfilPronto', {nome: importacao.nome || $t('wizardTheChild')}) }}</h2>
                         <button type="button" class="g-btn g-btn-principal g-btn-grande" @click="irParaPerfil()">
                             <i class="ti ti-arrow-right" aria-hidden="true"></i> {{ $t('entradaComecar') }}
@@ -128,7 +128,7 @@
 
                 <template v-else-if="importacao.etapa === 'erro'">
                     <div class="entrada-progresso">
-                        <img src="app/img/grilo/grilo-pensando.svg" alt="" aria-hidden="true" class="entrada-grilo-p"/>
+                        <img :src="importacao.arquivoRuim ? 'app/img/grilo/mascote/grilo-duvida.webp' : 'app/img/grilo/mascote/grilo-triste.webp'" alt="" aria-hidden="true" class="entrada-grilo-p"/>
                         <h2 id="entradaImportTitulo">{{ $t('entradaArquivoNaoAbriu') }}</h2>
                         <p class="g-apoio" role="alert">{{ importacao.erro }}</p>
                         <div class="entrada-painel-botoes">
@@ -269,7 +269,7 @@
                 if (!file) {
                     return;
                 }
-                this.importacao = { etapa: 'lendo', nomeArquivo: file.name, nome: '', progresso: 0, pranchas: 0, frases: 0, erro: null, preparado: null, usuario: null };
+                this.importacao = { etapa: 'lendo', nomeArquivo: file.name, nome: '', progresso: 0, pranchas: 0, frases: 0, erro: null, arquivoRuim: false, preparado: null, usuario: null };
                 try {
                     let preparado = await perfilArquivoService.prepararArquivo(file);
                     Object.assign(this.importacao, {
@@ -312,12 +312,13 @@
             mostrarErroImportacao(e) {
                 let codigo = e && e.codigo;
                 let texto = this.$t('entradaErroImportar');
+                let arquivoRuim = codigo === perfilArquivoService.ERRO_ARQUIVO_INVALIDO || codigo === perfilArquivoService.ERRO_ARQUIVO_VAZIO;
                 if (codigo === perfilArquivoService.ERRO_ARQUIVO_INVALIDO) {
                     texto = this.$t('entradaErroArquivoInvalido');
                 } else if (codigo === perfilArquivoService.ERRO_ARQUIVO_VAZIO) {
                     texto = this.$t('entradaErroArquivoVazio');
                 }
-                this.importacao = Object.assign(this.importacao || {}, { etapa: 'erro', erro: texto, preparado: null });
+                this.importacao = Object.assign(this.importacao || {}, { etapa: 'erro', erro: texto, arquivoRuim: arquivoRuim, preparado: null });
             },
             fecharImportacao() {
                 if (this.importacao && this.importacao.etapa === 'importando') {
@@ -396,7 +397,8 @@
         min-height: 64px;
     }
     .entrada-marca {
-        height: 36px;
+        height: 40px;
+        border-radius: var(--g-raio-p);
         width: auto;
     }
     .entrada-nome-app {
@@ -419,7 +421,7 @@
         margin: 0 auto;
     }
     .entrada-grilo {
-        width: 112px;
+        width: 152px;
         height: auto;
     }
     .entrada .entrada-titulo {
@@ -627,7 +629,7 @@
         margin: 0;
     }
     .entrada-grilo-p {
-        width: 96px;
+        width: 128px;
         height: auto;
     }
     .entrada-barra {
@@ -648,7 +650,7 @@
     }
 
     @media (max-width: 480px) {
-        .entrada-grilo { width: 84px; }
+        .entrada-grilo { width: 112px; }
         .entrada-perfis { gap: var(--g-e3); }
         .entrada-perfil, .entrada-remover { width: 136px; }
         .entrada-perfil { min-height: 156px; }
@@ -656,7 +658,7 @@
         .entrada-painel-botoes .g-btn { flex: 1 1 100%; }
     }
     @media (max-height: 700px) and (min-width: 700px) {
-        .entrada-grilo { width: 80px; }
+        .entrada-grilo { width: 104px; }
         .entrada-centro { justify-content: flex-start; }
     }
 </style>

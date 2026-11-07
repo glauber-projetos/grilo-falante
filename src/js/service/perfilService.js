@@ -8,6 +8,18 @@
  * A foto é uma miniatura (até ~160 px) para não ocupar espaço.
  */
 import { nomeExibicao, inicial, corDoPerfil } from './perfilNomes';
+import $ from '../externals/jquery';
+
+// mesmo valor de MainVue.EVENT_PERFIL_ALTERADO: o topo e o Início atualizam nome e foto
+const EVENT_PERFIL_ALTERADO = 'grilo-perfil-alterado';
+
+function avisar() {
+    try {
+        $(document).trigger(EVENT_PERFIL_ALTERADO);
+    } catch (e) {
+        // sem jQuery (testes): nada a avisar
+    }
+}
 
 const CHAVE = 'GRILO_PERFIS';
 const FOTO_LADO = 160;
@@ -64,6 +76,7 @@ perfilService.salvarPerfil = function (usuario, dados = {}) {
         atual.foto = null;
         gravar(todos);
     }
+    avisar();
 };
 
 perfilService.removerPerfil = function (usuario) {
@@ -71,6 +84,7 @@ perfilService.removerPerfil = function (usuario) {
     if (todos[usuario]) {
         delete todos[usuario];
         gravar(todos);
+        avisar();
     }
 };
 

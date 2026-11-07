@@ -1,7 +1,7 @@
 <template>
     <div class="overflow-content g-tela conta">
         <aside class="conta-arte" aria-hidden="true">
-            <img src="app/img/grilo/grilo-apontando.svg" alt="" class="conta-grilo"/>
+            <img src="app/img/grilo/mascote/grilo-apontando.webp" alt="" class="conta-grilo"/>
             <p class="conta-arte-frase">{{ $t('entradaCriarContaArteFrase') }}</p>
         </aside>
 
