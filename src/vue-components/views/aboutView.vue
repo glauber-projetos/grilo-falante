@@ -117,7 +117,7 @@
                 <div class="srow" style="margin-top: 3em">
                     <i18n path="youreUsingAstericsGridVersion" tag="div">
                         <template v-slot:gridVersion>
-                            <a target="_blank" href="https://github.com/asterics/Asterics-AAC/releases/tag/#ASTERICS_GRID_VERSION#">#ASTERICS_GRID_VERSION#</a>
+                            <a target="_blank" href="https://github.com/glauber-projetos/Asterics-AAC">#ASTERICS_GRID_VERSION#</a>
                         </template>
                     </i18n>
                 </div>

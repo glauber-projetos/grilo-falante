@@ -1,5 +1,5 @@
 {
-  "name": "asterics-aac",
+  "name": "grilo-falante",
   "version": "0.1.0",
   "description": "Free, easy-to-use AAC app with offline support, flexible input options, media & smart home access",
   "main": "index.js",
@@ -65,14 +65,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/asterics/Asterics-AAC.git"
+    "url": "git+https://github.com/glauber-projetos/Asterics-AAC.git"
   },
   "author": "Benjamin Klaus",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/asterics/Asterics-AAC/issues"
+    "url": "https://github.com/glauber-projetos/Asterics-AAC/issues"
   },
-  "homepage": "https://github.com/asterics/Asterics-AAC#readme",
+  "homepage": "https://glauber-projetos.github.io/Asterics-AAC/",
   "lint-staged": {
     "*.{js,css,md}": "prettier --write"
   },

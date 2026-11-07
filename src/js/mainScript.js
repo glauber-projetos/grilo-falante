@@ -154,7 +154,7 @@ function checkAppVersion() {
             translateParams: [constants.CURRENT_VERSION],
             timeout: 30000,
             actionLink: 'moreInformation',
-            actionLinkUrl: 'https://github.com/asterics/Asterics-AAC/releases/tag/' + constants.CURRENT_VERSION,
+            actionLinkUrl: 'https://github.com/glauber-projetos/Asterics-AAC',
             msgType: 'info'
         });
     }
