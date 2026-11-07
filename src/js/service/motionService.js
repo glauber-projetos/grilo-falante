@@ -21,7 +21,15 @@ const KEY_REDUCE_MOTION = 'GRILO_REDUCE_MOTION';
 const CLASS_REDUCE = 'gf-reduce-motion';
 const CLASS_PRESSED = 'gf-pressed';
 const FLY_DURATION_MS = 450;
-const GRILO_SHOW_MS = 1800;
+const GRILO_SHOW_MS = 3600;
+const GRILO_IMG = 'app/img/grilo/mascote/grilo-feliz.webp';
+
+// load the speaking mascot early, so it shows at once the first time a sentence is spoken
+let griloPreload = null;
+if (typeof Image !== 'undefined') {
+    griloPreload = new Image();
+    griloPreload.src = GRILO_IMG;
+}
 
 let initialized = false;
 let systemQuery = null;
@@ -209,7 +217,7 @@ function showGrilo() {
         grilo = document.createElement('div');
         grilo.id = 'gf-grilo-reacao';
         grilo.setAttribute('aria-hidden', 'true');
-        grilo.innerHTML = '<img src="app/img/grilo/grilo-falando.svg" alt="" draggable="false"/>';
+        grilo.innerHTML = `<img src="${GRILO_IMG}" alt="" draggable="false"/>`;
         document.body.appendChild(grilo);
     }
     clearTimeout(griloTimeout);

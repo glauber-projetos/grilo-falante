@@ -7,6 +7,7 @@ import { speechServiceExternal } from './speechServiceExternal.js';
 import { localStorageService } from './data/localStorageService.js';
 import { i18nService } from './i18nService';
 import voiceUtil from '../util/voiceUtil';
+import { vozAutomatica } from '../util/vozAutomatica.js';
 
 let speechService = {};
 
@@ -99,7 +100,8 @@ speechService.speak = async function (textOrOject, options = {}) {
     if (!options.dontStop) {
         speechService.stopSpeaking();
     }
-    let voices = getVoicesById(preferredVoiceId) || getVoicesByLang(langToUse);
+    // automatic choice: prefer voices installed on the device (see vozAutomatica)
+    let voices = getVoicesById(preferredVoiceId) || vozAutomatica.ordenar(getVoicesByLang(langToUse), constants.VOICE_DEVICE_DEFAULT);
     let nativeVoices = voices.filter((voice) => voice.type === constants.VOICE_TYPE_NATIVE);
     let responsiveVoices = voices.filter((voice) => voice.type === constants.VOICE_TYPE_RESPONSIVEVOICE);
     let externalVoices = voices.filter((voice) => voice.type === constants.VOICE_TYPE_EXTERNAL_PLAYING || voice.type === constants.VOICE_TYPE_EXTERNAL_DATA);
