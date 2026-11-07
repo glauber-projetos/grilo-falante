@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grilo Falante: 3 caminhos de design</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@font-face { font-family: "Baloo 2"; font-weight: 700; src: url("../../app/fonts/baloo-2-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson"; font-weight: 400; src: url("../../app/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson"; font-weight: 700; src: url("../../app/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Atkinson", system-ui, sans-serif; background: #ece9e2; color: #22261f; }
+.page { max-width: 1260px; margin: 0 auto; padding: 32px 20px 64px; }
+h1 { font-family: "Baloo 2", sans-serif; font-size: 34px; margin: 0 0 4px; }
+.lead { margin: 0 0 32px; color: #55594f; font-size: 17px; max-width: 760px; line-height: 1.5; }
+.dir { background: #fff; border-radius: 24px; padding: 24px; margin-bottom: 32px; }
+.dir-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+.dir-letter { font-family: "Baloo 2"; font-size: 15px; background: #22261f; color: #fff; border-radius: 99px; padding: 2px 12px; }
+.dir h2 { font-family: "Baloo 2"; font-size: 26px; margin: 0; }
+.dir p.idea { margin: 0 0 18px; color: #55594f; font-size: 16px; line-height: 1.5; max-width: 900px; }
+.screens { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; }
+.cap { font-size: 14px; color: #6b6f64; margin: 8px 4px 0; }
+.tab { aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden; position: relative; border: 6px solid #22261f; display: flex; flex-direction: column; font-size: 11px; }
+.ti { line-height: 1; }
+
+/* ---------- A: Casa do Grilo ---------- */
+.a { background: #fbf6ea; color: #263b1c; }
+.a .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; }
+.a .bar img { height: 26px; }
+.a .bar b { font-family: "Baloo 2"; font-size: 16px; color: #2f6b1f; }
+.a .bar .sp { flex: 1; }
+.a .pill { background: #fff; border-radius: 99px; padding: 5px 10px; display: flex; gap: 5px; align-items: center; font-weight: 700; border: 1.5px solid #e6dcc3; }
+.a .who { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding-bottom: 8px; }
+.a .who > img { height: 40px !important; }
+.a .prof { padding: 6px 6px !important; }
+.a .prof .av { width: 46px !important; height: 46px !important; font-size: 20px !important; }
+.a .who h3 { font-family: "Baloo 2"; font-size: 20px; margin: 0; }
+.a .profiles { display: flex; gap: 14px; }
+.a .prof { width: 92px; background: #fff; border-radius: 20px; padding: 10px 8px; text-align: center; border: 2px solid #e6dcc3; font-weight: 700; font-size: 13px; }
+.a .prof .av { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 6px; display: grid; place-items: center; font-family: "Baloo 2"; font-size: 26px; color: #fff; }
+.a .prof.add { border-style: dashed; color: #7a7f6f; }
+.a .prof.add .av { background: #f1ead6; color: #7a7f6f; }
+.a .hint { color: #6f735f; font-size: 11px; }
+.a .hub { flex: 1; display: grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; padding: 4px 14px 14px; }
+.a .tile { border-radius: 18px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; font-weight: 700; font-size: 13px; }
+.a .tile .ti { font-size: 26px; }
+.a .tile small { font-weight: 400; font-size: 10.5px; opacity: .85; }
+.a .t1 { grid-row: span 2; background: #3f8a2a; color: #fff; font-size: 17px; }
+.a .t1 .ti { font-size: 40px; }
+.a .t2 { background: #ffd43b; color: #4a3b00; }
+.a .t3 { background: #ffe8d6; color: #7a3410; }
+.a .t4 { background: #e3f0ff; color: #12406e; }
+.a .t5 { background: #efe9ff; color: #3e2a85; }
+.a .board { flex: 1; display: flex; flex-direction: column; padding: 8px 12px 10px; gap: 8px; }
+.a .strip { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 18px; padding: 6px 6px 6px 10px; border: 2px solid #e6dcc3; }
+.a .strip .w { background: #fbf6ea; border-radius: 10px; padding: 4px 8px; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 10px; }
+.a .strip .w .ti { font-size: 18px; }
+.a .strip .sp { flex: 1; }
+.a .speak { background: #3f8a2a; color: #fff; border-radius: 14px; width: 46px; height: 38px; display: grid; place-items: center; font-size: 22px; }
+.a .grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.a .cell { border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; gap: 3px; background: #fff; border: 2px solid; }
+.a .cell .ti { font-size: 22px; }
+.a .dock { display: flex; justify-content: center; gap: 10px; }
+.a .dock span { background: #fff; border: 1.5px solid #e6dcc3; border-radius: 99px; padding: 5px 12px; display: flex; gap: 5px; align-items: center; font-weight: 700; }
+
+/* ---------- B: Fala em foco ---------- */
+.b { background: #ffffff; color: #0f2e2c; }
+.b .board { flex: 1; display: flex; flex-direction: column; }
+.b .strip { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: #0f4c47; color: #fff; }
+.b .strip .w { background: rgba(255,255,255,.12); border-radius: 10px; padding: 4px 8px; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 10px; }
+.b .strip .w .ti { font-size: 18px; }
+.b .strip .sp { flex: 1; }
+.b .speak { background: #ff7a59; color: #fff; border-radius: 99px; height: 38px; padding: 0 14px; display: flex; gap: 6px; align-items: center; font-weight: 700; font-size: 13px; }
+.b .clr { width: 34px; height: 34px; border-radius: 99px; background: rgba(255,255,255,.12); display: grid; place-items: center; font-size: 18px; }
+.b .grid { flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; padding: 8px; background: #f2f5f4; }
+.b .cell { border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; gap: 3px; background: #fff; border-top: 5px solid; }
+.b .cell .ti { font-size: 22px; }
+.b .care { position: absolute; right: 10px; bottom: 10px; background: #0f2e2c; color: #fff; border-radius: 99px; padding: 6px 10px; display: flex; gap: 5px; align-items: center; font-weight: 700; font-size: 10.5px; opacity: .9; }
+.b .sheet-bg { position: absolute; inset: 0; background: rgba(8,30,28,.45); }
+.b .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 22px 22px 0 0; padding: 12px 16px 14px; }
+.b .grab { width: 40px; height: 4px; background: #cfd8d6; border-radius: 9px; margin: 0 auto 10px; }
+.b .sheet h4 { margin: 0 0 8px; font-family: "Baloo 2"; font-size: 16px; }
+.b .acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.b .act { border-radius: 14px; background: #f2f5f4; padding: 10px 6px; text-align: center; font-weight: 700; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.b .act .ti { font-size: 22px; color: #0f4c47; }
+.b .act.hot { background: #fff1ec; }
+.b .act.hot .ti { color: #e0532f; }
+.b .login { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+.b .login .art { background: #0f4c47; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 18px; gap: 8px; }
+.b .login .art img { height: 64px; }
+.b .login .art b { font-family: "Baloo 2"; font-size: 20px; line-height: 1.1; }
+.b .login .form { padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.b .lbl { font-weight: 700; font-size: 11px; }
+.b .inp { border: 2px solid #d5dedc; border-radius: 12px; height: 32px; padding: 0 10px; display: flex; align-items: center; color: #8b9795; }
+.b .btn { background: #ff7a59; color: #fff; border-radius: 12px; height: 34px; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+.b .ghost { color: #0f4c47; font-weight: 700; text-align: center; font-size: 11px; }
+
+/* ---------- C: Caderno de figurinhas ---------- */
+.c { background: #fff8f1; color: #2b2340; }
+.c .top { display: flex; align-items: center; gap: 8px; padding: 10px 14px 4px; }
+.c .top img { height: 34px; }
+.c .bubble { background: #fff; border-radius: 14px; padding: 6px 10px; font-weight: 700; border: 2px solid #2b2340; position: relative; font-size: 11.5px; }
+.c .sp { flex: 1; }
+.c .tabs { display: flex; gap: 6px; padding: 6px 14px; }
+.c .tabs span { border-radius: 12px 12px 4px 4px; padding: 6px 10px; font-weight: 700; display: flex; gap: 5px; align-items: center; border: 2px solid #2b2340; border-bottom-width: 4px; background: #fff; }
+.c .tabs span.on { background: #7c5cff; color: #fff; }
+.c .sheets { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 6px 14px 14px; }
+.c .card { border-radius: 16px; border: 2px solid #2b2340; border-bottom-width: 5px; background: #fff; display: flex; flex-direction: column; overflow: hidden; font-weight: 700; }
+.c .card .thumb { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 6px; }
+.c .card .thumb i { border-radius: 5px; }
+.c .card .name { padding: 6px 8px; border-top: 2px solid #2b2340; display: flex; justify-content: space-between; align-items: center; }
+.c .card.new { border-style: dashed; align-items: center; justify-content: center; color: #7c5cff; gap: 4px; }
+.c .card.new .ti { font-size: 26px; }
+.c .board { flex: 1; display: flex; flex-direction: column; padding: 8px 12px 10px; gap: 8px; }
+.c .strip { display: flex; align-items: center; gap: 6px; background: #fff; border: 2px solid #2b2340; border-bottom-width: 5px; border-radius: 18px; padding: 6px; }
+.c .strip .w { border-radius: 10px; padding: 4px 8px; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 10px; border: 2px solid #2b2340; transform: rotate(-2deg); background: #fff3c4; }
+.c .strip .w:nth-child(2) { transform: rotate(2deg); background: #d9f7e8; }
+.c .strip .w .ti { font-size: 18px; }
+.c .speak { background: #7c5cff; color: #fff; border-radius: 14px; width: 46px; height: 38px; display: grid; place-items: center; font-size: 22px; border: 2px solid #2b2340; border-bottom-width: 4px; }
+.c .grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.c .cell { border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; gap: 3px; border: 2px solid #2b2340; border-bottom-width: 5px; }
+.c .cell .ti { font-size: 22px; }
+.c .wiz { flex: 1; display: grid; grid-template-columns: 0.8fr 1.2fr; align-items: center; padding: 10px 18px; gap: 12px; }
+.c .wiz img { width: 100%; max-height: 150px; }
+.c .wiz h3 { font-family: "Baloo 2"; font-size: 19px; margin: 0 0 6px; line-height: 1.1; }
+.c .choice { border: 2px solid #2b2340; border-bottom-width: 4px; border-radius: 14px; padding: 8px 10px; margin-bottom: 6px; background: #fff; display: flex; gap: 8px; align-items: center; font-weight: 700; }
+.c .choice .ti { font-size: 20px; color: #7c5cff; }
+.c .choice.on { background: #efe9ff; }
+.c .steps { display: flex; gap: 4px; margin-top: 4px; }
+.c .steps i { height: 6px; flex: 1; border-radius: 9px; background: #e3dcf7; }
+.c .steps i.on { background: #7c5cff; }
+.compare { background: #fff; border-radius: 24px; padding: 24px; }
+.compare h2 { font-family: "Baloo 2"; font-size: 24px; margin: 0 0 10px; }
+.compare ul { margin: 0; padding-left: 20px; line-height: 1.7; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Grilo Falante: 3 caminhos de design</h1>
+  <p class="lead">Nenhum dos três tem a barra lateral, os ícones ou os formulários do AsTeRICS Grid. Cada caminho mostra três telas no tablet: a entrada, o lugar do adulto e a prancha do Cadu. Os desenhos dos botões são só exemplo; no app real continuam as figuras do ARASAAC e as fotos da família.</p>
+
+  <!-- A -->
+  <section class="dir">
+    <div class="dir-head"><span class="dir-letter">A</span><h2>Casa do Grilo</h2></div>
+    <p class="idea">O app abre perguntando "Quem vai falar hoje?", com o rosto de cada criança. Depois vem uma tela inicial com cartões grandes, sem menu escondido: Falar, Frases, Pranchas, Ajustes. Na prancha, a frase fica num balão no alto e os botões de apoio ficam embaixo. Visual quente: creme, verde-folha e amarelo-girassol.</p>
+    <div class="screens">
+      <div><div class="tab a">
+        <div class="bar"><img src="../../app/img/grilo/logo-icone.svg" alt=""><b>Grilo Falante</b><span class="sp"></span><span class="pill"><i class="ti ti-help-circle"></i>Ajuda</span></div>
+        <div class="who">
+          <img src="../../app/img/grilo/grilo-acenando.svg" alt="" style="height:64px">
+          <h3>Quem vai falar hoje?</h3>
+          <div class="profiles">
+            <div class="prof"><div class="av" style="background:#3f8a2a">C</div>Cadu</div>
+            <div class="prof"><div class="av" style="background:#e8590c">M</div>Maria</div>
+            <div class="prof add"><div class="av"><i class="ti ti-plus"></i></div>Nova criança</div>
+          </div>
+          <span class="hint">Sem senha. Tudo fica guardado neste tablet. <u>Entrar com conta</u></span>
+        </div>
+      </div><p class="cap">Entrada: escolher a criança pelo rosto</p></div>
+
+      <div><div class="tab a">
+        <div class="bar"><img src="../../app/img/grilo/logo-icone.svg" alt=""><b>Oi, Cadu!</b><span class="sp"></span><span class="pill"><i class="ti ti-user-circle"></i>Trocar</span></div>
+        <div class="hub">
+          <div class="tile t1"><i class="ti ti-message-circle-2"></i><div>Falar<br><small>Abre a prancha do Cadu</small></div></div>
+          <div class="tile t2"><i class="ti ti-star"></i><div>Frases<br><small>10 favoritas</small></div></div>
+          <div class="tile t3"><i class="ti ti-layout-grid"></i><div>Pranchas<br><small>30 pranchas</small></div></div>
+          <div class="tile t4"><i class="ti ti-adjustments"></i><div>Ajustes<br><small>Voz, cores, bloqueio</small></div></div>
+          <div class="tile t5"><i class="ti ti-wifi-off"></i><div>Sem internet<br><small>Tudo pronto</small></div></div>
+        </div>
+      </div><p class="cap">Início do adulto: cartões grandes, tudo à vista</p></div>
+
+      <div><div class="tab a">
+        <div class="board">
+          <div class="strip"><span class="w"><i class="ti ti-user"></i>eu</span><span class="w"><i class="ti ti-heart"></i>quero</span><span class="w"><i class="ti ti-glass-full"></i>água</span><span class="sp"></span><span class="speak"><i class="ti ti-volume"></i></span></div>
+          <div class="grid">
+            <div class="cell" style="border-color:#f2c94c"><i class="ti ti-user"></i>eu</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-heart"></i>quero</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-player-play"></i>brincar</div>
+            <div class="cell" style="border-color:#f2994a"><i class="ti ti-glass-full"></i>água</div>
+            <div class="cell" style="border-color:#f2994a"><i class="ti ti-cookie"></i>biscoito</div>
+            <div class="cell" style="border-color:#56ccf2"><i class="ti ti-mood-happy"></i>feliz</div>
+            <div class="cell" style="border-color:#56ccf2"><i class="ti ti-mood-sad"></i>triste</div>
+            <div class="cell" style="border-color:#bb6bd9"><i class="ti ti-home"></i>casa</div>
+            <div class="cell" style="border-color:#eb5757"><i class="ti ti-hand-stop"></i>não</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-check"></i>sim</div>
+          </div>
+          <div class="dock"><span><i class="ti ti-arrow-back-up"></i>Voltar</span><span><i class="ti ti-star"></i>Frases</span><span><i class="ti ti-backspace"></i>Apagar</span></div>
+        </div>
+      </div><p class="cap">Prancha: a frase num balão, apoio embaixo</p></div>
+    </div>
+  </section>
+
+  <!-- B -->
+  <section class="dir">
+    <div class="dir-head"><span class="dir-letter">B</span><h2>Fala em foco</h2></div>
+    <p class="idea">O app abre direto na prancha, que ocupa a tela inteira; a criança nunca vê menus. O adulto segura o botão "Responsável" e sobe um painel com tudo: editar, frases, fotos, ajustes. Visual limpo e moderno: branco, verde-petróleo e coral. Entrar com conta vira uma tela dividida, com os rótulos em cima dos campos.</p>
+    <div class="screens">
+      <div><div class="tab b">
+        <div class="login">
+          <div class="art"><img src="../../app/img/grilo/grilo-falando.svg" alt=""><b>Toda criança tem algo a dizer.</b><span>Comunicação alternativa grátis, que funciona sem internet.</span></div>
+          <div class="form">
+            <div class="lbl">Nome de usuário</div><div class="inp">cadu</div>
+            <div class="lbl">Senha</div><div class="inp">••••••</div>
+            <div class="btn">Entrar</div>
+            <div class="ghost">Usar só neste tablet, sem conta</div>
+          </div>
+        </div>
+      </div><p class="cap">Entrada: tela dividida, rótulos em cima dos campos</p></div>
+
+      <div><div class="tab b">
+        <div class="board">
+          <div class="strip"><span class="w"><i class="ti ti-user"></i>eu</span><span class="w"><i class="ti ti-heart"></i>quero</span><span class="w"><i class="ti ti-glass-full"></i>água</span><span class="sp"></span><span class="clr"><i class="ti ti-backspace"></i></span><span class="speak"><i class="ti ti-volume"></i>Falar</span></div>
+          <div class="grid">
+            <div class="cell" style="border-color:#f2c94c"><i class="ti ti-user"></i>eu</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-heart"></i>quero</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-player-play"></i>brincar</div>
+            <div class="cell" style="border-color:#f2994a"><i class="ti ti-glass-full"></i>água</div>
+            <div class="cell" style="border-color:#f2994a"><i class="ti ti-cookie"></i>biscoito</div>
+            <div class="cell" style="border-color:#bb6bd9"><i class="ti ti-home"></i>casa</div>
+            <div class="cell" style="border-color:#56ccf2"><i class="ti ti-mood-happy"></i>feliz</div>
+            <div class="cell" style="border-color:#56ccf2"><i class="ti ti-mood-sad"></i>triste</div>
+            <div class="cell" style="border-color:#eb5757"><i class="ti ti-hand-stop"></i>não</div>
+            <div class="cell" style="border-color:#6fcf97"><i class="ti ti-check"></i>sim</div>
+            <div class="cell" style="border-color:#bb6bd9"><i class="ti ti-school"></i>escola</div>
+            <div class="cell" style="border-color:#f2994a"><i class="ti ti-bed"></i>dormir</div>
+          </div>
+        </div>
+        <div class="care"><i class="ti ti-lock"></i>Responsável (segure)</div>
+      </div><p class="cap">Prancha em tela cheia; menus só para o adulto</p></div>
+
+      <div><div class="tab b">
+        <div class="board">
+          <div class="strip"><span class="w"><i class="ti ti-user"></i>eu</span><span class="sp"></span><span class="speak"><i class="ti ti-volume"></i>Falar</span></div>
+          <div class="grid">
+            <div class="cell" style="border-color:#f2c94c"></div><div class="cell" style="border-color:#6fcf97"></div><div class="cell" style="border-color:#6fcf97"></div><div class="cell" style="border-color:#f2994a"></div><div class="cell" style="border-color:#f2994a"></div><div class="cell" style="border-color:#bb6bd9"></div>
+            <div class="cell" style="border-color:#56ccf2"></div><div class="cell" style="border-color:#56ccf2"></div><div class="cell" style="border-color:#eb5757"></div><div class="cell" style="border-color:#6fcf97"></div><div class="cell" style="border-color:#bb6bd9"></div><div class="cell" style="border-color:#f2994a"></div>
+          </div>
+        </div>
+        <div class="sheet-bg"></div>
+        <div class="sheet"><div class="grab"></div><h4>Olá! O que vamos fazer?</h4>
+          <div class="acts">
+            <div class="act hot"><i class="ti ti-pencil"></i>Editar prancha</div>
+            <div class="act"><i class="ti ti-camera"></i>Foto nova</div>
+            <div class="act"><i class="ti ti-star"></i>Frases</div>
+            <div class="act"><i class="ti ti-layout-grid"></i>Pranchas</div>
+            <div class="act"><i class="ti ti-volume"></i>Voz</div>
+            <div class="act"><i class="ti ti-palette"></i>Aparência</div>
+            <div class="act"><i class="ti ti-user-circle"></i>Trocar criança</div>
+            <div class="act"><i class="ti ti-settings"></i>Ajustes</div>
+          </div>
+        </div>
+      </div><p class="cap">Painel do responsável: sobe por cima da prancha</p></div>
+    </div>
+  </section>
+
+  <!-- C -->
+  <section class="dir">
+    <div class="dir-head"><span class="dir-letter">C</span><h2>Caderno de figurinhas</h2></div>
+    <p class="idea">O app parece um caderno de figurinhas: botões com contorno grosso e "sombra" de papel, abas no alto em vez de menu lateral, e o grilo conversando com o adulto em balõezinhos para explicar cada passo. As palavras escolhidas viram figurinhas coladas na faixa da frase. É o caminho mais lúdico e o mais diferente de qualquer app de CAA.</p>
+    <div class="screens">
+      <div><div class="tab c">
+        <div class="wiz">
+          <img src="../../app/img/grilo/grilo-apontando.svg" alt="">
+          <div>
+            <h3>Oi! Eu sou o Grilo. Quem vai usar?</h3>
+            <div class="choice on"><i class="ti ti-mood-kid"></i>Cadu</div>
+            <div class="choice"><i class="ti ti-user-plus"></i>Criar perfil novo</div>
+            <div class="choice"><i class="ti ti-cloud"></i>Já tenho conta</div>
+            <div class="steps"><i class="on"></i><i></i><i></i></div>
+          </div>
+        </div>
+      </div><p class="cap">Entrada: o grilo guia passo a passo</p></div>
+
+      <div><div class="tab c">
+        <div class="top"><img src="../../app/img/grilo/logo-icone.svg" alt=""><span class="bubble">Escolha uma prancha para editar</span><span class="sp"></span></div>
+        <div class="tabs"><span class="on"><i class="ti ti-layout-grid"></i>Pranchas</span><span><i class="ti ti-star"></i>Frases</span><span><i class="ti ti-photo"></i>Fotos</span><span><i class="ti ti-adjustments"></i>Ajustes</span></div>
+        <div class="sheets">
+          <div class="card"><div class="thumb"><i style="background:#ffe08a"></i><i style="background:#b9efcf"></i><i style="background:#b9efcf"></i><i style="background:#ffc9a8"></i><i style="background:#ffc9a8"></i><i style="background:#cde9ff"></i></div><div class="name">Palavras essenciais <i class="ti ti-home"></i></div></div>
+          <div class="card"><div class="thumb"><i style="background:#ffc9a8"></i><i style="background:#ffc9a8"></i><i style="background:#ffc9a8"></i><i style="background:#ffe08a"></i><i style="background:#ffc9a8"></i><i style="background:#ffc9a8"></i></div><div class="name">Comidas</div></div>
+          <div class="card"><div class="thumb"><i style="background:#cde9ff"></i><i style="background:#cde9ff"></i><i style="background:#e5dcff"></i><i style="background:#cde9ff"></i><i style="background:#cde9ff"></i><i style="background:#e5dcff"></i></div><div class="name">Emoções</div></div>
+          <div class="card"><div class="thumb"><i style="background:#e5dcff"></i><i style="background:#ffe08a"></i><i style="background:#e5dcff"></i><i style="background:#e5dcff"></i><i style="background:#b9efcf"></i><i style="background:#e5dcff"></i></div><div class="name">Família</div></div>
+          <div class="card"><div class="thumb"><i style="background:#b9efcf"></i><i style="background:#b9efcf"></i><i style="background:#ffe08a"></i><i style="background:#b9efcf"></i><i style="background:#b9efcf"></i><i style="background:#cde9ff"></i></div><div class="name">Brincar</div></div>
+          <div class="card new"><i class="ti ti-plus"></i>Nova prancha</div>
+        </div>
+      </div><p class="cap">Lugar do adulto: abas no alto, pranchas como cartões</p></div>
+
+      <div><div class="tab c">
+        <div class="board">
+          <div class="strip"><span class="w"><i class="ti ti-user"></i>eu</span><span class="w"><i class="ti ti-heart"></i>quero</span><span class="w"><i class="ti ti-glass-full"></i>água</span><span class="sp"></span><span class="speak"><i class="ti ti-volume"></i></span></div>
+          <div class="grid">
+            <div class="cell" style="background:#fff3c4"><i class="ti ti-user"></i>eu</div>
+            <div class="cell" style="background:#d9f7e8"><i class="ti ti-heart"></i>quero</div>
+            <div class="cell" style="background:#d9f7e8"><i class="ti ti-player-play"></i>brincar</div>
+            <div class="cell" style="background:#ffe1cf"><i class="ti ti-glass-full"></i>água</div>
+            <div class="cell" style="background:#ffe1cf"><i class="ti ti-cookie"></i>biscoito</div>
+            <div class="cell" style="background:#dcefff"><i class="ti ti-mood-happy"></i>feliz</div>
+            <div class="cell" style="background:#dcefff"><i class="ti ti-mood-sad"></i>triste</div>
+            <div class="cell" style="background:#ece5ff"><i class="ti ti-home"></i>casa</div>
+            <div class="cell" style="background:#ffd9d9"><i class="ti ti-hand-stop"></i>não</div>
+            <div class="cell" style="background:#d9f7e8"><i class="ti ti-check"></i>sim</div>
+          </div>
+        </div>
+      </div><p class="cap">Prancha: palavras viram figurinhas coladas na frase</p></div>
+    </div>
+  </section>
+
+  <section class="compare">
+    <h2>Em todos os caminhos</h2>
+    <ul>
+      <li>Sai a barra lateral do original. A navegação passa a ser outra: cartões, painel ou abas, conforme o caminho.</li>
+      <li>Ícones novos (Tabler, licença MIT) no lugar dos ícones do original, guardados no app para funcionar sem internet.</li>
+      <li>Formulários com o rótulo em cima do campo. "Nome de usuário" nunca mais quebra em três linhas.</li>
+      <li>Ajuda e "Sobre" com texto próprio do Grilo Falante; o crédito ao AsTeRICS Grid fica só no "Sobre".</li>
+      <li>Nada muda nos dados: as pranchas, fotos e frases do Cadu continuam iguais.</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>

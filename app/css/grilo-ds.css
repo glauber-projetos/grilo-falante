@@ -1,0 +1,285 @@
+/*
+ * Grilo Falante: base visual (design system) da versão nova.
+ * Regras e mapa das telas: docs/grilo-design/DESIGN.md
+ *
+ * Tudo aqui usa o prefixo "g-" para não colidir com o CSS herdado.
+ * Ícones: Tabler Icons outline (MIT), em app/css/tabler, uso: <i class="ti ti-home" aria-hidden="true"></i>
+ * Fontes: Baloo 2 (títulos) e Atkinson Hyperlegible (textos), já carregadas por grilo-theme.css.
+ */
+
+:root {
+    /* cores da marca */
+    --g-folha: #3f8a2a;          /* ação principal */
+    --g-folha-escura: #2f6b1f;   /* hover, texto sobre fundo claro */
+    --g-folha-clara: #e4f2dc;
+    --g-girassol: #ffd43b;       /* destaque, favoritos */
+    --g-girassol-claro: #fff4c2;
+    --g-coral: #ff7a59;          /* "Falar", alertas suaves */
+    --g-coral-escuro: #c94a2c;
+    --g-ceu: #e3f0ff;
+    --g-ceu-escuro: #12406e;
+    --g-lavanda: #efe9ff;
+    --g-lavanda-escura: #3e2a85;
+    --g-pessego: #ffe8d6;
+    --g-pessego-escuro: #7a3410;
+
+    /* superfícies e texto */
+    --g-fundo: #fbf6ea;          /* creme: fundo das telas */
+    --g-superficie: #ffffff;     /* cartões, campos */
+    --g-superficie-2: #f4eedd;   /* áreas recolhidas */
+    --g-borda: #e6dcc3;
+    --g-borda-forte: #cdbf9c;
+    --g-tinta: #263b1c;          /* texto principal */
+    --g-tinta-2: #55594f;        /* texto de apoio */
+    --g-tinta-3: #7a7f6f;        /* dicas, legendas */
+    --g-perigo: #b42318;
+    --g-perigo-claro: #fde8e6;
+
+    /* forma */
+    --g-raio-p: 10px;
+    --g-raio: 16px;
+    --g-raio-g: 24px;
+    --g-raio-pilula: 999px;
+    --g-sombra: 0 1px 2px rgba(38, 59, 28, 0.06), 0 4px 14px rgba(38, 59, 28, 0.08);
+    --g-sombra-alta: 0 -6px 30px rgba(38, 59, 28, 0.18);
+    --g-foco: 0 0 0 3px #fff, 0 0 0 6px #1b6fd8;
+
+    /* espaço e toque */
+    --g-alvo: 48px;              /* menor área de toque permitida */
+    --g-alvo-g: 56px;            /* botões principais */
+    --g-e1: 4px;
+    --g-e2: 8px;
+    --g-e3: 12px;
+    --g-e4: 16px;
+    --g-e5: 24px;
+    --g-e6: 32px;
+
+    /* texto */
+    --g-fonte-titulo: "Baloo 2", "Atkinson Hyperlegible", system-ui, sans-serif;
+    --g-fonte: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --g-t-legenda: 0.875rem;
+    --g-t-corpo: 1rem;
+    --g-t-grande: 1.125rem;
+    --g-t-h3: 1.25rem;
+    --g-t-h2: 1.5rem;
+    --g-t-h1: 2rem;
+
+    /* movimento */
+    --g-rapido: 120ms;
+    --g-medio: 220ms;
+    --g-curva: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --g-rapido: 0ms; --g-medio: 0ms; }
+}
+
+/* ---------- página ---------- */
+.g-tela {
+    min-height: 100%;
+    background: var(--g-fundo);
+    color: var(--g-tinta);
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-corpo);
+    line-height: 1.5;
+}
+.g-tela h1, .g-tela h2, .g-tela h3, .g-titulo {
+    font-family: var(--g-fonte-titulo);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--g-tinta);
+    margin: 0 0 var(--g-e3);
+    letter-spacing: 0;
+    text-transform: none;
+}
+.g-tela h1 { font-size: var(--g-t-h1); }
+.g-tela h2 { font-size: var(--g-t-h2); }
+.g-tela h3 { font-size: var(--g-t-h3); }
+.g-conteudo { max-width: 1100px; margin: 0 auto; padding: var(--g-e5) var(--g-e4) var(--g-e6); }
+.g-apoio { color: var(--g-tinta-2); }
+.g-dica { color: var(--g-tinta-3); font-size: var(--g-t-legenda); }
+.g-tela .ti { line-height: 1; }
+
+/* ---------- barra do alto (telas do adulto) ---------- */
+.g-topo {
+    display: flex;
+    align-items: center;
+    gap: var(--g-e3);
+    min-height: 64px;
+    padding: var(--g-e2) var(--g-e4);
+    background: var(--g-fundo);
+    border-bottom: 1px solid var(--g-borda);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+.g-topo .g-topo-titulo { font-family: var(--g-fonte-titulo); font-weight: 700; font-size: var(--g-t-h3); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-topo img.g-marca { height: 36px; width: auto; }
+
+/* ---------- botões ---------- */
+.g-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--g-e2);
+    min-height: var(--g-alvo);
+    padding: 0 var(--g-e5);
+    margin: 0;
+    border-radius: var(--g-raio);
+    border: 2px solid var(--g-borda);
+    background: var(--g-superficie);
+    color: var(--g-tinta);
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-corpo);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: normal;
+    text-align: center;
+    height: auto;
+    cursor: pointer;
+    transition: transform var(--g-rapido) var(--g-curva), background var(--g-rapido), border-color var(--g-rapido);
+}
+.g-btn:hover { border-color: var(--g-borda-forte); }
+.g-btn:active { transform: scale(0.97); }
+.g-btn .ti { font-size: 1.4em; }
+.g-btn-principal { background: var(--g-folha); border-color: var(--g-folha); color: #fff; }
+.g-btn-principal:hover { background: var(--g-folha-escura); border-color: var(--g-folha-escura); color: #fff; }
+.g-btn-falar { background: var(--g-coral); border-color: var(--g-coral); color: #fff; }
+.g-btn-falar:hover { background: var(--g-coral-escuro); border-color: var(--g-coral-escuro); color: #fff; }
+.g-btn-leve { background: transparent; border-color: transparent; color: var(--g-folha-escura); }
+.g-btn-leve:hover { background: var(--g-folha-clara); border-color: transparent; }
+.g-btn-perigo { background: var(--g-superficie); border-color: var(--g-perigo); color: var(--g-perigo); }
+.g-btn-grande { min-height: var(--g-alvo-g); font-size: var(--g-t-grande); border-radius: var(--g-raio-g); }
+.g-btn-bloco { display: flex; width: 100%; }
+.g-btn-icone { padding: 0; width: var(--g-alvo); min-width: var(--g-alvo); border-radius: var(--g-raio-pilula); }
+.g-btn[disabled], .g-btn.g-desligado { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ---------- foco visível (teclado e acionadores) ---------- */
+.g-tela :focus-visible, .g-btn:focus-visible, .g-cartao:focus-visible, .g-campo input:focus-visible {
+    outline: none;
+    box-shadow: var(--g-foco);
+}
+
+/* ---------- cartões e ladrilhos ---------- */
+.g-cartao {
+    background: var(--g-superficie);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio-g);
+    padding: var(--g-e4) var(--g-e5);
+}
+.g-ladrilhos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--g-e3);
+}
+.g-ladrilho {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--g-e3);
+    min-height: 132px;
+    padding: var(--g-e4);
+    border-radius: var(--g-raio-g);
+    border: none;
+    text-align: left;
+    font-family: var(--g-fonte);
+    font-weight: 700;
+    font-size: var(--g-t-grande);
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.2;
+    height: auto;
+    margin: 0;
+    white-space: normal;
+    cursor: pointer;
+    color: var(--g-tinta);
+    background: var(--g-superficie);
+    text-decoration: none;
+    transition: transform var(--g-rapido) var(--g-curva);
+}
+.g-ladrilho:active { transform: scale(0.97); }
+.g-ladrilho .ti { font-size: 2.2rem; }
+.g-ladrilho small { display: block; font-weight: 400; font-size: var(--g-t-legenda); opacity: 0.85; margin-top: 2px; }
+.g-ladrilho-folha { background: var(--g-folha); color: #fff; }
+.g-ladrilho-girassol { background: var(--g-girassol); color: #4a3b00; }
+.g-ladrilho-pessego { background: var(--g-pessego); color: var(--g-pessego-escuro); }
+.g-ladrilho-ceu { background: var(--g-ceu); color: var(--g-ceu-escuro); }
+.g-ladrilho-lavanda { background: var(--g-lavanda); color: var(--g-lavanda-escura); }
+
+/* ---------- formulários: rótulo SEMPRE em cima do campo ---------- */
+.g-campo { display: flex; flex-direction: column; gap: var(--g-e1); margin-bottom: var(--g-e4); }
+.g-campo > label { font-weight: 700; font-size: var(--g-t-corpo); margin: 0; width: auto; }
+.g-campo input[type="text"], .g-campo input[type="password"], .g-campo input[type="email"],
+.g-campo input[type="number"], .g-campo select, .g-campo textarea {
+    width: 100%;
+    min-height: var(--g-alvo);
+    padding: var(--g-e2) var(--g-e3);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio);
+    background: var(--g-superficie);
+    color: var(--g-tinta);
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-grande);
+    box-shadow: none;
+    margin: 0;
+}
+.g-campo input:focus, .g-campo select:focus, .g-campo textarea:focus { border-color: var(--g-folha); }
+.g-campo .g-dica { margin-top: 2px; }
+.g-campo-erro input { border-color: var(--g-perigo); }
+.g-erro { color: var(--g-perigo); font-size: var(--g-t-legenda); font-weight: 700; }
+.g-marcar { display: flex; align-items: flex-start; gap: var(--g-e3); min-height: var(--g-alvo); cursor: pointer; }
+.g-marcar input { width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--g-folha); flex: none; }
+
+/* ---------- pílulas e etiquetas ---------- */
+.g-pilula {
+    display: inline-flex; align-items: center; gap: var(--g-e1);
+    min-height: 32px; padding: 0 var(--g-e3);
+    border-radius: var(--g-raio-pilula);
+    background: var(--g-superficie-2); color: var(--g-tinta-2);
+    font-size: var(--g-t-legenda); font-weight: 700;
+}
+.g-pilula-ok { background: var(--g-folha-clara); color: var(--g-folha-escura); }
+
+/* ---------- avatar de perfil ---------- */
+.g-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: grid; place-items: center; overflow: hidden; flex: none;
+    font-family: var(--g-fonte-titulo); font-size: 2rem; color: #fff;
+    background: var(--g-folha);
+}
+.g-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- painel que sobe de baixo (bottom sheet) ---------- */
+.g-veu { position: fixed; inset: 0; background: rgba(20, 32, 15, 0.45); z-index: 900; animation: g-aparecer var(--g-medio) var(--g-curva); }
+.g-painel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 901;
+    max-height: 88vh; overflow-y: auto;
+    background: var(--g-superficie);
+    border-radius: var(--g-raio-g) var(--g-raio-g) 0 0;
+    box-shadow: var(--g-sombra-alta);
+    padding: var(--g-e3) var(--g-e5) var(--g-e5);
+    animation: g-subir var(--g-medio) var(--g-curva);
+}
+.g-painel-alca { width: 48px; height: 5px; border-radius: 9px; background: var(--g-borda-forte); margin: 0 auto var(--g-e4); }
+@media (min-width: 900px) {
+    .g-painel { left: 50%; right: auto; width: 820px; transform: translateX(-50%); animation: g-subir-centro var(--g-medio) var(--g-curva); }
+}
+@keyframes g-aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes g-subir { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes g-subir-centro { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
+
+/* ---------- aviso curto ---------- */
+.g-aviso {
+    display: flex; gap: var(--g-e3); align-items: flex-start;
+    padding: var(--g-e3) var(--g-e4); border-radius: var(--g-raio);
+    background: var(--g-girassol-claro); color: #4a3b00;
+}
+.g-aviso .ti { font-size: 1.4rem; flex: none; }
+
+/* ---------- utilidades ---------- */
+.g-linha { display: flex; align-items: center; gap: var(--g-e3); flex-wrap: wrap; }
+.g-coluna { display: flex; flex-direction: column; gap: var(--g-e3); }
+.g-espaco { flex: 1; }
+.g-oculto-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
