@@ -16,7 +16,19 @@ O Grilo Falante é uma versão do **[AsTeRICS Grid](https://github.com/asterics/
 * **Frases favoritas** e histórico de frases faladas.
 * Visual próprio pensado para tablet e para dificuldade motora: alvos grandes, cores com bom contraste e as fontes Atkinson Hyperlegible e Baloo 2 (licença SIL OFL, em `app/fonts`).
 
+* **Sem internet**: em Configurações → Sem internet, um botão guarda no aparelho todos os pictogramas das pranchas (ARASAAC, licença CC BY-NC-SA; o autor e o link de cada imagem ficam na prancha) e um assistente confere se a voz em português do Brasil do aparelho funciona offline. Roteiro de teste: [docs/teste-tablet-offline.md](docs/teste-tablet-offline.md).
+
 O mascote, o logo e os ícones do Grilo Falante são desenhos originais (pasta `app/img/grilo`).
+
+### Por que ainda não há "voz natural" própria (Piper)
+
+Avaliamos as vozes neurais abertas que rodam dentro do navegador, sem internet. A melhor opção é o [Piper](https://github.com/rhasspy/piper) em português do Brasil (vozes faber, cadu, jeff e edresson; licença CC0 nos [model cards](https://huggingface.co/rhasspy/piper-voices/tree/main/pt/pt_BR)). As bibliotecas para usá-lo no navegador (onnxruntime-web e piper-tts-web, licença MIT; espeak-ng, GPL-3.0) são compatíveis com a AGPL-3.0. **A licença permite. O que impede agora é o tablet fraco:**
+
+* **Download grande:** cerca de 92 MB por voz (modelo 63 MB + programa de voz 10,6 MB + dicionário de pronúncia 18 MB), medido em 2026-11-07.
+* **Lento sem vários núcleos:** no GitHub Pages o navegador só usa 1 núcleo para isso (faltam os cabeçalhos COOP/COEP). Medido num PC com 1 núcleo: a voz faber leva ~0,3 s para cada 1 s de fala, e carregar a voz leva ~1 s. Num tablet barato (processador uns 5 a 8 vezes mais lento por núcleo) isso vira ~1,5 a 2,5 s por palavra curta e 5 a 8 s para carregar. É demora demais para comunicação.
+* **Memória:** o modelo carregado ocupa algumas centenas de MB, o que arrisca o Chrome fechar o app em tablets com 2 a 3 GB de RAM.
+
+**Por enquanto, use a voz do Google baixada no aparelho** (grátis, rápida e offline; o assistente da aba Sem internet ensina a baixar). Um caminho para o futuro: gerar com o Piper, uma única vez, o áudio de cada botão e guardar, como o app já faz com vozes externas. Assim a demora some nos botões, mas continua nas frases digitadas.
 
 ---
 

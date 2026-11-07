@@ -71,6 +71,17 @@ const dynamicImageHandler = async ({ url, request }) => {
         });
     } catch (e) {
         try {
+            // an image already shown via <img> can be in the HTTP cache without CORS header -> ask the network again
+            response = await fetch(url.href, {
+                mode: 'cors',
+                cache: 'reload'
+            });
+        } catch (e2) {
+            response = null;
+        }
+    }
+    if (!response) {
+        try {
             response = await fetch(url.href, {
                 mode: 'no-cors'
             });
