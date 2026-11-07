@@ -1,61 +1,42 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keyup.27="$emit('close')" @keyup.ctrl.enter="save()">
-                    <a class="inline close-button" href="javascript:void(0);" @click="$emit('close')"><i class="fas fa-times"/></a>
-                    <div class="modal-header">
-                        <h1 name="header">
-                            {{ $t('addMultipleGridItems') }}
-                        </h1>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="srow">
-                            <label class="three columns" for="inputText">{{ $t('input') }}</label>
-                            <span class="nine columns">{{ $t('insertLabelsForNewElements') }}</span>
-                        </div>
-                        <div class="srow">
-                            <textarea v-focus class="twelve columns" id="inputText" v-model="inputText" @input="textChanged" style="resize: vertical;min-height: 70px;" placeholder="Element1;Element2;Element3;..."/>
-                        </div>
-                        <div class="srow">
-                            <label class="three columns">{{ $t('recognizedElements') }}</label>
-                            <div v-show="parsedElems.length > 0" class="nine columns">
-                                <span>{{parsedElems.length}}</span>
-                                <span>{{ $t('elementsBracket') }}</span>
-                                <span class="break-word">{{JSON.stringify(parsedElems)}}</span>
-                            </div>
-                            <div v-show="parsedElems.length == 0" class="nine columns">
-                                <span>{{ $t('noElements') }}</span>
-                            </div>
-                        </div>
-                        <div class="srow">
-                            <input id="addImages" type="checkbox" v-model="addImages">
-                            <label for="addImages">{{ $t('automaticallyAddImages') }}</label>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <div class="button-container srow">
-                            <button class="four columns offset-by-four" @click="$emit('close')" :title="$t('keyboardEsc')">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button class="four columns" @click="save()" :title="$t('keyboardCtrlEnter')" :disabled="parsedElems.length == 0">
-                                <i v-if="!loading" class="fas fa-check"/>
-                                <i v-if="loading" class="fas fa-spinner fa-spin"/>
-                                <span>{{ $t('insertElements') }}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <gestao-modal :titulo="$t('gestaoEdicaoVariosTitulo')" icone="playlist-add" tamanho="m"
+                  @close="$emit('close')" @keyup.ctrl.enter.native="save()">
+        <div class="g-campo">
+            <label for="inputText">{{ $t('gestaoEdicaoVariosRotulo') }}</label>
+            <span class="g-dica" id="dicaVarios">{{ $t('gestaoEdicaoVariosDica') }}</span>
+            <textarea v-focus id="inputText" v-model="inputText" @input="textChanged" rows="6" aria-describedby="dicaVarios"
+                      :placeholder="$t('gestaoEdicaoVariosExemplo')"></textarea>
         </div>
-    </div>
+
+        <div class="av-previa" aria-live="polite">
+            <p class="av-previa-titulo" v-if="parsedElems.length > 0">
+                <i class="ti ti-list-details" aria-hidden="true"></i>{{ $t('gestaoEdicaoVariosSeraoCriados', [parsedElems.length]) }}
+            </p>
+            <ul class="av-fichas" v-if="parsedElems.length > 0">
+                <li v-for="(elem, i) in parsedElems" :key="i + elem" class="av-ficha">{{ elem }}</li>
+            </ul>
+            <p v-else class="g-dica av-nada">{{ $t('gestaoEdicaoVariosNenhum') }}</p>
+        </div>
+
+        <label class="g-marcar">
+            <input id="addImages" type="checkbox" v-model="addImages"/>
+            <span>{{ $t('gestaoEdicaoVariosFiguras') }}<br/><small class="g-dica">{{ $t('gestaoEdicaoVariosFigurasDica') }}</small></span>
+        </label>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :title="$t('keyboardCtrlEnter')" :disabled="parsedElems.length == 0 || loading">
+                <i v-if="!loading" class="ti ti-plus" aria-hidden="true"></i>
+                <i v-if="loading" class="ti ti-loader-2 av-girando" aria-hidden="true"></i>
+                <span>{{ loading ? $t('gestaoEdicaoVariosAdicionando') : (parsedElems.length > 1 ? $t('gestaoEdicaoVariosAdicionarN', [parsedElems.length]) : $t('gestaoEdicaoVariosAdicionar')) }}</span>
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {i18nService} from "../../js/service/i18nService";
-    import './../../css/modal.css';
+    import GestaoModal from "./gestaoModal.vue";
     import {GridElement} from "../../js/model/GridElement";
     import {GridData} from "../../js/model/GridData";
     import {helpService} from "../../js/service/helpService";
@@ -64,6 +45,7 @@
     import { arasaacService } from '../../js/service/pictograms/arasaacService';
 
     export default {
+        components: {GestaoModal},
         props: ['gridData', 'undoService'],
         data: function () {
             return {
@@ -131,7 +113,25 @@
 </script>
 
 <style scoped>
-    .srow {
-        margin-top: 1em;
-    }
+.g-campo .g-dica { margin: 0 0 var(--g-e1); }
+.g-campo textarea { min-height: 150px; font-size: var(--g-t-grande); line-height: 1.5; }
+.av-previa {
+    background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio-g);
+    padding: var(--g-e3) var(--g-e4); margin-bottom: var(--g-e4);
+}
+.av-previa-titulo { display: flex; align-items: center; gap: var(--g-e2); font-weight: 700; margin: 0 0 var(--g-e2); }
+.av-previa-titulo .ti { color: var(--g-folha-escura); font-size: 1.3em; }
+.av-fichas { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--g-e2); max-height: 180px; overflow-y: auto; }
+.av-ficha {
+    margin: 0; padding: var(--g-e1) var(--g-e3); min-height: 36px; display: inline-flex; align-items: center;
+    background: var(--g-folha-clara); color: var(--g-folha-escura); border-radius: var(--g-raio-pilula);
+    font-weight: 700; overflow-wrap: anywhere;
+}
+.av-nada { margin: 0; }
+.g-marcar small { font-size: var(--g-t-legenda); }
+.av-girando { animation: av-girar 1s linear infinite; }
+@keyframes av-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .av-girando { animation: none; }
+}
 </style>

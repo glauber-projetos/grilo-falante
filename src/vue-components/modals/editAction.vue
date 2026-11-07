@@ -1,41 +1,45 @@
 <template>
-<div>
+<div class="ac">
     <div v-if="action.modelName == 'GridActionSpeak'">
-        <div class="srow">
-            <div class="four columns">
-                <label for="selectLang" class="normal-text">{{ $t('language') }}</label>
+        <p class="ac-explica"><i class="ti ti-volume" aria-hidden="true"></i><span>{{ $t('gestaoAcaoExplicaFala') }}</span></p>
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="g-campo">
+                    <label for="selectLang">{{ $t('gestaoAcaoIdiomaFala') }}</label>
+                    <select id="selectLang" v-model="action.speakLanguage">
+                        <option :value="undefined">{{ $t('automaticCurrentLanguage') }}</option>
+                        <option v-for="lang in voiceLangs" :value="lang.code">
+                            {{lang | extractTranslation}}
+                        </option>
+                    </select>
+                    <span class="g-dica" v-if="action.speakLanguage && gridElement">
+                        {{ $t('gestaoAcaoTextoNesseIdioma', [$t('lang.' + action.speakLanguage)]) }} {{gridElement.label[action.speakLanguage]}}
+                    </span>
+                </div>
             </div>
-            <select class="eight columns" id="selectLang" v-model="action.speakLanguage">
-                <option :value="undefined">{{ $t('automaticCurrentLanguage') }}</option>
-                <option v-for="lang in voiceLangs" :value="lang.code">
-                    {{lang | extractTranslation}}
-                </option>
-            </select>
-        </div>
-        <div class="srow" v-if="action.speakLanguage">
-            <div class="eight columns offset-by-four">
-                <span>{{ $t('label') }}</span><span> ({{ $t('lang.' + action.speakLanguage) }})</span>: {{gridElement.label[action.speakLanguage]}}
-            </div>
-        </div>
+        </details>
     </div>
     <div v-if="action.modelName == 'GridActionSpeakCustom'">
-        <div class="srow">
-            <div class="four columns">
-                <label for="selectLang2" class="normal-text">{{ $t('language') }}</label>
-            </div>
-            <select class="eight columns" id="selectLang2" v-model="action.speakLanguage">
-                <option :value="undefined">{{ $t('automaticCurrentLanguage') }}</option>
-                <option v-for="lang in voiceLangs" :value="lang.code">
-                    {{lang | extractTranslation}}
-                </option>
-            </select>
+        <div class="g-campo">
+            <label for="inCustomText">{{ $t('gestaoAcaoTextoFalar') }}</label>
+            <input id="inCustomText" type="text" v-model="action.speakText[getCurrentSpeakLang(action)]" :placeholder="gridElement && gridElement.type === GridElement.ELEMENT_TYPE_LIVE ? $t('canIncludePlaceholderLike') : ''"/>
+            <span class="g-dica">{{ $t('gestaoAcaoTextoFalarDica') }}</span>
         </div>
-        <div class="srow">
-            <div class="four columns">
-                <label for="inCustomText" class="normal-text">{{ $t('textToSpeak') }}</label>
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="g-campo">
+                    <label for="selectLang2">{{ $t('gestaoAcaoIdiomaFala') }}</label>
+                    <select id="selectLang2" v-model="action.speakLanguage">
+                        <option :value="undefined">{{ $t('automaticCurrentLanguage') }}</option>
+                        <option v-for="lang in voiceLangs" :value="lang.code">
+                            {{lang | extractTranslation}}
+                        </option>
+                    </select>
+                </div>
             </div>
-            <input class="eight columns" id="inCustomText" type="text" v-model="action.speakText[getCurrentSpeakLang(action)]" :placeholder="gridElement.type === GridElement.ELEMENT_TYPE_LIVE ? $t('canIncludePlaceholderLike') : ''"/>
-        </div>
+        </details>
     </div>
     <div v-if="action.modelName == 'GridActionAudio'">
         <edit-audio-action :action="action" :grid-data="gridData"></edit-audio-action>
@@ -44,36 +48,43 @@
         <edit-word-form-action :action="action" :grid-data="gridData"></edit-word-form-action>
     </div>
     <div v-if="action.modelName == 'GridActionNavigate'">
-        <div class="srow">
-            <label for="selectNavType" class="four columns normal-text">{{ $t('navigationType') }}</label>
-            <select class="eight columns" id="selectNavType" v-model="action.navType">
-                <option v-for="type in Object.values(GridActionNavigate.NAV_TYPES)" :value="type">{{ type | translate }}</option>
-            </select>
-        </div>
-        <div class="srow" v-if="action.navType === GridActionNavigate.NAV_TYPES.TO_GRID">
-            <div class="four columns">
-                <label for="selectGrid" class="normal-text">{{ $t('navigateToGrid') }}</label>
+        <fieldset class="ac-grupo">
+            <legend class="ac-legenda">{{ $t('gestaoAcaoParaOnde') }}</legend>
+            <div class="gm-escolhas ac-escolhas">
+                <button v-for="type in Object.values(GridActionNavigate.NAV_TYPES)" :key="type" type="button" class="gm-escolha"
+                        :aria-pressed="(action.navType === type).toString()" @click="action.navType = type">
+                    <i :class="'ti ti-' + (iconesNavegacao[type] || 'arrow-right')" aria-hidden="true"></i>
+                    <span>{{ nomesNavegacao[type] }}</span>
+                </button>
             </div>
-            <select class="eight columns" id="selectGrid" v-model="action.toGridId">
+        </fieldset>
+        <div class="g-campo" v-if="action.navType === GridActionNavigate.NAV_TYPES.TO_GRID">
+            <label for="selectGrid">{{ $t('gestaoAcaoQualPrancha') }}</label>
+            <select id="selectGrid" v-model="action.toGridId">
                 <option v-for="grid in grids" :value="grid.id">
                     {{grid.label | extractTranslation}}
                 </option>
             </select>
         </div>
         <div v-if="action.navType === GridActionNavigate.NAV_TYPES.OPEN_SEARCH">
-            <div class="srow">
-                <label for="searchTextInput" class="four columns normal-text">{{ $t('searchForCustomText') }}</label>
-                <input id="searchTextInput" class="eight columns" type="text" v-model="action.searchText" :placeholder="$t('customText')"/>
+            <div class="g-campo">
+                <label for="searchTextInput">{{ $t('gestaoAcaoBuscarTexto') }}</label>
+                <input id="searchTextInput" type="text" v-model="action.searchText" :placeholder="$t('customText')"/>
             </div>
-            <div class="srow">
+            <label class="g-marcar">
                 <input id="searchCollected" type="checkbox" v-model="action.searchCollectedText"/>
-                <label for="searchCollected" class="normal-text">{{ $t('searchForCollectedText') }}</label>
+                <span>{{ $t('gestaoAcaoBuscarFrase') }}</span>
+            </label>
+        </div>
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <label class="g-marcar">
+                    <input id="addToCollectChk" type="checkbox" v-model="action.addToCollectElem"/>
+                    <span>{{ $t('gestaoAcaoJuntarMesmoNavegando') }}</span>
+                </label>
             </div>
-        </div>
-        <div class="srow">
-            <input id="addToCollectChk" type="checkbox" v-model="action.addToCollectElem"/>
-            <label for="addToCollectChk" class="normal-text">{{ $t('addThisElementToCollectionElementsDespiteNav') }}</label>
-        </div>
+        </details>
     </div>
     <div v-if="action.modelName === 'GridActionARE'">
         <edit-are-action :action="action" :grid-data="gridData"/>
@@ -91,17 +102,9 @@
         <edit-matrix-action :action="action"/>
     </div>
     <div v-if="action.modelName == 'GridActionPredict'">
-        <div class="srow" v-show="gridElement.type === GridElement.ELEMENT_TYPE_COLLECT">
-            <div class="eight columns">
-                <input id="chkSuggestOnChange" type="checkbox" v-model="action.suggestOnChange">
-                <label for="chkSuggestOnChange" class="normal-text">{{ $t('refreshSuggestionsOnChange') }}</label>
-            </div>
-        </div>
-        <div class="srow">
-            <div class="four columns">
-                <label for="comboUseDict" class="normal-text">{{ $t('dictionaryToUse') }}</label>
-            </div>
-            <select class="eight columns" id="comboUseDict" v-model="action.dictionaryKey">
+        <div class="g-campo">
+            <label for="comboUseDict">{{ $t('gestaoAcaoPalavrasSugestao') }}</label>
+            <select id="comboUseDict" v-model="action.dictionaryKey">
                 <option :value="null">{{ $t('allDictionaries') }}</option>
                 <option :value="GridActionPredict.USE_DICTIONARY_CURRENT_LANG">{{ $t('useDictionaryOfCurrentContentLanguage') }}</option>
                 <option v-for="id in dictionaryKeys" :value="id">
@@ -109,34 +112,35 @@
                 </option>
             </select>
         </div>
+        <label class="g-marcar" v-show="gridElement && gridElement.type === GridElement.ELEMENT_TYPE_COLLECT">
+            <input id="chkSuggestOnChange" type="checkbox" v-model="action.suggestOnChange"/>
+            <span>{{ $t('refreshSuggestionsOnChange') }}</span>
+        </label>
     </div>
     <div v-if="action.modelName == 'GridActionCollectElement'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="selectCollectElmAction" class="four columns normal-text">{{ $t('performActionOnCollectElement') }}</label>
-                <select id="selectCollectElmAction" class="eight columns" v-model="action.action">
-                    <option v-for="elmAction in collectActions" :value="elmAction">
-                        {{elmAction | translate}}
-                    </option>
-                </select>
-            </div>
+        <div class="g-campo">
+            <label for="selectCollectElmAction">{{ $t('gestaoAcaoOQueFazerFrase') }}</label>
+            <select id="selectCollectElmAction" v-model="action.action">
+                <option v-for="elmAction in collectActions" :value="elmAction">
+                    {{elmAction | translate}}
+                </option>
+            </select>
+            <span class="g-dica">{{ $t('gestaoAcaoFraseDica') }}</span>
         </div>
     </div>
     <div v-if="action.modelName == 'GridActionWebradio'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="selectRadioElmAction" class="four columns normal-text">{{ $t('webRadioAction') }}</label>
-                <select id="selectRadioElmAction" class="eight columns" v-model="action.action">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label for="selectRadioElmAction">{{ $t('gestaoAcaoOQueFazerRadio') }}</label>
+                <select id="selectRadioElmAction" v-model="action.action">
                     <option v-for="elmAction in webradioActions" :value="elmAction">
                         {{elmAction | translate}}
                     </option>
                 </select>
             </div>
-        </div>
-        <div class="srow" v-show="action.action === 'WEBRADIO_ACTION_START' || action.action === 'WEBRADIO_ACTION_TOGGLE'">
-            <div class="twelve columns">
-                <label for="selectRadio" class="four columns normal-text">{{ $t('webadioToPlay') }}</label>
-                <select id="selectRadio" class="eight columns" v-model="action.radioId" @change="selectedRadioChanged(action.radioId)">
+            <div class="g-campo" v-show="action.action === 'WEBRADIO_ACTION_START' || action.action === 'WEBRADIO_ACTION_TOGGLE'">
+                <label for="selectRadio">{{ $t('gestaoAcaoQualRadio') }}</label>
+                <select id="selectRadio" v-model="action.radioId" @change="selectedRadioChanged(action.radioId)">
                     <option value="" selected>{{ $t('automaticLastPlayed') }}</option>
                     <option v-for="webradio in gridData.webRadios" :value="webradio.radioId">
                         {{webradio.radioName}}
@@ -144,177 +148,163 @@
                 </select>
             </div>
         </div>
-        <div class="srow">
-            <accordion :acc-label="$t('manageWebradioList')" :acc-open="gridData.webRadios.length === 0" class="twelve columns">
+        <details class="gm-avancado" :open="gridData.webRadios.length === 0">
+            <summary>{{ $t('gestaoAcaoEscolherRadios') }}</summary>
+            <div class="gm-avancado-corpo">
                 <radio-list-selector :grid-data="gridData"></radio-list-selector>
-            </accordion>
-        </div>
+            </div>
+        </details>
     </div>
     <div v-if="action.modelName == 'GridActionPodcast'">
         <edit-podcast-action :action="action" :grid-data="gridData"></edit-podcast-action>
     </div>
     <div v-if="action.modelName === 'GridActionYoutube'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="ytActions" class="four columns normal-text">{{ $t('youtubeVideoAction') }}</label>
-                <select id="ytActions" class="eight columns" v-model="action.action">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label for="ytActions">{{ $t('gestaoAcaoOQueFazerVideo') }}</label>
+                <select id="ytActions" v-model="action.action">
                     <option v-for="elmAction in GridActionYoutube.actions" :value="elmAction">
                         {{elmAction | translate}}
                     </option>
                 </select>
             </div>
-        </div>
-        <div class="srow" v-show="[GridActionYoutube.actions.YT_PLAY, GridActionYoutube.actions.YT_TOGGLE, GridActionYoutube.actions.YT_RESTART].indexOf(action.action) !== -1">
-            <div class="twelve columns">
-                <label for="ytPlayType" class="four columns normal-text">{{ $t('playType') }}</label>
-                <select id="ytPlayType" class="eight columns" v-model="action.playType">
+            <div class="g-campo" v-show="[GridActionYoutube.actions.YT_PLAY, GridActionYoutube.actions.YT_TOGGLE, GridActionYoutube.actions.YT_RESTART].indexOf(action.action) !== -1">
+                <label for="ytPlayType">{{ $t('gestaoAcaoTipoVideo') }}</label>
+                <select id="ytPlayType" v-model="action.playType">
                     <option v-for="playType in Object.keys(GridActionYoutube.playTypes).filter(t => t !== GridActionYoutube.playTypes.YT_PLAY_RELATED)" :value="playType">{{playType | translate}}</option>
                 </select>
             </div>
         </div>
         <div v-show="action.playType && [GridActionYoutube.actions.YT_PLAY, GridActionYoutube.actions.YT_TOGGLE, GridActionYoutube.actions.YT_RESTART].indexOf(action.action) !== -1">
-            <div class="srow" v-show="action.playType !== GridActionYoutube.playTypes.YT_PLAY_RELATED">
-                <div class="twelve columns">
-                    <label for="ytList" class="four columns normal-text">
-                        <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_VIDEO">{{ $t('videoLink') }}</span>
-                        <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_SEARCH">{{ $t('youtubeSearchQuery') }}</span>
-                        <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_PLAYLIST">{{ $t('youtubePlaylistLink') }}</span>
-                        <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_CHANNEL">{{ $t('youtubeChannelLinkOrId') }}</span>
+            <div class="g-campo" v-show="action.playType !== GridActionYoutube.playTypes.YT_PLAY_RELATED">
+                <label for="ytList">
+                    <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_VIDEO">{{ $t('videoLink') }}</span>
+                    <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_SEARCH">{{ $t('youtubeSearchQuery') }}</span>
+                    <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_PLAYLIST">{{ $t('youtubePlaylistLink') }}</span>
+                    <span v-show="action.playType === GridActionYoutube.playTypes.YT_PLAY_CHANNEL">{{ $t('youtubeChannelLinkOrId') }}</span>
+                </label>
+                <input id="ytList" type="text" v-model="action.data"/>
+            </div>
+            <details class="gm-avancado">
+                <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+                <div class="gm-avancado-corpo">
+                    <label class="g-marcar">
+                        <input id="showCC" type="checkbox" v-model="action.showCC"/>
+                        <span>{{ $t('showVideoSubtitlesIfAvailable') }}</span>
                     </label>
-                    <input id="ytList" type="text" class="eight columns" v-model="action.data"/>
+                    <label class="g-marcar">
+                        <input id="playMuted" type="checkbox" v-model="action.playMuted"/>
+                        <span>{{ $t('startVideoMuted') }}</span>
+                    </label>
+                    <label class="g-marcar">
+                        <input id="afterNav" type="checkbox" v-model="action.performAfterNav"/>
+                        <span>{{ $t('performActionAfterNavigation') }}</span>
+                    </label>
                 </div>
-            </div>
-            <div class="srow">
-                <input id="showCC" type="checkbox" v-model="action.showCC"/>
-                <label for="showCC" class="normal-text">{{ $t('showVideoSubtitlesIfAvailable') }}</label>
-            </div>
-            <div class="srow">
-                <input id="playMuted" type="checkbox" v-model="action.playMuted"/>
-                <label for="playMuted" class="normal-text">{{ $t('startVideoMuted') }}</label>
-            </div>
-            <div class="srow">
-                <input id="afterNav" type="checkbox" v-model="action.performAfterNav"/>
-                <label for="afterNav" class="normal-text">{{ $t('performActionAfterNavigation') }}</label>
-            </div>
+            </details>
         </div>
-        <div class="srow" v-show="[GridActionYoutube.actions.YT_STEP_FORWARD, GridActionYoutube.actions.YT_STEP_BACKWARD].indexOf(action.action) !== -1">
-            <div class="twelve columns">
-                <label for="stepSeconds" class="four columns normal-text">{{ $t(action.action) }} {{ $t('secondsBracket') }}</label>
-                <input id="stepSeconds" type="number" class="eight columns" v-model="action.stepSeconds" min="0"/>
-            </div>
+        <div class="g-campo" v-show="[GridActionYoutube.actions.YT_STEP_FORWARD, GridActionYoutube.actions.YT_STEP_BACKWARD].indexOf(action.action) !== -1">
+            <label for="stepSeconds">{{ $t(action.action) }} {{ $t('secondsBracket') }}</label>
+            <input id="stepSeconds" type="number" v-model="action.stepSeconds" min="0"/>
         </div>
-        <div class="srow" v-show="[GridActionYoutube.actions.YT_VOLUME_UP, GridActionYoutube.actions.YT_VOLUME_DOWN].indexOf(action.action) !== -1">
-            <div class="twelve columns">
-                <label for="stepVolume" class="four columns normal-text">{{ $t(action.action) }} {{ $t('percentBracket') }}</label>
-                <input id="stepVolume" type="number" class="eight columns" v-model="action.stepVolume" min="0" max="100"/>
-            </div>
+        <div class="g-campo" v-show="[GridActionYoutube.actions.YT_VOLUME_UP, GridActionYoutube.actions.YT_VOLUME_DOWN].indexOf(action.action) !== -1">
+            <label for="stepVolume">{{ $t(action.action) }} {{ $t('percentBracket') }}</label>
+            <input id="stepVolume" type="number" v-model="action.stepVolume" min="0" max="100"/>
         </div>
     </div>
     <div v-if="action.modelName === 'GridActionChangeLang'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="changeLang" class="four columns normal-text">{{ $t('changeLanguageTo') }}</label>
-                <select id="changeLang" class="four columns mb-2" v-model="action.language">
-                    <option :value="undefined">{{ $t('systemLanguage') }}</option>
-                    <option :value="GridActionChangeLang.LAST_LANG">{{ $t(GridActionChangeLang.LAST_LANG) }}</option>
-                    <option v-for="lang in allLanguages" :value="lang.code" v-show="selectFromAllLanguages || lang.code === action.language || gridLanguageCodes.includes(lang.code)">
-                        {{lang | extractTranslation}}
-                    </option>
-                </select>
-                <div class="four columns">
+        <div class="gm-grade">
+            <div>
+                <div class="g-campo">
+                    <label for="changeLang">{{ $t('gestaoAcaoTrocarIdiomaPara') }}</label>
+                    <select id="changeLang" v-model="action.language">
+                        <option :value="undefined">{{ $t('systemLanguage') }}</option>
+                        <option :value="GridActionChangeLang.LAST_LANG">{{ $t(GridActionChangeLang.LAST_LANG) }}</option>
+                        <option v-for="lang in allLanguages" :value="lang.code" v-show="selectFromAllLanguages || lang.code === action.language || gridLanguageCodes.includes(lang.code)">
+                            {{lang | extractTranslation}}
+                        </option>
+                    </select>
+                </div>
+                <label class="g-marcar ac-marcar-junto">
                     <input id="selectFromAllLangs" type="checkbox" v-model="selectFromAllLanguages"/>
-                    <label for="selectFromAllLangs" class="normal-text">{{ $t('showAllLanguages') }}</label>
-                </div>
+                    <span>{{ $t('showAllLanguages') }}</span>
+                </label>
             </div>
-        </div>
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="changeVoice" class="four columns normal-text">{{ $t('changeVoiceTo') }}</label>
-                <select id="changeVoice" class="four columns mb-2" v-model="action.voice">
-                    <option :value="undefined">{{ $t('automatic') }}</option>
-                    <option v-for="voice in allVoices" :value="voice.id" v-show="selectFromAllVoices || !action.language || i18nService.getBaseLang(voice.lang) === i18nService.getBaseLang(action.language)">
-                        <span v-if="!selectFromAllVoices && action.language">{{voice.name}}, {{voice.local ? $t('offline') : $t('online')}}</span>
-                        <span v-if="selectFromAllVoices || !action.language">{{ $t(`lang.${voice.lang}`) }}: {{voice.name}}, {{voice.local ? $t('offline') : $t('online')}}</span>
-                    </option>
-                </select>
-                <div class="four columns mb-2">
+            <div>
+                <div class="g-campo">
+                    <label for="changeVoice">{{ $t('gestaoAcaoTrocarVozPara') }}</label>
+                    <select id="changeVoice" v-model="action.voice">
+                        <option :value="undefined">{{ $t('automatic') }}</option>
+                        <option v-for="voice in allVoices" :value="voice.id" v-show="selectFromAllVoices || !action.language || i18nService.getBaseLang(voice.lang) === i18nService.getBaseLang(action.language)">
+                            <span v-if="!selectFromAllVoices && action.language">{{voice.name}}, {{voice.local ? $t('offline') : $t('online')}}</span>
+                            <span v-if="selectFromAllVoices || !action.language">{{ $t(`lang.${voice.lang}`) }}: {{voice.name}}, {{voice.local ? $t('offline') : $t('online')}}</span>
+                        </option>
+                    </select>
+                </div>
+                <label class="g-marcar ac-marcar-junto">
                     <input id="selectAllVoices" type="checkbox" v-model="selectFromAllVoices"/>
-                    <label for="selectAllVoices" class="normal-text">{{ $t('showAllVoices') }}</label>
-                </div>
+                    <span>{{ $t('showAllVoices') }}</span>
+                </label>
             </div>
         </div>
-        <div class="srow">
-            <button id="testVoice2" class="four columns offset-by-four" :disabled="!action.voice" @click="speechService.testSpeak(action.voice, null, action.language)">{{ $t('testVoice') }}</button>
-        </div>
+        <button type="button" id="testVoice2" class="g-btn" :disabled="!action.voice" @click="speechService.testSpeak(action.voice, null, action.language)">
+            <i class="ti ti-volume" aria-hidden="true"></i><span>{{ $t('testVoice') }}</span>
+        </button>
     </div>
     <div v-if="action.modelName === 'GridActionVocabLevelToggle'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="vocabLevelMode" class="four columns normal-text">{{ $t('actionType') }}</label>
-                <select id="vocabLevelMode" class="eight columns" v-model="action.mode">
-                    <option v-for="mode in GridActionVocabLevelToggle.getModes()" :value="GridActionVocabLevelToggle.modes[mode]">{{ mode | translate }}</option>
-                </select>
-            </div>
+        <div class="g-campo">
+            <label for="vocabLevelMode">{{ $t('gestaoAcaoOQueFazer') }}</label>
+            <select id="vocabLevelMode" v-model="action.mode">
+                <option v-for="mode in GridActionVocabLevelToggle.getModes()" :value="GridActionVocabLevelToggle.modes[mode]">{{ mode | translate }}</option>
+            </select>
         </div>
-        <div class="srow">
-            <div class="twelve columns">
-                <span class="fa fa-info-circle"></span>
-                <span>{{ $t('vocabLevelToggleDescription') }}</span>
-            </div>
-        </div>
+        <p class="g-aviso"><i class="ti ti-info-circle" aria-hidden="true"></i><span>{{ $t('vocabLevelToggleDescription') }}</span></p>
     </div>
     <div v-if="action.modelName === 'GridActionOpenWebpage'">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="openUrl" class="four columns normal-text">{{ $t('webpageUrl') }}</label>
-                <input id="openUrl" type="text" class="eight columns" v-model="action.openURL"/>
-            </div>
+        <div class="g-campo">
+            <label for="openUrl">{{ $t('gestaoAcaoEnderecoPagina') }}</label>
+            <input id="openUrl" type="text" inputmode="url" spellcheck="false" v-model="action.openURL" placeholder="https://"/>
+            <span class="g-dica">{{ $t('gestaoAcaoEnderecoPaginaDica') }}</span>
         </div>
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="webpageCloseTimeout" class="four columns normal-text">{{ $t('automaticallyCloseTimeoutInSeconds') }}</label>
-                <input id="webpageCloseTimeout" type="number" min="0" class="eight columns" v-model="action.timeoutSeconds"/>
-            </div>
-        </div>
-    </div>
-    <div v-if="action.modelName === GridActionUART.getModelName()">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="uartType" class="four columns normal-text">UART Type</label>
-                <select id="uartType" class="eight columns" v-model="action.connectionType">
-                    <option v-for="type in GridActionUART.CONN_TYPES" :value="type">{{ type | translate}}</option>
-                </select>
-            </div>
-        </div>
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="uartCmd" class="four columns normal-text">{{ $t('dataToSend') }}</label>
-                <div class="eight columns">
-                  <textarea id="uartCmd" v-model="action.data" class="col-12" rows="1"
-                    placeholder="LED1.set(); or AT MX 10" spellcheck="false" type="text"/>
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="g-campo">
+                    <label for="webpageCloseTimeout">{{ $t('gestaoAcaoFecharPaginaApos') }}</label>
+                    <input id="webpageCloseTimeout" type="number" min="0" v-model="action.timeoutSeconds"/>
+                    <span class="g-dica">{{ $t('gestaoAcaoFecharPaginaDica') }}</span>
                 </div>
             </div>
+        </details>
+    </div>
+    <div v-if="action.modelName === GridActionUART.getModelName()">
+        <div class="g-campo">
+            <label for="uartType">{{ $t('gestaoAcaoTipoConexao') }}</label>
+            <select id="uartType" v-model="action.connectionType">
+                <option v-for="type in GridActionUART.CONN_TYPES" :value="type">{{ type | translate}}</option>
+            </select>
+        </div>
+        <div class="g-campo">
+            <label for="uartCmd">{{ $t('gestaoAcaoComandoEnviar') }}</label>
+            <textarea id="uartCmd" v-model="action.data" rows="2"
+                      placeholder="LED1.set(); or AT MX 10" spellcheck="false" type="text"/>
         </div>
     </div>
     <div v-if="action.modelName === GridActionSystem.getModelName()">
-        <div class="srow">
-            <div class="twelve columns">
-                <label for="systemActionType" class="four columns normal-text">{{ $t('actionType') }}</label>
-                <select id="systemActionType" class="eight columns" v-model="action.action" @change="action.actionValue = action.action === GridActionSystem.actions.SYS_UPDATE_LIVE_ELEMENTS ? 0 : 10">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label for="systemActionType">{{ $t('gestaoAcaoOQueFazer') }}</label>
+                <select id="systemActionType" v-model="action.action" @change="action.actionValue = action.action === GridActionSystem.actions.SYS_UPDATE_LIVE_ELEMENTS ? 0 : 10">
                     <option v-for="action in GridActionSystem.actions" :value="action">{{ action | translate}}</option>
                 </select>
             </div>
-        </div>
-        <div class="srow" v-if="[GridActionSystem.actions.SYS_VOLUME_UP, GridActionSystem.actions.SYS_VOLUME_DOWN].includes(action.action)">
-            <div class="twelve columns">
-                <label for="systemActionValue" class="four columns normal-text">{{ $t(action.action) }} {{ $t('percentBracket') }}</label>
-                <input id="systemActionValue" type="number" class="eight columns" min="0" max="100" v-model.number="action.actionValue">
+            <div class="g-campo" v-if="[GridActionSystem.actions.SYS_VOLUME_UP, GridActionSystem.actions.SYS_VOLUME_DOWN].includes(action.action)">
+                <label for="systemActionValue">{{ $t(action.action) }} {{ $t('percentBracket') }}</label>
+                <input id="systemActionValue" type="number" min="0" max="100" v-model.number="action.actionValue"/>
             </div>
-        </div>
-        <div class="srow" v-if="[GridActionSystem.actions.SYS_UPDATE_LIVE_ELEMENTS].includes(action.action)">
-            <div class="twelve columns">
-                <label for="systemActionDelay" class="four columns normal-text">{{ $t('delayMs') }}</label>
-                <input id="systemActionDelay" type="number" class="eight columns" min="0" v-model.number="action.actionValue">
+            <div class="g-campo" v-if="[GridActionSystem.actions.SYS_UPDATE_LIVE_ELEMENTS].includes(action.action)">
+                <label for="systemActionDelay">{{ $t('delayMs') }}</label>
+                <input id="systemActionDelay" type="number" min="0" v-model.number="action.actionValue"/>
             </div>
         </div>
     </div>
@@ -332,7 +322,6 @@
     import EditOpenHabAction from "./editActionsSub/editOpenHABAction.vue";
     import {GridActionCollectElement} from "../../js/model/GridActionCollectElement";
     import {GridActionWebradio} from "../../js/model/GridActionWebradio";
-    import Accordion from "../components/accordion.vue";
     import {imageUtil} from "../../js/util/imageUtil";
     import {GridImage} from "../../js/model/GridImage";
     import RadioListSelector from "../components/radioListSelector.vue";
@@ -382,10 +371,31 @@
             EditWordFormAction,
             EditAudioAction,
             RadioListSelector,
-            Accordion,
             EditAreAction,
             EditOpenHabAction,
             EditHttpAction
+        },
+        computed: {
+            // só apresentação: ícone e nome simples de cada tipo de navegação
+            iconesNavegacao() {
+                let t = GridActionNavigate.NAV_TYPES, r = {};
+                r[t.TO_GRID] = 'layout-grid';
+                r[t.TO_HOME] = 'home';
+                r[t.TO_LAST] = 'arrow-left';
+                r[t.OPEN_SEARCH] = 'search';
+                return r;
+            },
+            nomesNavegacao() {
+                let t = GridActionNavigate.NAV_TYPES, r = {};
+                r[t.TO_GRID] = this.$t('gestaoAcaoNavPrancha');
+                r[t.TO_HOME] = this.$t('gestaoAcaoNavInicial');
+                r[t.TO_LAST] = this.$t('gestaoAcaoNavAnterior');
+                r[t.OPEN_SEARCH] = this.$t('gestaoAcaoNavBusca');
+                for (let tipo of Object.values(t)) {
+                    r[tipo] = r[tipo] || this.$t(tipo);
+                }
+                return r;
+            }
         },
         methods: {
             getCurrentSpeakLang(action) {
@@ -411,11 +421,44 @@
 </script>
 
 <style scoped>
-    .srow {
-        margin-top: 1em;
+    .ac {
+        min-width: 0;
     }
-
-    .normal-text {
-        font-weight: normal;
+    .ac-explica {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--g-e2);
+        margin: 0 0 var(--g-e3);
+        color: var(--g-tinta-2);
+    }
+    .ac-explica .ti {
+        font-size: 22px;
+        color: var(--g-folha-escura);
+        flex: none;
+    }
+    .ac-grupo {
+        border: none;
+        margin: 0 0 var(--g-e2);
+        padding: 0;
+        min-width: 0;
+    }
+    .ac-legenda {
+        font-weight: 700;
+        font-size: var(--g-t-corpo);
+        margin: 0 0 var(--g-e2);
+        padding: 0;
+    }
+    .ac-escolhas {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        margin-bottom: var(--g-e3);
+    }
+    .ac .g-aviso {
+        margin: 0 0 var(--g-e3);
+    }
+    .ac .gm-avancado {
+        margin: var(--g-e3) 0 0;
+    }
+    .ac-marcar-junto {
+        margin-top: calc(-1 * var(--g-e2));
     }
 </style>

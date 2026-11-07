@@ -1,8 +1,7 @@
 <template>
-    <div class="d-none d-sm-flex row mb-2" aria-hidden="true">
-        <strong class="col-sm-2">{{ $t('transferQuestionmark') }}</strong>
-        <strong class="col-sm-5">{{ $t('propertyName') }}</strong>
-        <strong class="col-sm-3">{{ $t('currentValue') }}</strong>
+    <div class="tph" aria-hidden="true">
+        <span>{{ $t('gestaoEdicaoCopiarOque') }}</span>
+        <span>{{ $t('gestaoEdicaoCopiarAgora') }}</span>
     </div>
 </template>
 
@@ -11,4 +10,11 @@ export default {}
 </script>
 
 <style scoped>
+.tph {
+    display: flex; justify-content: space-between; gap: var(--g-e3);
+    padding: 0 var(--g-e3) var(--g-e2); color: var(--g-tinta-3); font-size: var(--g-t-legenda); font-weight: 700;
+}
+@media (max-width: 600px) {
+    .tph { display: none; }
+}
 </style>

@@ -1,103 +1,98 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keydown.27="cancel()" @keydown.enter="save()">
-                    <a class="inline close-button" href="javascript:void(0);" @click="cancel()"><i class="fas fa-times"/></a>
-                    <a class="close-button" href="javascript:;" @click="openHelp()"><i class="fas fa-question-circle"></i></a>
-                    <div class="modal-header">
-                        <h1 name="header">
-                            {{ $t('scanning') }}
-                        </h1>
+    <gestao-modal :titulo="$t('gestaoAcessoVarreduraTitulo')" icone="focus-2" tamanho="m" @close="cancel()">
+        <template #cabeca>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="openHelp()" :aria-label="$t('gestaoAcessoAjuda')" :title="$t('gestaoAcessoAjuda')">
+                <i class="ti ti-help-circle" aria-hidden="true"></i>
+            </button>
+        </template>
+
+        <div v-if="inputConfig" class="acesso" @keydown.enter="['BUTTON', 'SUMMARY', 'SELECT', 'A'].includes($event.target.tagName) || save()">
+            <p class="g-apoio acesso-intro">{{ $t('gestaoAcessoVarreduraIntro') }}</p>
+            <div class="gm-secao acesso-ligar">
+                <label class="g-marcar">
+                    <input v-focus type="checkbox" v-model="inputConfig.scanEnabled"/>
+                    <span>{{ $t('gestaoAcessoVarreduraLigar') }}</span>
+                </label>
+            </div>
+
+            <div v-show="inputConfig.scanEnabled">
+                <section class="gm-secao">
+                    <h3><i class="ti ti-hand-click" aria-hidden="true"></i>{{ $t('gestaoAcessoAcionadores') }}</h3>
+                    <p class="g-dica">{{ $t('gestaoAcessoAcionadoresDica') }}</p>
+                    <input-event-list v-model="inputConfig.scanInputs" :input-labels="[InputConfig.SELECT, InputConfig.NEXT]" :error-inputs="errorInputs" @input="inputChanged"></input-event-list>
+                    <button type="button" class="g-btn g-btn-leve" @click="resetInput"><i class="ti ti-restore" aria-hidden="true"></i>{{ $t('gestaoAcessoRestaurar') }}</button>
+                </section>
+
+                <section class="gm-secao">
+                    <h3><i class="ti ti-clock" aria-hidden="true"></i>{{ $t('gestaoAcessoTempo') }}</h3>
+                    <label class="g-marcar">
+                        <input type="checkbox" v-model="inputConfig.scanAuto"/>
+                        <span>{{ $t('gestaoAcessoVarreduraAuto') }}</span>
+                    </label>
+                    <div class="acesso-deslizante" v-show="inputConfig.scanAuto">
+                        <slider-input :label="$t('gestaoAcessoVarreduraTempo')" id="inScanTime" min="100" max="10000" step="100" decimals="0" v-model.number="inputConfig.scanTimeoutMs"/>
+                        <p class="g-dica">{{ $t('gestaoAcessoDicaMs') }}</p>
                     </div>
+                </section>
 
-                    <div class="modal-body" v-if="inputConfig">
-                        <div class="srow">
-                            <span>{{ $t('scanningInputMethod12InputEvents') }}</span>
-                            <a :aria-label="$t('help')" href="javascript:;" @click="openHelp()"><i class="fas blue fa-question-circle"></i></a>
+                <details class="gm-avancado">
+                    <summary>{{ $t('gestaoAcessoAvancado') }}</summary>
+                    <div class="gm-avancado-corpo">
+                        <label class="g-marcar">
+                            <input type="checkbox" v-model="inputConfig.scanVertical"/>
+                            <span>{{ $t('gestaoAcessoVarreduraVertical') }}</span>
+                        </label>
+                        <label class="g-marcar">
+                            <input type="checkbox" v-model="inputConfig.scanBinary"/>
+                            <span>{{ $t('gestaoAcessoVarreduraBinaria') }}</span>
+                        </label>
+                        <label class="g-marcar">
+                            <input type="checkbox" v-model="inputConfig.scanStartWithAction"/>
+                            <span>{{ $t('gestaoAcessoComecarAoAcionar') }}</span>
+                        </label>
+                        <div class="acesso-deslizante">
+                            <slider-input :label="$t('gestaoAcessoVoltasAteVoltar')" id="roundsUntilBack" min="1" max="10" step="1" decimals="0" default="3" v-model.number="inputConfig.scanRoundsUntilBack"/>
                         </div>
-                        <div class="srow" >
-                            <div class="twelve columns">
-                                <input v-focus type="checkbox" id="enableScanning" v-model="inputConfig.scanEnabled"/>
-                                <label class="inline" for="enableScanning">{{ $t('enableScanning') }}</label>
-                            </div>
-                        </div>
-                        <div v-show="inputConfig.scanEnabled">
-                            <accordion :acc-label="$t('input')" acc-open="true" acc-label-type="h2" acc-background-color="white" class="srow">
-                                <input-event-list v-model="inputConfig.scanInputs" :input-labels="[InputConfig.SELECT, InputConfig.NEXT]" :error-inputs="errorInputs" @input="inputChanged"></input-event-list>
-                                <div class="srow">
-                                    <button class="twelve columns" @click="resetInput">{{ $t('resetToDefaultInputConfiguration') }}</button>
-                                </div>
-                            </accordion>
-                            <accordion :acc-label="$t('ADVANCED_SETTINGS')" acc-label-type="h2" acc-background-color="white">
-                                <div class="srow" style="margin-top: 0">
-                                    <div class="twelve columns">
-                                        <input type="checkbox" id="chkVerticalScanning" v-model="inputConfig.scanVertical"/>
-                                        <label for="chkVerticalScanning">{{ $t('verticalScanning') }}</label>
-                                    </div>
-                                </div>
-                                <div class="srow">
-                                    <div class="twelve columns">
-                                        <input type="checkbox" id="chkBinaryScanning" v-model="inputConfig.scanBinary"/>
-                                        <label for="chkBinaryScanning">{{ $t('binaryScanning') }}</label>
-                                    </div>
-                                </div>
-                                <div class="srow">
-                                    <div class="twelve columns">
-                                        <input type="checkbox" id="chkStartWithAction" v-model="inputConfig.scanStartWithAction"/>
-                                        <label for="chkStartWithAction">{{ $t('startManuallyByUserInputEvent') }}</label>
-                                    </div>
-                                </div>
-                                <div class="srow">
-                                    <slider-input :label="$t('roundsUntilGoingBack')" id="roundsUntilBack" min="1" max="10" step="1" decimals="0" default="3" v-model.number="inputConfig.scanRoundsUntilBack"/>
-                                </div>
-                                <div class="srow">
-                                    <div class="twelve columns">
-                                        <input type="checkbox" id="chkAutoScanning" v-model="inputConfig.scanAuto"/>
-                                        <label for="chkAutoScanning">{{ $t('automaticTimedScanning') }}</label>
-                                    </div>
-                                </div>
-                                <div class="srow" v-show="inputConfig.scanAuto">
-                                    <slider-input :label="$t('scanningTimeMs')" id="inScanTime" min="100" max="10000" step="100" decimals="0" v-model.number="inputConfig.scanTimeoutMs"/>
-                                </div>
-                                <div class="srow" v-show="inputConfig.scanAuto">
-                                    <slider-input :label="$t('timeFactorFirstElement')" id="inFirstElement" min="1" max="5" step="0.1" decimals="1" v-model.number="inputConfig.scanTimeoutFirstElementFactor"/>
-                                </div>
-                            </accordion>
-                            <accordion :acc-label="$t('generalInputSettings')" acc-label-type="h2" acc-background-color="white">
-                                <global-input-options :input-config="inputConfig"/>
-                            </accordion>
-                            <accordion :acc-label="$t('TEST_CONFIGURATION')" acc-label-type="h2" acc-background-color="white" @open="testOpen = true; initTest()" @close="testOpen = false; stopTest()">
-                                <test-area :selected-element="selectedTestElement"></test-area>
-                            </accordion>
-
-                            <div class="warn" v-show="error">
-                                <i class="fas fa-exclamation-triangle"></i> {{error}}
-                            </div>
+                        <div class="acesso-deslizante" v-show="inputConfig.scanAuto">
+                            <slider-input :label="$t('gestaoAcessoPrimeiroMaisTempo')" id="inFirstElement" min="1" max="5" step="0.1" decimals="1" v-model.number="inputConfig.scanTimeoutFirstElementFactor"/>
                         </div>
                     </div>
+                </details>
 
-                    <div class="modal-footer">
-                        <div class="button-container row">
-                            <button @click="cancel()" class="four columns offset-by-four">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button @click="save()" class="four columns">
-                                <i class="fas fa-check"/> <span>{{ $t('ok') }}</span>
-                            </button>
-                        </div>
+                <details class="gm-avancado">
+                    <summary>{{ $t('gestaoAcessoGerais') }}</summary>
+                    <div class="gm-avancado-corpo acesso-deslizante acesso-gerais">
+                        <global-input-options :input-config="inputConfig"/>
                     </div>
+                </details>
+
+                <details class="gm-avancado acesso-teste" @toggle="$event.target.open ? (testOpen = true, initTest()) : (testOpen = false, stopTest())">
+                    <summary><i class="ti ti-player-play" aria-hidden="true"></i>{{ $t('gestaoAcessoTestar') }}</summary>
+                    <div class="gm-avancado-corpo">
+                        <p class="g-dica">{{ $t('gestaoAcessoTestarDica') }}</p>
+                        <test-area :selected-element="selectedTestElement"></test-area>
+                    </div>
+                </details>
+
+                <div class="g-aviso acesso-erro" role="alert" v-if="error">
+                    <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+                    <span>{{ $t('gestaoAcessoFaltaAcionador') }}</span>
                 </div>
             </div>
         </div>
-    </div>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="cancel()">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoSalvar') }}</button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {dataService} from '../../../js/service/data/dataService'
     import {helpService} from "../../../js/service/helpService";
     import {i18nService} from "../../../js/service/i18nService";
-    import Accordion from "../../components/accordion.vue"
+    import GestaoModal from "../gestaoModal.vue";
     import InputEventList from "../../components/inputEventList.vue"
     import TestArea from "./testArea.vue"
     import './../../../css/modal.css';
@@ -109,7 +104,7 @@
 
     export default {
         props: [],
-        components: {GlobalInputOptions, Accordion, InputEventList, TestArea, SliderInput},
+        components: {GlobalInputOptions, GestaoModal, InputEventList, TestArea, SliderInput},
         data: function () {
             return {
                 inputConfig: null,
@@ -214,11 +209,41 @@
 </script>
 
 <style scoped>
-    .warn {
-        margin-top: 2em;
-    }
+    .acesso-intro { margin: 0 0 var(--g-e4); }
+    .acesso-ligar { padding-top: var(--g-e3); padding-bottom: var(--g-e3); }
+    .acesso-ligar .g-marcar { margin: 0; align-items: center; }
+    .acesso-ligar .g-marcar > span { font-weight: 700; font-size: var(--g-t-grande); }
+    .acesso .gm-secao > .g-dica { margin: calc(-1 * var(--g-e2)) 0 var(--g-e3); }
+    .acesso-erro { margin-top: var(--g-e4); }
+    .acesso-teste > summary .ti { font-size: 1.3em; }
+    .acesso-numero { align-items: center; }
+    .g-campo .acesso-numero > input[type="range"] { flex: 1 1 auto; width: auto; }
+    .g-campo .acesso-numero > input[type="number"] { flex: 0 0 112px; width: 112px; }
+    .acesso-cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 0 var(--g-e3); margin-top: var(--g-e3); }
 
-    .slidergroup input {
-        width: 50%;
+    /* sliderInput e globalInputOptions são compartilhados e usados como estão: aqui só muda a disposição dentro deste modal */
+    .acesso-deslizante ::v-deep div,
+    .acesso-deslizante ::v-deep label,
+    .acesso-deslizante ::v-deep input,
+    .acesso-deslizante ::v-deep button { float: none; width: auto; margin-left: 0; box-sizing: border-box; }
+    .acesso-deslizante ::v-deep div { margin-top: 0; margin-bottom: 0; }
+    .acesso-deslizante ::v-deep label { display: block; font-weight: 700; margin: var(--g-e2) 0 0; }
+    .acesso-deslizante ::v-deep input[type="range"] {
+        display: block; width: 100%; min-height: var(--g-alvo); margin: 0;
+        accent-color: var(--g-folha);
+    }
+    .acesso-deslizante ::v-deep input[type="range"]:focus-visible { outline: none; box-shadow: var(--g-foco); border-radius: var(--g-raio-p); }
+    .acesso-deslizante ::v-deep input[type="range"] + div { color: var(--g-tinta-2); font-size: var(--g-t-legenda); margin-bottom: var(--g-e3); }
+    .acesso-deslizante ::v-deep input[type="range"] ~ button { min-height: var(--g-alvo); margin: 0 0 var(--g-e3); }
+    .acesso-deslizante > .g-dica { margin: 0 0 var(--g-e3); }
+
+    .acesso-gerais ::v-deep h3 { font-size: var(--g-t-grande); margin: var(--g-e4) 0 var(--g-e1); }
+    .acesso-gerais ::v-deep input[type="checkbox"] {
+        width: 24px; height: 24px; margin: 0 var(--g-e3) 0 0; vertical-align: middle;
+        accent-color: var(--g-folha);
+    }
+    .acesso-gerais ::v-deep input[type="checkbox"] + label {
+        display: inline-flex; align-items: center; min-height: var(--g-alvo);
+        font-weight: 400; margin: 0; vertical-align: middle; cursor: pointer;
     }
 </style>

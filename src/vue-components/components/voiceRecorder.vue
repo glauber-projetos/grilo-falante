@@ -3,15 +3,15 @@
         <p v-if="state === 'idle'" class="vr-hint">{{ $t('recordVoiceHint') }}</p>
         <div class="vr-buttons">
             <button v-if="state !== 'recording'" type="button" class="vr-btn vr-record" @click="start()">
-                <i class="fas fa-microphone" aria-hidden="true"></i>
+                <i class="ti ti-microphone" aria-hidden="true"></i>
                 <span>{{ recording ? $t('recordAgain') : $t('startRecording') }}</span>
             </button>
             <button v-if="state === 'recording'" type="button" class="vr-btn vr-stop" @click="stop()">
-                <i class="fas fa-stop" aria-hidden="true"></i>
+                <i class="ti ti-player-stop" aria-hidden="true"></i>
                 <span>{{ $t('stopRecording') }} ({{ secondsLeft }})</span>
             </button>
             <button v-if="recording && state !== 'recording'" type="button" class="vr-btn" @click="play()">
-                <i class="fas fa-play" aria-hidden="true"></i> <span>{{ $t('listen') }}</span>
+                <i class="ti ti-player-play" aria-hidden="true"></i> <span>{{ $t('listen') }}</span>
             </button>
         </div>
         <div v-if="state === 'recording'" class="vr-level" aria-hidden="true">

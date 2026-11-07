@@ -1,48 +1,40 @@
 <template>
-    <div class="container-fluid px-0">
-        <div class="row" v-if="actionGroups">
-            <label class="col-12 col-md-4 normal-text" for="actionGroup-123">{{ $t('actionGroup') }}</label>
-            <div class="col-12 col-md-7">
-                <select id="actionGroup-123" v-model="action.groupId" class="col-12" @change="groupChanged">
+    <div class="pd">
+        <div class="gm-grade">
+            <div class="g-campo" v-if="actionGroups">
+                <label for="actionGroup-123">{{ $t('gestaoAcaoAparelho') }}</label>
+                <select id="actionGroup-123" v-model="action.groupId" @change="groupChanged">
                     <option :value="undefined" disabled selected hidden>{{ $t("pleaseSelect") }}</option>
                     <option v-for="group in actionGroups" :value="group.id">{{ i18nService.tPredefined(group.name) }}</option>
                 </select>
             </div>
-        </div>
-        <div class="row" v-if="actionInfos.length > 0">
-            <label class="col-12 col-md-4 normal-text" for="actionInfo-123">{{ $t('actionName') }}</label>
-            <div class="col-12 col-md-7">
-                <select id="actionInfo-123" v-model="action.actionInfo" class="col-12" @change="actionInfoChanged">
+            <div class="g-campo" v-if="actionInfos.length > 0">
+                <label for="actionInfo-123">{{ $t('gestaoAcaoOQueFazer') }}</label>
+                <select id="actionInfo-123" v-model="action.actionInfo" @change="actionInfoChanged">
                     <option :value="{}" disabled selected hidden>{{ $t("pleaseSelect") }}</option>
                     <option v-for="info in actionInfos" :value="info">{{ i18nService.tPredefined(info.name) }}</option>
                 </select>
             </div>
         </div>
-        <div v-if="customValues.length">
-            <div v-for="customValue in customValues">
-                <div class="row" v-if="customValue.type === 'text'">
-                    <label class="col-12 col-md-4 normal-text" :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
-                    <div class="col-12 col-md-7">
-                        <input class="col-12" :id="customValue.name" v-model="action.customValues[customValue.name]" @input="textChanged(customValue)" spellcheck="false"
-                               type="text" :placeholder="i18nService.tPredefined(customValue.placeholder)"/>
-                    </div>
+        <div v-if="customValues.length" class="gm-grade">
+            <template v-for="customValue in customValues">
+                <div class="g-campo" v-if="customValue.type === 'text'">
+                    <label :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
+                    <input :id="customValue.name" v-model="action.customValues[customValue.name]" @input="textChanged(customValue)" spellcheck="false"
+                           type="text" :placeholder="i18nService.tPredefined(customValue.placeholder)"/>
                 </div>
-                <div class="row" v-if="customValue.type === 'number'">
-                    <label class="col-12 col-md-4 normal-text" :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
-                    <div class="col-12 col-md-7">
-                        <input class="col-12" :id="customValue.name" v-model.number="action.customValues[customValue.name]"
-                               type="number" :min="customValue.min" :max="customValue.max" :step="customValue.step" :placeholder="i18nService.tPredefined(customValue.placeholder)"/>
-                    </div>
+                <div class="g-campo" v-if="customValue.type === 'number'">
+                    <label :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
+                    <input :id="customValue.name" v-model.number="action.customValues[customValue.name]"
+                           type="number" :min="customValue.min" :max="customValue.max" :step="customValue.step" :placeholder="i18nService.tPredefined(customValue.placeholder)"/>
                 </div>
-                <div class="row" v-if="customValue.type === 'select'">
-                    <label class="col-12 col-md-4 normal-text" :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
-                    <div class="col-12 col-md-7">
-                        <select class="col-12" :id="customValue.name" v-model="action.customValues[customValue.name]">
-                            <option v-for="value in customValue.values" :value="value.value ? value.value : value">{{ i18nService.tPredefined(value.label ? value.label : value) }}</option>
-                        </select>
-                    </div>
+                <div class="g-campo" v-if="customValue.type === 'select'">
+                    <label :for="customValue.name">{{ i18nService.tPredefined(customValue.name) }}</label>
+                    <select :id="customValue.name" v-model="action.customValues[customValue.name]">
+                        <option v-for="value in customValue.values" :value="value.value ? value.value : value">{{ i18nService.tPredefined(value.label ? value.label : value) }}</option>
+                    </select>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>
@@ -167,11 +159,4 @@ export default {
 </script>
 
 <style scoped>
-.normal-text {
-    font-weight: normal;
-}
-
-.row {
-    margin-bottom: 1em;
-}
 </style>

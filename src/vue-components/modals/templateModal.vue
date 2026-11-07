@@ -1,43 +1,26 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keyup.27="$emit('close')" @keyup.ctrl.enter="save()">
-                    <a class="inline close-button" href="javascript:void(0);" @click="$emit('close')"><i class="fas fa-times"/></a>
-                    <div class="modal-header">
-                        <h1 name="header">
-                            {{ $t('setGridSize') }}
-                        </h1>
-                    </div>
-
-                    <div class="modal-body container">
-                        <div class="srow">
-                            <label for="gridRows">{{ $t('minimumNumberOfRows') }}</label>
-                            <input id="gridRows" type="number"/>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <div class="button-container">
-                            <button @click="$emit('close')" :title="$t('keyboardEsc')">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button @click="save()" :title="$t('keyboardCtrlEnter')">
-                                <i class="fas fa-check"/> <span>{{ $t('insertWords') }}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <gestao-modal :titulo="$t('gestaoEdicaoTamanho')" icone="layout-grid" tamanho="p"
+                  @close="$emit('close')" @keyup.ctrl.enter.native="save()">
+        <div class="g-campo">
+            <label for="gridRows">{{ $t('gestaoEdicaoLinhas') }}</label>
+            <input id="gridRows" type="number"/>
         </div>
-    </div>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :title="$t('keyboardCtrlEnter')">
+                <i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoSalvar') }}
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {i18nService} from "../../js/service/i18nService";
-    import './../../css/modal.css';
+    import GestaoModal from './gestaoModal.vue';
 
     export default {
+        components: {GestaoModal},
         props: ['dictData'],
         data: function () {
             return {
@@ -54,9 +37,3 @@
         }
     }
 </script>
-
-<style scoped>
-    .srow {
-        margin-top: 1em;
-    }
-</style>

@@ -1,85 +1,89 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keydown.27="cancel()" @keydown.enter="save()">
-                    <a class="inline close-button" href="javascript:void(0);" @click="cancel()"><i class="fas fa-times"/></a>
-                    <a class="close-button" href="javascript:;" @click="openHelp()"><i class="fas fa-question-circle"></i></a>
-                    <div class="modal-header">
-                        <h1 name="header">{{ $t('mousetouchInput') }}</h1>
-                    </div>
+    <gestao-modal :titulo="$t('gestaoAcessoMouseTitulo')" icone="hand-finger" tamanho="m" @close="cancel()">
+        <template #cabeca>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="openHelp()" :aria-label="$t('gestaoAcessoAjuda')" :title="$t('gestaoAcessoAjuda')">
+                <i class="ti ti-help-circle" aria-hidden="true"></i>
+            </button>
+        </template>
 
-                    <div class="modal-body" v-if="inputConfig">
-                        <div class="srow">
-                            <div class="twelve columns">
-                                <input v-focus type="checkbox" id="enableClick" v-model="inputConfig.mouseclickEnabled"/>
-                                <label class="inline" for="enableClick">{{ $t('selectWithMouseClickOrTap') }}</label>
-                            </div>
-                        </div>
-                        <div class="srow">
-                            <div class="twelve columns">
-                                <input v-focus type="checkbox" id="enableDoubleClick" v-model="inputConfig.mouseDoubleClickEnabled"/>
-                                <label class="inline" for="enableDoubleClick">{{ $t('selectWithDoubleClickOrDoubleTap') }}</label>
-                            </div>
-                        </div>
-                        <div class="srow" >
-                            <div class="twelve columns">
-                                <input v-focus type="checkbox" id="enableHover" v-model="inputConfig.hoverEnabled"/>
-                                <label class="inline" for="enableHover">{{ $t('enableHovering') }}</label>
-                            </div>
-                        </div>
-                        <div class="srow" v-show="inputConfig.hoverEnabled">
-                            <label class="four columns" for="inHoverTime">{{ $t('hoverTimeMs') }}</label>
+        <div v-if="inputConfig" class="acesso" @keydown.enter="['BUTTON', 'SUMMARY', 'SELECT', 'A'].includes($event.target.tagName) || save()">
+            <p class="g-apoio acesso-intro">{{ $t('gestaoAcessoMouseIntro') }}</p>
+
+            <section class="gm-secao">
+                <h3><i class="ti ti-hand-click" aria-hidden="true"></i>{{ $t('gestaoAcessoMouseTocar') }}</h3>
+                <label class="g-marcar">
+                    <input v-focus type="checkbox" v-model="inputConfig.mouseclickEnabled"/>
+                    <span>{{ $t('gestaoAcessoMouseClique') }}</span>
+                </label>
+                <label class="g-marcar">
+                    <input type="checkbox" v-model="inputConfig.mouseDoubleClickEnabled"/>
+                    <span>{{ $t('gestaoAcessoMouseDuplo') }}</span>
+                </label>
+            </section>
+
+            <section class="gm-secao">
+                <h3><i class="ti ti-eye" aria-hidden="true"></i>{{ $t('gestaoAcessoMouseParar') }}</h3>
+                <label class="g-marcar">
+                    <input type="checkbox" v-model="inputConfig.hoverEnabled"/>
+                    <span>{{ $t('gestaoAcessoMouseHover') }}</span>
+                </label>
+                <div v-show="inputConfig.hoverEnabled">
+                    <div class="g-campo">
+                        <label for="inHoverTime">{{ $t('gestaoAcessoMouseHoverTempo') }}</label>
+                        <div class="gm-campo-linha acesso-numero">
                             <input type="range" id="inHoverTime" v-model.number="inputConfig.hoverTimeoutMs" min="0" max="5000" step="100"/>
-                            <input type="number" v-model.number="inputConfig.hoverTimeoutMs" min="0" max="5000" step="100"/>
+                            <input type="number" v-model.number="inputConfig.hoverTimeoutMs" min="0" max="5000" step="100" :aria-label="$t('gestaoAcessoMouseHoverNumero')"/>
                         </div>
-                        <div class="srow" v-show="inputConfig.hoverEnabled">
-                            <div class="twelve columns">
-                                <input v-focus type="checkbox" id="hoverHideCursor" v-model="inputConfig.hoverHideCursor"/>
-                                <label class="inline" for="hoverHideCursor">{{ $t('hideCursor') }}</label>
-                            </div>
-                            <div class="twelve columns">
-                                <input type="checkbox" id="chkDisableHoverpane" v-model="inputConfig.hoverDisableHoverpane"/>
-                                <label for="chkDisableHoverpane">{{ $t('disableHoverPane') }}</label>
-                            </div>
-                        </div>
-                        <div class="mb-4"></div>
-                        <accordion :acc-label="$t('ADVANCED_SETTINGS')" acc-label-type="h2" acc-background-color="white">
-                            <div class="srow">
-                                <div class="twelve columns">
-                                    <input v-focus type="checkbox" id="mousedown" v-model="inputConfig.mouseDownInsteadClick"/>
-                                    <label class="inline" for="mousedown">{{ $t('directlySelectElementOnPressingMouseButton') }}</label>
-                                </div>
-                            </div>
-                        </accordion>
-                        <accordion :acc-label="$t('generalInputSettings')" acc-label-type="h2" acc-background-color="white">
-                            <global-input-options :input-config="inputConfig"/>
-                        </accordion>
-                        <accordion :acc-label="$t('TEST_CONFIGURATION')" acc-label-type="h2" acc-background-color="white" @open="testOpen = true; initTest()" @close="testOpen = false; stopTest()">
-                            <test-area :selected-element="selectedTestElement"></test-area>
-                        </accordion>
+                        <span class="g-dica">{{ $t('gestaoAcessoDicaMs') }}</span>
                     </div>
-
-                    <div class="modal-footer">
-                        <div class="button-container srow">
-                            <button @click="cancel()" class="four columns offset-by-four">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button @click="save()" class="four columns">
-                                 <i class="fas fa-check"/> <span>{{ $t('ok') }}</span>
-                            </button>
-                        </div>
-                    </div>
+                    <label class="g-marcar">
+                        <input type="checkbox" v-model="inputConfig.hoverHideCursor"/>
+                        <span>{{ $t('gestaoAcessoMouseEsconderCursor') }}</span>
+                    </label>
+                    <label class="g-marcar">
+                        <input type="checkbox" v-model="inputConfig.hoverDisableHoverpane"/>
+                        <span>{{ $t('gestaoAcessoMouseSemPainel') }}</span>
+                    </label>
                 </div>
-            </div>
+            </section>
+
+            <details class="gm-avancado">
+                <summary>{{ $t('gestaoAcessoAvancado') }}</summary>
+                <div class="gm-avancado-corpo">
+                    <label class="g-marcar">
+                        <input type="checkbox" v-model="inputConfig.mouseDownInsteadClick"/>
+                        <span>{{ $t('gestaoAcessoMouseAoApertar') }}</span>
+                    </label>
+                </div>
+            </details>
+
+            <details class="gm-avancado">
+                <summary>{{ $t('gestaoAcessoGerais') }}</summary>
+                <div class="gm-avancado-corpo acesso-deslizante acesso-gerais">
+                    <global-input-options :input-config="inputConfig"/>
+                </div>
+            </details>
+
+            <details class="gm-avancado acesso-teste" @toggle="$event.target.open ? (testOpen = true, initTest()) : (testOpen = false, stopTest())">
+                <summary><i class="ti ti-player-play" aria-hidden="true"></i>{{ $t('gestaoAcessoTestar') }}</summary>
+                <div class="gm-avancado-corpo">
+                    <p class="g-dica">{{ $t('gestaoAcessoTestarDica') }}</p>
+                    <test-area :selected-element="selectedTestElement"></test-area>
+                </div>
+            </details>
         </div>
-    </div>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="cancel()">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoSalvar') }}</button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {dataService} from '../../../js/service/data/dataService'
     import {helpService} from "../../../js/service/helpService";
-    import Accordion from "../../components/accordion.vue"
+    import GestaoModal from "../gestaoModal.vue";
     import InputEventList from "../../components/inputEventList.vue"
     import TestArea from "./testArea.vue"
     import './../../../css/modal.css';
@@ -91,7 +95,7 @@
 
     export default {
         props: [],
-        components: {GlobalInputOptions, Accordion, InputEventList, TestArea},
+        components: {GlobalInputOptions, GestaoModal, InputEventList, TestArea},
         data: function () {
             return {
                 inputConfig: null,
@@ -177,4 +181,41 @@
 </script>
 
 <style scoped>
+    .acesso-intro { margin: 0 0 var(--g-e4); }
+    .acesso-ligar { padding-top: var(--g-e3); padding-bottom: var(--g-e3); }
+    .acesso-ligar .g-marcar { margin: 0; align-items: center; }
+    .acesso-ligar .g-marcar > span { font-weight: 700; font-size: var(--g-t-grande); }
+    .acesso .gm-secao > .g-dica { margin: calc(-1 * var(--g-e2)) 0 var(--g-e3); }
+    .acesso-erro { margin-top: var(--g-e4); }
+    .acesso-teste > summary .ti { font-size: 1.3em; }
+    .acesso-numero { align-items: center; }
+    .g-campo .acesso-numero > input[type="range"] { flex: 1 1 auto; width: auto; }
+    .g-campo .acesso-numero > input[type="number"] { flex: 0 0 112px; width: 112px; }
+    .acesso-cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 0 var(--g-e3); margin-top: var(--g-e3); }
+
+    /* sliderInput e globalInputOptions são compartilhados e usados como estão: aqui só muda a disposição dentro deste modal */
+    .acesso-deslizante ::v-deep div,
+    .acesso-deslizante ::v-deep label,
+    .acesso-deslizante ::v-deep input,
+    .acesso-deslizante ::v-deep button { float: none; width: auto; margin-left: 0; box-sizing: border-box; }
+    .acesso-deslizante ::v-deep div { margin-top: 0; margin-bottom: 0; }
+    .acesso-deslizante ::v-deep label { display: block; font-weight: 700; margin: var(--g-e2) 0 0; }
+    .acesso-deslizante ::v-deep input[type="range"] {
+        display: block; width: 100%; min-height: var(--g-alvo); margin: 0;
+        accent-color: var(--g-folha);
+    }
+    .acesso-deslizante ::v-deep input[type="range"]:focus-visible { outline: none; box-shadow: var(--g-foco); border-radius: var(--g-raio-p); }
+    .acesso-deslizante ::v-deep input[type="range"] + div { color: var(--g-tinta-2); font-size: var(--g-t-legenda); margin-bottom: var(--g-e3); }
+    .acesso-deslizante ::v-deep input[type="range"] ~ button { min-height: var(--g-alvo); margin: 0 0 var(--g-e3); }
+    .acesso-deslizante > .g-dica { margin: 0 0 var(--g-e3); }
+
+    .acesso-gerais ::v-deep h3 { font-size: var(--g-t-grande); margin: var(--g-e4) 0 var(--g-e1); }
+    .acesso-gerais ::v-deep input[type="checkbox"] {
+        width: 24px; height: 24px; margin: 0 var(--g-e3) 0 0; vertical-align: middle;
+        accent-color: var(--g-folha);
+    }
+    .acesso-gerais ::v-deep input[type="checkbox"] + label {
+        display: inline-flex; align-items: center; min-height: var(--g-alvo);
+        font-weight: 400; margin: 0; vertical-align: middle; cursor: pointer;
+    }
 </style>

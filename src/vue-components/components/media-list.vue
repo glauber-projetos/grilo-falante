@@ -1,41 +1,40 @@
 <template>
-    <div>
-        <ul class="mediaList">
+    <div class="ml">
+        <ul class="ml-lista" v-if="paginatedElems.length">
             <li v-for="(mediaElem, index) in paginatedElems" :title="titleProp ? mediaElem[titleProp] : ''">
-                <div class="mediaListItem">
-                    <img :src="mediaElem[imgProp]" :key="mediaElem[imgProp]" alt=""/>
-                    <div class="mediaElemLabel">{{ labelFn ? labelFn(mediaElem) : '' }}</div>
-                    <div class="mediaElemButtons">
-                        <button v-if="actionConfig.canMoveUp"
-                                @click="elemUp(mediaElem)"
-                                :disabled="isFirstElem(mediaElem)">
-                            <span class="hide-mobile">{{ $t('up') }}</span> <i class="fas fa-arrow-up"></i>
-                        </button>
-                        <button v-if="actionConfig.canPlay"
-                                @click="emitTogglePlay(mediaElem)">
-                            <span v-if="!elemsEqual(playingMedia, mediaElem)">
-                                <span class="hide-mobile">{{ $t('play') }} </span><i class="fas fa-play"></i>
-                            </span>
-                            <span v-if="elemsEqual(playingMedia, mediaElem)">
-                                <span class="hide-mobile">{{ $t('stop') }} </span><i class="fas fa-pause"></i>
-                            </span>
-                        </button>
-                        <button v-if="actionConfig.canRemove"
-                                @click="remove(mediaElem)">
-                            <span class="hide-mobile">{{ $t('remove') }}</span> <i class="fas fa-trash"></i>
-                        </button>
-                        <button v-if="actionConfig.canSelect"
-                                @click="addMediaElem(mediaElem)"
-                                :disabled="value && Array.isArray(value) ? !!value.find(elem => elemsEqual(elem, mediaElem)) : false">
-                            <span class="hide-mobile">{{ $t('select') }}</span> <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
+                <img :src="mediaElem[imgProp]" :key="mediaElem[imgProp]" alt=""/>
+                <span class="ml-nome">{{ labelFn ? labelFn(mediaElem) : '' }}</span>
+                <span class="ml-botoes">
+                    <button v-if="actionConfig.canMoveUp" type="button" class="g-btn g-btn-leve g-btn-icone"
+                            @click="elemUp(mediaElem)"
+                            :disabled="isFirstElem(mediaElem)"
+                            :aria-label="$t('gestaoAcaoSubirX', [labelFn ? labelFn(mediaElem) : ''])" :title="$t('gestaoAcaoSubir')">
+                        <i class="ti ti-arrow-up" aria-hidden="true"></i>
+                    </button>
+                    <button v-if="actionConfig.canPlay" type="button" class="g-btn g-btn-leve g-btn-icone"
+                            @click="emitTogglePlay(mediaElem)"
+                            :aria-pressed="elemsEqual(playingMedia, mediaElem).toString()"
+                            :aria-label="$t(elemsEqual(playingMedia, mediaElem) ? 'gestaoAcaoPararX' : 'gestaoAcaoOuvirX', [labelFn ? labelFn(mediaElem) : ''])"
+                            :title="$t(elemsEqual(playingMedia, mediaElem) ? 'gestaoAcaoAudioParar' : 'gestaoAcaoAudioOuvir')">
+                        <i :class="elemsEqual(playingMedia, mediaElem) ? 'ti ti-player-stop' : 'ti ti-player-play'" aria-hidden="true"></i>
+                    </button>
+                    <button v-if="actionConfig.canRemove" type="button" class="g-btn g-btn-leve g-btn-icone ml-tirar"
+                            @click="remove(mediaElem)"
+                            :aria-label="$t('gestaoAcaoTirarX', [labelFn ? labelFn(mediaElem) : ''])" :title="$t('gestaoAcaoTirar')">
+                        <i class="ti ti-trash" aria-hidden="true"></i>
+                    </button>
+                    <button v-if="actionConfig.canSelect" type="button" class="g-btn g-btn-leve g-btn-icone"
+                            @click="addMediaElem(mediaElem)"
+                            :disabled="value && Array.isArray(value) ? !!value.find(elem => elemsEqual(elem, mediaElem)) : false"
+                            :aria-label="$t('gestaoAcaoEscolherX', [labelFn ? labelFn(mediaElem) : ''])" :title="$t('gestaoAcaoEscolher')">
+                        <i class="ti ti-plus" aria-hidden="true"></i>
+                    </button>
+                </span>
             </li>
         </ul>
-        <div style="display: flex; margin-top: 1em" v-if="!disableNext || !disablePrev">
-            <button @click="prev" :disabled="disablePrev" style="flex-grow: 1;"><i class="fas fa-arrow-left"></i> <span class="hide-mobile">{{ $t('previousPage') }}</span></button>
-            <button @click="next" :disabled="disableNext" style="flex-grow: 1;"><span class="hide-mobile">{{ $t('nextPage') }}</span> <i class="fas fa-arrow-right"></i></button>
+        <div class="ml-paginas" v-if="!disableNext || !disablePrev">
+            <button type="button" class="g-btn" @click="prev" :disabled="disablePrev"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>{{ $t('gestaoAcaoPaginaAnterior') }}</span></button>
+            <button type="button" class="g-btn" @click="next" :disabled="disableNext"><span>{{ $t('gestaoAcaoPaginaSeguinte') }}</span><i class="ti ti-arrow-right" aria-hidden="true"></i></button>
         </div>
     </div>
 </template>
@@ -173,48 +172,59 @@
 </script>
 
 <style scoped>
-    ul li {
+    .ml-lista {
         list-style: none;
-        outline: 1px solid lightgray;
-        padding: 0.5em;
-    }
-
-    .mediaList button {
-        line-height: unset;
-        margin-bottom: 0;
-        padding: 0 10px;
-    }
-
-    .mediaList, .mediaList li, .mediaList li div {
-        padding: 0;
         margin: 0;
-    }
-
-    .mediaList li:hover {
-        background-color: #c4f0fe;
-    }
-
-    .mediaListItem {
+        padding: 0;
         display: flex;
+        flex-direction: column;
+        gap: var(--g-e1);
     }
-
-    .mediaListItem img {
-        flex-grow: 0;
-        flex-shrink: 0;
-        vertical-align: middle;
-        height: 28px;
-        width: 28px;
-    }
-
-    .mediaElemLabel {
-        flex-grow: 1;
-        flex-shrink: 1;
-        margin: 0 5px !important;
-    }
-
-    .mediaElemButtons {
+    .ml-lista li {
         display: flex;
-        flex-grow: 0;
-        flex-shrink: 0;
+        align-items: center;
+        gap: var(--g-e3);
+        margin: 0;
+        padding: var(--g-e1) var(--g-e1) var(--g-e1) var(--g-e3);
+        background: var(--g-superficie);
+        border: 2px solid var(--g-borda);
+        border-radius: var(--g-raio);
+    }
+    .ml-lista li:hover {
+        border-color: var(--g-borda-forte);
+    }
+    .ml-lista img {
+        flex: none;
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+        border-radius: var(--g-raio-p);
+        background: var(--g-superficie-2);
+    }
+    .ml-nome {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-weight: 700;
+    }
+    .ml-botoes {
+        display: flex;
+        flex: none;
+        gap: 2px;
+    }
+    .ml-tirar {
+        color: var(--g-perigo);
+    }
+    .ml-tirar:hover {
+        background: var(--g-perigo-claro);
+    }
+    .ml-paginas {
+        display: flex;
+        gap: var(--g-e2);
+        margin-top: var(--g-e3);
+    }
+    .ml-paginas .g-btn {
+        flex: 1;
+        padding: 0 var(--g-e3);
     }
 </style>

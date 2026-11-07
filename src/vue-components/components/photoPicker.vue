@@ -2,15 +2,15 @@
     <div class="photo-picker">
         <div v-if="!pickedSrc" class="photo-picker-buttons">
             <label :for="cameraId" class="button photo-btn photo-btn-main" role="button" tabindex="0" @keydown.enter.space.prevent="openInput(cameraId)">
-                <i class="fas fa-camera" aria-hidden="true"></i> <span>{{ $t('takePhotoNow') }}</span>
+                <i class="ti ti-camera" aria-hidden="true"></i> <span>{{ $t('takePhotoNow') }}</span>
             </label>
             <input type="file" :id="cameraId" class="photo-input" accept="image/*" :capture="facing" @change="onFile($event.target)"/>
             <label v-if="withGallery" :for="galleryId" class="button photo-btn" role="button" tabindex="0" @keydown.enter.space.prevent="openInput(galleryId)">
-                <i class="fas fa-images" aria-hidden="true"></i> <span>{{ $t('chooseFromGallery') }}</span>
+                <i class="ti ti-photo" aria-hidden="true"></i> <span>{{ $t('chooseFromGallery') }}</span>
             </label>
             <input v-if="withGallery" type="file" :id="galleryId" class="photo-input" accept="image/*" @change="onFile($event.target)"/>
         </div>
-        <div v-if="loading" class="photo-picker-loading"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ $t('loadingPhoto') }}</div>
+        <div v-if="loading" class="photo-picker-loading"><i class="ti ti-loader-2 pp-gira" aria-hidden="true"></i> {{ $t('loadingPhoto') }}</div>
         <p v-if="error" class="photo-picker-error" role="alert">{{ $t('photoCouldNotBeLoaded') }}</p>
         <image-cropper v-if="pickedSrc" :src="pickedSrc" :cell-aspect="cellAspect" :output-width="outputWidth"
                        @apply="onApply" @cancel="reset()" @error="onError"/>
@@ -108,6 +108,9 @@ export default {
 </script>
 
 <style scoped>
+.pp-gira { display: inline-block; animation: pp-girar 1s linear infinite; }
+@keyframes pp-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pp-gira { animation: none; } }
 .photo-picker-buttons {
     display: flex;
     flex-wrap: wrap;

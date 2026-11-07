@@ -1,23 +1,14 @@
 <template>
-    <div class="container-fluid px-0">
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="inputRestUri">HTTP URL</label>
-            <div class="col-12 col-md-7">
-                <input class="col-12" id="inputRestUri" v-model="action.restUrl" spellcheck="false" autocomplete="true"
-                       type="text" placeholder="http(s)://<hostname>:<port>/<path to rest function>"/>
-            </div>
+    <div class="ht">
+        <div class="g-campo">
+            <label for="inputRestUri">{{ $t('gestaoAcaoHttpEndereco') }}</label>
+            <input id="inputRestUri" v-model="action.restUrl" spellcheck="false" autocomplete="true"
+                   type="text" placeholder="http(s)://<hostname>:<port>/<path to rest function>"/>
         </div>
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="body">{{ $t('httpBodyData') }}</label>
-            <div class="col-12 col-md-7">
-                <textarea id="body" v-model="action.body" class="col-12" rows="1"
-                       placeholder="ON | OFF | {&quot;data&quot;: 123} | ..." spellcheck="false" type="text"/>
-            </div>
-        </div>
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="method">{{ $t('httpMethod') }}</label>
-            <div class="col-12 col-md-7">
-                <select id="method" v-model="action.method" class="col-12">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label for="method">{{ $t('httpMethod') }}</label>
+                <select id="method" v-model="action.method">
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
                     <option value="PUT">PUT</option>
@@ -27,39 +18,41 @@
                     <option value="PATCH">PATCH</option>
                 </select>
             </div>
-        </div>
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="content-type">HTTP Content-Type</label>
-            <div class="col-12 col-md-7">
-                <input id="content-type" v-model="action.contentType" class="col-12"
+            <div class="g-campo">
+                <label for="content-type">HTTP Content-Type</label>
+                <input id="content-type" v-model="action.contentType"
                        placeholder="text/plain | application/json | ..." spellcheck="false" autocomplete="true" type="text"/>
             </div>
         </div>
-        <div class="row" v-if="action.isLiveAction">
-            <label class="col-12 col-md-4 normal-text" for="acceptHeader">HTTP Accept Header</label>
-            <div class="col-12 col-md-7">
-                <input id="acceptHeader" v-model="action.acceptHeader" class="col-12"
-                       placeholder="text/plain | application/json | ..." spellcheck="false" autocomplete="true" type="text"/>
-            </div>
+        <div class="g-campo">
+            <label for="body">{{ $t('httpBodyData') }}</label>
+            <textarea id="body" v-model="action.body" rows="2"
+                   placeholder="ON | OFF | {&quot;data&quot;: 123} | ..." spellcheck="false" type="text"/>
         </div>
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="auth-user">{{ $t('httpAuthUser') }}</label>
-            <div class="col-12 col-md-7">
-                <input id="auth-user" v-model="action.authUser" class="col-12" autocomplete="true" type="text" :placeholder="$t('optionalBracket')"/>
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="g-campo" v-if="action.isLiveAction">
+                    <label for="acceptHeader">HTTP Accept Header</label>
+                    <input id="acceptHeader" v-model="action.acceptHeader"
+                           placeholder="text/plain | application/json | ..." spellcheck="false" autocomplete="true" type="text"/>
+                </div>
+                <div class="gm-grade">
+                    <div class="g-campo">
+                        <label for="auth-user">{{ $t('httpAuthUser') }}</label>
+                        <input id="auth-user" v-model="action.authUser" autocomplete="true" type="text" :placeholder="$t('optionalBracket')"/>
+                    </div>
+                    <div class="g-campo">
+                        <label for="auth-pw">{{ $t('httpAuthPw') }}</label>
+                        <input id="auth-pw" v-model="action.authPw" type="password" :placeholder="$t('optionalBracket')"/>
+                    </div>
+                </div>
+                <label class="g-marcar" v-if="action.isLiveAction">
+                    <input id="useCorsProxy" v-model="action.useCorsProxy" type="checkbox"/>
+                    <span>{{ $t('useCorsProxy') }}</span>
+                </label>
             </div>
-        </div>
-        <div class="row">
-            <label class="col-12 col-md-4 normal-text" for="auth-pw">{{ $t('httpAuthPw') }}</label>
-            <div class="col-12 col-md-7">
-                <input id="auth-pw" v-model="action.authPw" class="col-12" type="password" :placeholder="$t('optionalBracket')"/>
-            </div>
-        </div>
-        <div class="row" v-if="action.isLiveAction">
-            <div class="col-12">
-                <input id="useCorsProxy" v-model="action.useCorsProxy" type="checkbox"/>
-                <label class="normal-text" for="useCorsProxy">{{ $t('useCorsProxy') }}</label>
-            </div>
-        </div>
+        </details>
     </div>
 </template>
 
@@ -77,11 +70,4 @@ export default {
 </script>
 
 <style scoped>
-.normal-text {
-    font-weight: normal;
-}
-
-.row {
-    margin-bottom: 1em;
-}
 </style>

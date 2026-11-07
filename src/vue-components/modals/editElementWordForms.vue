@@ -1,87 +1,91 @@
 <template>
-    <div>
-        <accordion :acc-label="$t('addWordForm')" acc-label-type="h2" acc-open="true" acc-background-color="white">
-            <edit-word-form v-model="newWordForm" :allow-empty="true"></edit-word-form>
-            <div class="srow mb-4">
-                <button class="three columns offset-by-nine" @click="addWordForm()" :disabled="!newWordForm.value">{{ $t('addWordForm') }}</button>
-            </div>
-        </accordion>
-        <accordion :acc-label="$t('importExport')" acc-label-type="h2" acc-background-color="white">
-            <div class="srow">
-                <input id="importExportGlobally" type="checkbox" v-model="importExportGlobally" @change="overrideAtImport = importExportGlobally ? true : overrideAtImport"/>
-                <label for="importExportGlobally">{{ $t('importexportDataTofromAllGrids') }}</label>
-            </div>
-            <div class="srow">
-                <input id="overrideAtImport" type="checkbox" :disabled="importExportGlobally" v-model="overrideAtImport"/>
-                <label for="overrideAtImport">{{ $t('overrideExistingWordForms') }}</label>
-            </div>
-            <div class="srow">
-                <button class="three columns six columns" @click="importFromClipboard()"><i class="fas fa-file-import"/> {{ $t('importFromClipboard') }}</button>
-                <button class="three columns six columns" @click="copyToClipboard()"><i class="fas fa-file-export"/> {{ $t('copyToClipboard') }}</button>
-            </div>
-            <div class="srow" v-if="currentMsg === msgTypes.WAIT">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <div class="srow warn" v-if="currentMsg === msgTypes.ERROR_PASTE">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>{{ $t('clipboardContainsNoWordFormsPleaseCopyFrom') }}</span>
-            </div>
-            <div class="srow success" v-if="currentMsg === msgTypes.SUCCESS_PASTE">
-                <i class="fas fa-check"></i>
-                <span v-if="gridPasteCount === 0">{{ $t('importedWordForms', {count: msgCount}) }}</span>
-                <span v-if="gridPasteCount > 0">{{ $t('importedWordFormsGrids', {count: msgCount, gridCount: this.gridPasteCount}) }}</span>
-            </div>
-            <div class="srow success" v-if="currentMsg === msgTypes.SUCCESS_COPY">
-                <i class="fas fa-check"></i>
-                <span>{{ $t('copiedWordForms', {count: msgCount}) }}</span>
-            </div>
-        </accordion>
+    <div class="ewf">
+        <div class="ewf-intro">
+            <img src="app/img/grilo/mascote/grilo-ideia.webp" alt="" aria-hidden="true" class="ewf-intro-grilo"/>
+            <p class="g-apoio">{{ $t('gestaoBotaoFormasIntro') }}</p>
+        </div>
 
-        <div class="mb-3 mt-5 d-flex align-items-end">
-            <h2 class="me-3">{{ $t('currentWordForms') }}</h2>
-            <span v-if="gridElement.wordForms.length > 0">{{ gridElement.wordForms.length }} {{ 'elementsBracket' | translate}}</span>
-        </div>
-        <div class="row mb-3">
-            <label for="filterLang" class="col-12 col-md-3">{{ $t('language') }}</label>
-            <div class="col-12 col-md-3 mb-2">
-                <select class="col-12" id="filterLang" v-model="filterLang">
-                    <option :value="null">{{ $t('allSelected') }}</option>
-                    <option v-if="gridElement.wordForms.some((f) => f.lang === lang.code)" v-for="lang in langs" :value="lang.code">{{lang | extractTranslationAppLang}} ({{ lang.code }})</option>
-                </select>
+        <section class="gm-secao">
+            <h3><i class="ti ti-plus" aria-hidden="true"></i>{{ $t('gestaoBotaoNovaForma') }}</h3>
+            <edit-word-form v-model="newWordForm" :allow-empty="true"></edit-word-form>
+            <div class="ewf-direita">
+                <button type="button" class="g-btn g-btn-principal" @click="addWordForm()" :disabled="!newWordForm.value">
+                    <i class="ti ti-plus" aria-hidden="true"></i>{{ $t('gestaoBotaoAdicionarForma') }}
+                </button>
             </div>
-            <div class="col-12 col-md-3"/>
-            <div class="col-12 col-md-3 d-flex justify-content-end">
-                <button @click="deleteAll" class="flex-grow-1"><i class="fas fa-trash"/> {{ $t('deleteAll') }}</button>
-            </div>
-        </div>
-        <ol v-if="gridElement.wordForms.length > 0" style="list-style-type: none">
-            <li v-if="!filterLang || form.lang === filterLang" v-for="(form, index) in gridElement.wordForms" :class="index % 2 === 1 && index !== editId ? 'bg-gray' : ''">
-                <div class="row">
-                    <div class="col-12 col-sm-8 my-2 my-sm-0 d-flex">
-                        <div class="row d-flex align-items-center flex-grow-1">
-                            <span v-if="form.lang" class="col-3 col-md-2">
-                                <span class="lang-tag p-2 m-1">{{ form.lang }}</span>
-                            </span>
-                            <span class="col-3 col-md-3 value"><strong>{{ form.value }}</strong></span>
-                            <div v-if="form.tags.length" class="col-6 col-md-7">
-                                <div class="row">
-                                    <span v-for="tag in form.tags" class="tag">{{ tag }}</span>
-                                </div>
-                            </div>
-                            <span v-if="!form.tags.length" class="col-6 col-md-7">(no tags)</span>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-4 mb-2 mb-sm-0 d-flex">
-                        <button class="col" :title="editId !== index ? 'Edit' : 'End editing'" @click="edit(index)"><i class="fas fa-pencil-alt"/></button>
-                        <button class="col" :title="$t('delete')" @click="remove(form)"><i class="fas fa-trash"/></button>
-                        <button class="col" :title="$t('moveUp')" @click="moveUp(form)"><i class="fas fa-arrow-up"/></button>
-                        <button class="col" :title="$t('moveDown')" @click="moveDown(form)"><i class="fas fa-arrow-down"/></button>
-                    </div>
+        </section>
+
+        <section class="gm-secao">
+            <h3>
+                <i class="ti ti-abc" aria-hidden="true"></i>{{ $t('gestaoBotaoFormasDesta') }}
+                <span v-if="gridElement.wordForms.length > 0" class="g-pilula">{{ gridElement.wordForms.length }}</span>
+            </h3>
+            <div class="ewf-filtro" v-if="gridElement.wordForms.length > 0">
+                <div class="g-campo">
+                    <label for="filterLang">{{ $t('gestaoBotaoMostrarIdioma') }}</label>
+                    <select id="filterLang" v-model="filterLang">
+                        <option :value="null">{{ $t('gestaoBotaoTodosOsIdiomas') }}</option>
+                        <option v-if="gridElement.wordForms.some((f) => f.lang === lang.code)" v-for="lang in langs" :value="lang.code">{{lang | extractTranslationAppLang}} ({{ lang.code }})</option>
+                    </select>
                 </div>
-                <edit-word-form v-if="editId === index" class="my-3 ps-4 pe-4" v-model="gridElement.wordForms[index]"></edit-word-form>
-            </li>
-        </ol>
-        <span v-if="gridElement.wordForms.length === 0">{{ $t('noWordFormsDefined') }}</span>
+                <button type="button" @click="deleteAll" class="g-btn g-btn-perigo"><i class="ti ti-trash" aria-hidden="true"></i>{{ $t('gestaoBotaoApagarTodas') }}</button>
+            </div>
+            <ul v-if="gridElement.wordForms.length > 0" class="gm-lista">
+                <li v-if="!filterLang || form.lang === filterLang" v-for="(form, index) in gridElement.wordForms" :class="{'ewf-editando': index === editId}">
+                    <span v-if="form.lang" class="g-pilula ewf-idioma">{{ form.lang }}</span>
+                    <span class="gm-lista-texto">
+                        {{ form.value }}
+                        <small v-if="form.tags.length" class="ewf-marcas">
+                            <span v-for="tag in form.tags" class="g-pilula g-pilula-ok">{{ tag }}</span>
+                        </small>
+                        <small v-else>{{ $t('gestaoBotaoSemMarcas') }}</small>
+                    </span>
+                    <span class="ewf-botoes">
+                        <button type="button" class="g-btn g-btn-leve g-btn-icone" :aria-pressed="(editId === index).toString()" :aria-label="editId !== index ? $t('gestaoBotaoEditarForma', [form.value]) : $t('gestaoBotaoTerminarEdicao')" :title="editId !== index ? $t('gestaoEditar') : $t('gestaoBotaoTerminarEdicao')" @click="edit(index)">
+                            <i :class="editId !== index ? 'ti ti-pencil' : 'ti ti-check'" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="g-btn g-btn-leve g-btn-icone" :aria-label="$t('gestaoBotaoApagarForma', [form.value])" :title="$t('gestaoApagar')" @click="remove(form)"><i class="ti ti-trash" aria-hidden="true"></i></button>
+                        <button type="button" class="g-btn g-btn-leve g-btn-icone" :aria-label="$t('gestaoBotaoSubir')" :title="$t('gestaoBotaoSubir')" @click="moveUp(form)"><i class="ti ti-arrow-up" aria-hidden="true"></i></button>
+                        <button type="button" class="g-btn g-btn-leve g-btn-icone" :aria-label="$t('gestaoBotaoDescer')" :title="$t('gestaoBotaoDescer')" @click="moveDown(form)"><i class="ti ti-arrow-down" aria-hidden="true"></i></button>
+                    </span>
+                    <edit-word-form v-if="editId === index" class="ewf-form-item" v-model="gridElement.wordForms[index]"></edit-word-form>
+                </li>
+            </ul>
+            <p v-if="gridElement.wordForms.length === 0" class="gm-vazio"><i class="ti ti-abc" aria-hidden="true"></i>{{ $t('gestaoBotaoNenhumaForma') }}</p>
+        </section>
+
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoBotaoCopiarColarPlanilha') }}</summary>
+            <div class="gm-avancado-corpo">
+                <p class="g-dica">{{ $t('gestaoBotaoPlanilhaDica') }}</p>
+                <label class="g-marcar">
+                    <input id="importExportGlobally" type="checkbox" v-model="importExportGlobally" @change="overrideAtImport = importExportGlobally ? true : overrideAtImport"/>
+                    <span>{{ $t('gestaoBotaoTodasPranchas') }}</span>
+                </label>
+                <label class="g-marcar">
+                    <input id="overrideAtImport" type="checkbox" :disabled="importExportGlobally" v-model="overrideAtImport"/>
+                    <span>{{ $t('gestaoBotaoSubstituirFormas') }}</span>
+                </label>
+                <div class="g-linha ewf-planilha">
+                    <button type="button" class="g-btn" @click="importFromClipboard()"><i class="ti ti-file-import" aria-hidden="true"></i>{{ $t('gestaoBotaoColarPlanilha') }}</button>
+                    <button type="button" class="g-btn" @click="copyToClipboard()"><i class="ti ti-file-export" aria-hidden="true"></i>{{ $t('gestaoBotaoCopiarPlanilha') }}</button>
+                </div>
+                <p v-if="currentMsg === msgTypes.WAIT" class="ewf-msg" role="status"><i class="ti ti-loader-2 ewf-gira" aria-hidden="true"></i>{{ $t('gestaoBotaoAguarde') }}</p>
+                <p v-if="currentMsg === msgTypes.ERROR_PASTE" class="g-aviso" role="alert">
+                    <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+                    <span>{{ $t('clipboardContainsNoWordFormsPleaseCopyFrom') }}</span>
+                </p>
+                <p v-if="currentMsg === msgTypes.SUCCESS_PASTE" class="ewf-msg ewf-ok" role="status">
+                    <i class="ti ti-check" aria-hidden="true"></i>
+                    <span v-if="gridPasteCount === 0">{{ $t('importedWordForms', {count: msgCount}) }}</span>
+                    <span v-if="gridPasteCount > 0">{{ $t('importedWordFormsGrids', {count: msgCount, gridCount: this.gridPasteCount}) }}</span>
+                </p>
+                <p v-if="currentMsg === msgTypes.SUCCESS_COPY" class="ewf-msg ewf-ok" role="status">
+                    <i class="ti ti-check" aria-hidden="true"></i>
+                    <span>{{ $t('copiedWordForms', {count: msgCount}) }}</span>
+                </p>
+            </div>
+        </details>
     </div>
 </template>
 
@@ -90,14 +94,13 @@
     import {helpService} from "../../js/service/helpService";
     import {WordForm} from "../../js/model/WordForm.js";
     import EditWordForm from "../components/editWordForm.vue";
-    import Accordion from "../components/accordion.vue";
     import {util} from "../../js/util/util.js";
     import {i18nService} from "../../js/service/i18nService.js";
     import {dataService} from "../../js/service/data/dataService.js";
     import {constants} from "../../js/util/constants.js";
 
     export default {
-        components: {Accordion, EditWordForm},
+        components: {EditWordForm},
         props: ['gridElement', 'gridData'],
         data: function () {
             return {
@@ -300,46 +303,21 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
-li {
-    border: 1px solid gray;
-    margin-bottom: 0;
-}
-
-li > .row {
-    margin: 0;
-}
-
-button {
-    margin-bottom: 0;
-    flex-grow: 1;
-    flex-shrink: 1;
-    padding: 0;
-}
-
-.bg-gray {
-    background-color: lightgray;
-}
-
-.tag {
-    background-color: #41b883;
-    flex-basis: min-content;
-    flex-shrink: 1;
-    margin: 0.3em 0.3em 0.3em 0;
-    border-radius: 5px;
-}
-
-.value {
-    min-width: 4em;
-}
-
-.lang-tag {
-    background-color: lightblue;
-    border-radius: 5px;
-}
-
-@media (max-width: 575px) {
-    li {
-        margin-bottom: 0.8em;
-    }
-}
+.ewf-intro { display: flex; align-items: center; gap: var(--g-e3); margin: 0 0 var(--g-e4); }
+.ewf-intro p { margin: 0; }
+.ewf-intro-grilo { width: 64px; height: auto; flex: none; }
+.ewf-direita { display: flex; justify-content: flex-end; }
+.ewf-filtro { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--g-e3); margin-bottom: var(--g-e3); }
+.ewf-filtro > .g-campo { flex: 1 1 220px; margin-bottom: 0; }
+.ewf-idioma { text-transform: uppercase; }
+.ewf-marcas { display: flex !important; flex-wrap: wrap; gap: var(--g-e1); margin-top: var(--g-e1); }
+.ewf-botoes { display: flex; flex-wrap: nowrap; gap: 2px; }
+.ewf-editando { border-color: var(--g-folha) !important; }
+.ewf-form-item { flex: 1 1 100%; padding: var(--g-e3) 0 var(--g-e2); border-top: 1px solid var(--g-borda); }
+.ewf-planilha { margin: var(--g-e2) 0 var(--g-e3); }
+.ewf-msg { display: flex; align-items: center; gap: var(--g-e2); font-weight: 700; color: var(--g-tinta-2); }
+.ewf-ok { color: var(--g-folha-escura); }
+.ewf-gira { animation: ewf-girar 1s linear infinite; }
+@keyframes ewf-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ewf-gira { animation: none; } }
 </style>

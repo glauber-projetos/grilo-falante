@@ -1,69 +1,58 @@
 <template>
-    <div>
+    <div class="are">
         <test-are-connection v-model="action.areURL"/>
-        <div class="srow">
-            <div class="four columns">
-                <label class="normal-text">{{ $t('areModel') }}</label>
+        <div class="g-campo">
+            <span class="are-rotulo">{{ $t('gestaoAcaoAreModelo') }}</span>
+            <div class="are-modelo" role="status" aria-live="polite">
+                <i class="ti ti-file" aria-hidden="true"></i>
+                <span v-show="loading">{{ $t('gestaoAcaoAreCarregando') }}</span>
+                <span v-show="!loading && areModelSync && areModelFile && !areModelFile.dataBase64">{{ $t('gestaoAcaoAreNaoCarregou') }}</span>
+                <span v-show="!loading && !areModelSync && areModelFile && !areModelFile.dataBase64">{{ $t('gestaoAcaoAreSemModelo') }}</span>
+                <span v-if="!loading && areModelFile && areModelFile.dataBase64">
+                    <a href="javascript:void(0);" @click="downloadModelFile(areModelFile)">{{areModelFile.fileName}}</a>
+                </span>
             </div>
-            <div class="eight columns">
-                <div class="srow nomargin">
-                    <div class="twelve columns">
-                        <span v-show="loading">{{ $t('loadingModelFromAre') }}</span>
-                        <span v-show="!loading && areModelSync && areModelFile && !areModelFile.dataBase64">{{ $t('couldNotLoadModelFromAre') }}</span>
-                        <span v-show="!loading && !areModelSync && areModelFile && !areModelFile.dataBase64">{{ $t('noAreModel') }}</span>
-                        <span v-if="!loading && areModelFile && areModelFile.dataBase64">
-                            <a href="javascript:void(0);" @click="downloadModelFile(areModelFile)">{{areModelFile.fileName}}</a>
-                        </span>
-                    </div>
-                </div>
-                <div class="srow">
-                    <button class="six columns" @click="reloadAREModel(action)"><i class="fas fa-download"/> <span>{{ $t('downloadFromAre') }}</span></button>
-                    <button v-if="areModelFile && areModelFile.dataBase64" class="six columns" @click="uploadAREModel(action)"><i class="fas fa-upload"/> <span>{{ $t('uploadToAre') }}</span></button>
-                </div>
+            <div class="g-linha are-botoes">
+                <button type="button" class="g-btn" @click="reloadAREModel(action)"><i class="ti ti-download" aria-hidden="true"></i><span>{{ $t('gestaoAcaoAreBaixar') }}</span></button>
+                <button type="button" v-if="areModelFile && areModelFile.dataBase64" class="g-btn" @click="uploadAREModel(action)"><i class="ti ti-upload" aria-hidden="true"></i><span>{{ $t('gestaoAcaoAreEnviar') }}</span></button>
             </div>
         </div>
-        <div class="srow" v-if="!areModelSync">
-            <div class="eight columns offset-by-four">
-                <i class="fas fa-info-circle" />
-                <span v-show="areModelFile && areModelFile.dataBase64">{{ $t('uploadTheSavedModelOrDownloadCurrent') }}</span>
-                <span v-show="areModelFile && !areModelFile.dataBase64">{{ $t('downloadTheCurrentAreModelInOrderToDefine') }}</span>
-            </div>
-        </div>
-        <div class="srow" v-if="areModelSync">
-            <div class="four columns">
-                <label class="normal-text" for="inputComponentId">{{ $t('component') }}</label>
-            </div>
-            <select class="eight columns" id="inputComponentId" v-model="action.componentId" @change="reloadPorts(action)">
+        <p class="g-aviso" v-if="!areModelSync">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span v-show="areModelFile && areModelFile.dataBase64">{{ $t('gestaoAcaoAreDicaEnviarOuBaixar') }}</span>
+            <span v-show="areModelFile && !areModelFile.dataBase64">{{ $t('gestaoAcaoAreDicaBaixar') }}</span>
+        </p>
+        <div class="g-campo" v-if="areModelSync">
+            <label for="inputComponentId">{{ $t('component') }}</label>
+            <select id="inputComponentId" v-model="action.componentId" @change="reloadPorts(action)">
                 <option v-for="id in areComponentIds" :value="id">
                     {{id}}
                 </option>
             </select>
         </div>
-        <div class="srow" v-if="areModelSync && areComponentPorts.length != 0">
-            <div class="four columns offset-by-four">
-                <label for="inputDataPortId" class="normal-text">{{ $t('sendDataToPort') }}</label>
-                <select id="inputDataPortId" class="full-width" v-model="action.dataPortId">
+        <div class="gm-grade" v-if="areModelSync && areComponentPorts.length != 0">
+            <div class="g-campo">
+                <label for="inputDataPortId">{{ $t('sendDataToPort') }}</label>
+                <select id="inputDataPortId" v-model="action.dataPortId">
                     <option value="">{{ $t('empty') }}</option>
                     <option v-for="id in areComponentPorts" :value="id">
                         {{id}}
                     </option>
                 </select>
             </div>
-            <div class="four columns">
-                <label for="inputDataPortData" class="normal-text">{{ $t('dataToSend') }}</label>
-                <input id="inputDataPortData" type="text" class="full-width" v-model="action.dataPortSendData"/>
+            <div class="g-campo">
+                <label for="inputDataPortData">{{ $t('dataToSend') }}</label>
+                <input id="inputDataPortData" type="text" v-model="action.dataPortSendData"/>
             </div>
         </div>
-        <div class="srow" v-if="areModelSync && areComponentEventPorts.length != 0">
-            <div class="eight columns offset-by-four">
-                <label for="inputeventPortId" class="normal-text">Event-Port</label>
-                <select id="inputeventPortId" class="full-width" v-model="action.eventPortId">
-                    <option value="">{{ $t('empty') }}</option>
-                    <option v-for="id in areComponentEventPorts" :value="id">
-                        {{id}}
-                    </option>
-                </select>
-            </div>
+        <div class="g-campo" v-if="areModelSync && areComponentEventPorts.length != 0">
+            <label for="inputeventPortId">Event-Port</label>
+            <select id="inputeventPortId" v-model="action.eventPortId">
+                <option value="">{{ $t('empty') }}</option>
+                <option v-for="id in areComponentEventPorts" :value="id">
+                    {{id}}
+                </option>
+            </select>
         </div>
     </div>
 </template>
@@ -170,19 +159,21 @@
 </script>
 
 <style scoped>
-    .srow {
-        margin-top: 1em;
-    }
-
-    .nomargin {
-        margin-top: 0;
-    }
-
-    .full-width {
-        width: 100%;
-    }
-
-    .normal-text {
-        font-weight: normal;
-    }
+.are-rotulo {
+    font-weight: 700;
+}
+.are-modelo {
+    display: flex;
+    align-items: center;
+    gap: var(--g-e2);
+    min-height: var(--g-alvo);
+    color: var(--g-tinta-2);
+    overflow-wrap: anywhere;
+}
+.are-botoes {
+    gap: var(--g-e2);
+}
+.are .g-aviso {
+    margin: 0 0 var(--g-e4);
+}
 </style>

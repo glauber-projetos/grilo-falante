@@ -1,5 +1,6 @@
 import { MainVue } from '../vue/mainVue';
 import { constants } from './constants';
+import { i18nService } from '../service/i18nService';
 
 let messageUtil = {};
 
@@ -20,16 +21,16 @@ messageUtil.showImportSuccess = async function(importData, onCloseFn) {
     // Build items list
     let items = [];
     if (importedGridsCount > 0) {
-        items.push(`${importedGridsCount} grid(s) imported`);
+        items.push(i18nService.t(importedGridsCount === 1 ? 'gestaoArquivoImportadaUmaPrancha' : 'gestaoArquivoImportadasPranchas', importedGridsCount));
     }
     if (importedDictsCount > 0) {
-        items.push(`${importedDictsCount} dictionaries imported`);
+        items.push(i18nService.t(importedDictsCount === 1 ? 'gestaoArquivoImportadaUmaLista' : 'gestaoArquivoImportadasListas', importedDictsCount));
     }
 
     // Show success message box
     return MainVue.showMessageBox({
         type: constants.MODAL_TYPE_SUCCESS,
-        header: 'importSuccessful',
+        header: 'gestaoArquivoImportadoTitulo',
         items: items,
         buttonPreset: constants.BUTTONS_OK,
         onClose: onCloseFn

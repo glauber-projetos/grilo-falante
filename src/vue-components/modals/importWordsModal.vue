@@ -1,91 +1,72 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keyup.27="$emit('close')" @keyup.ctrl.enter="save()">
-                    <a class="inline close-button" href="javascript:void(0);" @click="$emit('close')"><i class="fas fa-times"/></a>
-                    <a class="close-button" href="javascript:;" @click="openHelp()"><i class="fas fa-question-circle"></i></a>
-                    <div class="modal-header">
-                        <h1 name="header">
-                            {{ $t('importWordsToDictionary') }}
-                        </h1>
-                    </div>
+    <gestao-modal :titulo="$t('gestaoPalavrasAcrescentar')" :subtitulo="$t('gestaoPalavrasNaLista', [dictData.dictionaryKey])" icone="text-plus"
+                  @close="$emit('close')" @keyup.ctrl.enter.native="parsedElems.length > 0 && save()">
+        <template #cabeca>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="openHelp()" :aria-label="$t('gestaoArquivoAjuda')" :title="$t('gestaoArquivoAjuda')">
+                <i class="ti ti-help-circle" aria-hidden="true"></i>
+            </button>
+        </template>
 
-                    <div class="modal-body container">
-                        <div class="srow">
-                            <label class="three columns" for="inputText">{{ $t('input') }}</label>
-                            <span class="nine columns">{{ $t('insertWordsSeparatedBySpaceEnter') }}</span>
-                        </div>
-                        <div class="srow">
-                            <button @click="() => {showAdvanced = !showAdvanced}" class="nine columns offset-by-three btn-accordion" style="margin-bottom: 0">
-                                <i class="fas fa-chevron-down" v-show="!showAdvanced"></i>
-                                <i class="fas fa-chevron-up" v-show="showAdvanced"></i>
-                                <span>{{ $t('advancedOptions') }}</span>
-                            </button>
-                        </div>
-                        <div class="srow" v-if="showAdvanced">
-                            <div class="nine columns offset-by-three" style="background-color: whitesmoke;">
-                                <div class="srow">
-                                    <label for="inputElementSeparator" class="five columns">{{ $t('elementSeparator') }}</label>
-                                    <input id="inputElementSeparator" type="text" v-model="elementSeparator" @input="textChanged"/>
-                                </div>
-                                <div class="srow">
-                                    <label for="inputRankSeparator" class="five columns">{{ $t('inelementSeparator') }}</label>
-                                    <input id="inputRankSeparator" type="text" v-model="rankSeparator" @input="textChanged"/>
-                                </div>
-                                <div class="srow">
-                                    <label for="inputElIndex" class="five columns">{{ $t('wordIndex0based') }}</label>
-                                    <input id="inputElIndex" type="number" v-model="wordPosition" @input="textChanged"/>
-                                </div>
-                                <div class="srow">
-                                    <label for="inputRankIndex" class="five columns">{{ $t('rankIndex0based') }}</label>
-                                    <input id="inputRankIndex" type="number" v-model="rankPosition" @input="textChanged"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="srow">
-                            <textarea v-focus class="twelve columns" id="inputText" v-model="inputText" @input="textChanged" style="resize: vertical;min-height: 70px;" :placeholder="$t('word1Word2Word3')"/>
-                        </div>
-                        <div class="srow">
-                            <label class="three columns">{{ $t('recognizedWords') }}</label>
-                            <div v-show="parsedElems.length > 0" class="nine columns">
-                                <span>{{elementCount}}</span>
-                                <span>{{ $t('wordsBracket') }}</span>
-                                <span class="break-word">{{JSON.stringify(parsedElems)}}</span>
-                                <span v-if="parsedElems.length < elementCount">...</span>
-                            </div>
-                            <div v-show="parsedElems.length === 0" class="nine columns">
-                                <span>{{ $t('noWords') }}</span>
-                            </div>
-                        </div>
-                    </div>
+        <div class="g-campo">
+            <label for="inputText">{{ $t('gestaoPalavrasEscreva') }}</label>
+            <textarea id="inputText" v-model="inputText" @input="textChanged" :placeholder="$t('gestaoPalavrasEscrevaExemplo')" aria-describedby="inputTextDica"></textarea>
+            <span id="inputTextDica" class="g-dica">{{ $t('gestaoPalavrasEscrevaDica') }}</span>
+        </div>
 
-                    <div class="modal-footer">
-                        <div class="button-container">
-                            <button @click="$emit('close')" :title="$t('keyboardEsc')">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button @click="save()" :title="$t('keyboardCtrlEnter')" :disabled="parsedElems.length == 0">
-                                <i class="fas fa-check"/> <span>{{ $t('insertWords') }}</span>
-                            </button>
-                        </div>
+        <section class="gm-secao" aria-live="polite">
+            <h3><i class="ti ti-checks" aria-hidden="true"></i>{{ $t('gestaoPalavrasEncontradas', [elementCount]) }}</h3>
+            <ul v-show="parsedElems.length > 0" class="pw-palavras">
+                <li v-for="(elem, index) in parsedElems" :key="index" class="g-pilula">{{ elem }}</li>
+                <li v-if="parsedElems.length < elementCount" class="g-pilula pw-mais">+{{ elementCount - parsedElems.length }}</li>
+            </ul>
+            <p v-show="parsedElems.length === 0" class="g-dica pw-nenhuma">{{ $t('gestaoPalavrasNenhumaAinda') }}</p>
+        </section>
+
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoArquivoAvancado') }}</summary>
+            <div class="gm-avancado-corpo">
+                <p class="g-dica">{{ $t('gestaoPalavrasAvancadoDica') }}</p>
+                <div class="gm-grade">
+                    <div class="g-campo">
+                        <label for="inputElementSeparator">{{ $t('elementSeparator') }}</label>
+                        <input id="inputElementSeparator" type="text" v-model="elementSeparator" @input="textChanged"/>
+                    </div>
+                    <div class="g-campo">
+                        <label for="inputRankSeparator">{{ $t('inelementSeparator') }}</label>
+                        <input id="inputRankSeparator" type="text" v-model="rankSeparator" @input="textChanged"/>
+                    </div>
+                    <div class="g-campo">
+                        <label for="inputElIndex">{{ $t('wordIndex0based') }}</label>
+                        <input id="inputElIndex" type="number" v-model="wordPosition" @input="textChanged"/>
+                    </div>
+                    <div class="g-campo">
+                        <label for="inputRankIndex">{{ $t('rankIndex0based') }}</label>
+                        <input id="inputRankIndex" type="number" v-model="rankPosition" @input="textChanged"/>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </details>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :title="$t('keyboardCtrlEnter')" :disabled="parsedElems.length == 0">
+                <i class="ti ti-check" aria-hidden="true"></i>{{ elementCount > 0 ? $t('gestaoPalavrasAcrescentarN', [elementCount]) : $t('gestaoPalavrasAcrescentar') }}
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {dataService} from '../../js/service/data/dataService'
     import {i18nService} from "../../js/service/i18nService";
-    import './../../css/modal.css';
+    import GestaoModal from './gestaoModal.vue';
     import Predictionary from 'predictionary'
     import {helpService} from "../../js/service/helpService";
 
     let predictionary = Predictionary.instance();
 
     export default {
+        components: {GestaoModal},
         props: ['dictData'],
         data: function () {
             return {
@@ -145,20 +126,8 @@
 </script>
 
 <style scoped>
-    .srow {
-        margin-top: 1em;
-    }
-
-    .btn-accordion {
-        background-color: white;
-        border-style: solid;
-        border-color: gray;
-        border-width: 1px;
-        text-align: left;
-        border-left: none;
-        border-right: none;
-    }
-    .btn-accordion:hover span {
-        color: cornflowerblue;
-    }
+    .pw-palavras { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--g-e2); }
+    .pw-palavras li { margin: 0; font-size: var(--g-t-corpo); color: var(--g-tinta); background: var(--g-folha-clara); }
+    .pw-palavras .pw-mais { background: var(--g-superficie-2); color: var(--g-tinta-2); }
+    .pw-nenhuma { margin: 0; }
 </style>

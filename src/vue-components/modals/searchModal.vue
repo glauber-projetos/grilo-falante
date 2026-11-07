@@ -1,66 +1,59 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask" style="z-index: 9999">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keydown.esc="$emit('close')">
-                    <a class="inline close-button" href="javascript:void(0);" @click="$emit('close')"><i class="fas fa-times"/></a>
-                    <div class="modal-header">
-                        <h1>{{ $t('searchElement') }}</h1>
-                    </div>
+    <gestao-modal class="sm-veu" :titulo="$t('gestaoEdicaoBuscaTitulo')" icone="search" tamanho="m" @close="$emit('close')">
+        <div class="sm">
+            <search-bar :placeholder="$t('gestaoEdicaoBuscaPlaceholder')" v-model="searchTerm" :keydown-enter-fn="() => goToFirstResult()" :keydown-ctrl-enter-fn="() => goToFirstResult(true)" @input="search()" :debounce-time="300"></search-bar>
 
-                    <div class="modal-body mt-5 row">
-                        <search-bar :placeholder="$t('searchElement')" v-model="searchTerm" :keydown-enter-fn="() => goToFirstResult()" :keydown-ctrl-enter-fn="() => goToFirstResult(true)" @input="search()" :debounce-time="300"></search-bar>
-                    </div>
-                    <div>
-                        <div class="warn mt-5" v-if="results && !homeGridId">
-                            <i class="fas fa-info-circle"></i>
-                            <span>{{ $t('infoPleaseDefineAHomeGridInManageGrids') }}</span>
-                        </div>
-                        <ul v-if="results && results.length > 0" style="list-style-type: none" class="mt-5">
-                            <li v-for="(result, index) in results" class="d-flex align-items-center" style="flex-direction: row; min-height: 40px;">
-                                <a href="javascript:;" @click="toResult(result)" class="d-flex align-items-center" :title="index === 0 ? `${$t('showElement')} ${$t('keyboardEnter')}` : $t('showElement')">
-                                    <img v-if="result.elem.image" :src="result.elem.image.data || result.elem.image.url" width="40" style="margin-right: 1em"/>
-                                </a>
-                                <a href="javascript:;" @click="toResult(result, true)" class="d-flex align-items-center" :title="index === 0 ? `${$t('showPathToElement')} ${$t('keyboardCtrlEnter')}` : $t('showPathToElement')">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <span v-for="(pathElem, index) in result.path">
-                                                <span v-if="index === 0">{{ $t('homeGrid')  }}<span class="fas fa-arrow-right mx-2"/></span>
-                                                <span v-if="pathElem.toNextElementLabel">{{ pathElem.toNextElementLabel | extractTranslation }}<span class="fas fa-arrow-right mx-2"/></span>
-                                            </span>
-                                            <span v-if="i18nService.getContentLang() === result.matchLang" v-html="highlightSearch(result.matchLabel)"></span>
-                                            <span v-if="i18nService.getContentLang() !== result.matchLang">
-                                                <span>{{ i18nService.getTranslation(result.elem.label) }}</span>
-                                                <span>( {{ i18nService.t(`lang.${result.matchLang}`) }}: <span v-html="highlightSearch(result.matchLabel)"></span> )</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                        <div class="mt-5">
-                            <div v-if="results === null">
-                                {{ $t('searching') }}
-                            </div>
-                            <div v-if="results && results.length === 0 && searchTerm">
-                                {{ $t('noSearchResults') }}
-                            </div>
-                            <div v-if="overflow">
-                                {{ $t('notShowingAllResultsTryALongerSearchTerm') }}
-                            </div>
-                        </div>
-                    </div>
+            <div class="g-aviso sm-aviso" v-if="results && !homeGridId">
+                <i class="ti ti-info-circle" aria-hidden="true"></i>
+                <span>{{ $t('gestaoEdicaoBuscaSemInicial') }}</span>
+            </div>
 
-                    <div class="modal-footer">
-                    </div>
-                </div>
+            <ul v-if="results && results.length > 0" class="sm-lista">
+                <li v-for="(result, index) in results" class="sm-item">
+                    <button type="button" class="sm-resultado" @click="toResult(result, true)" :title="index === 0 ? `${$t('gestaoEdicaoBuscaMostrarCaminho')} ${$t('keyboardCtrlEnter')}` : $t('gestaoEdicaoBuscaMostrarCaminho')">
+                        <span class="sm-figura">
+                            <img v-if="result.elem.image" :src="result.elem.image.data || result.elem.image.url" alt=""/>
+                            <i v-else class="ti ti-square" aria-hidden="true"></i>
+                        </span>
+                        <span class="sm-textos">
+                            <span class="sm-rotulo" v-if="i18nService.getContentLang() === result.matchLang" v-html="highlightSearch(result.matchLabel)"></span>
+                            <span class="sm-rotulo" v-if="i18nService.getContentLang() !== result.matchLang">
+                                <span>{{ i18nService.getTranslation(result.elem.label) }}</span>
+                                <small class="sm-outra-lingua">({{ i18nService.t(`lang.${result.matchLang}`) }}: <span v-html="highlightSearch(result.matchLabel)"></span>)</small>
+                            </span>
+                            <span class="sm-caminho" v-if="result.path && result.path.length > 0">
+                                <template v-for="(pathElem, i) in result.path">
+                                    <span v-if="i === 0" class="sm-passo"><i class="ti ti-home" aria-hidden="true"></i>{{ $t('gestaoPranchaInicial') }}</span>
+                                    <span v-if="pathElem.toNextElementLabel" class="sm-passo"><i class="ti ti-chevron-right sm-sep" aria-hidden="true"></i>{{ pathElem.toNextElementLabel | extractTranslation }}</span>
+                                </template>
+                            </span>
+                        </span>
+                    </button>
+                    <button type="button" class="g-btn g-btn-leve g-btn-icone sm-direto" @click="toResult(result)"
+                            :aria-label="$t('gestaoEdicaoBuscaIrDireto')" :title="index === 0 ? `${$t('gestaoEdicaoBuscaIrDireto')} ${$t('keyboardEnter')}` : $t('gestaoEdicaoBuscaIrDireto')">
+                        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="sm-estado" aria-live="polite">
+                <p v-if="results === undefined" class="gm-vazio">
+                    <i class="ti ti-list-search" aria-hidden="true"></i>{{ $t('gestaoEdicaoBuscaComece') }}
+                </p>
+                <p v-if="results === null" class="gm-vazio">
+                    <i class="ti ti-loader-2 sm-girando" aria-hidden="true"></i>{{ $t('gestaoEdicaoBuscaProcurando') }}
+                </p>
+                <p v-if="results && results.length === 0 && searchTerm" class="gm-vazio">
+                    <i class="ti ti-mood-empty" aria-hidden="true"></i>{{ $t('gestaoEdicaoBuscaNada') }}
+                </p>
+                <p v-if="overflow" class="g-dica sm-mais">{{ $t('gestaoEdicaoBuscaMuitos') }}</p>
             </div>
         </div>
-    </div>
+    </gestao-modal>
 </template>
 
 <script>
-    import './../../css/modal.css';
+    import GestaoModal from './gestaoModal.vue';
     import {dataService} from "../../js/service/data/dataService.js";
     import {i18nService} from "../../js/service/i18nService.js";
     import {Router} from "../../js/router.js";
@@ -72,7 +65,7 @@
     export default {
         props: ['routeToEdit', 'options'],
         components: {
-            SearchBar
+            SearchBar, GestaoModal
         },
         data: function () {
             return {
@@ -241,11 +234,46 @@
 </script>
 
 <style scoped>
-.modal-container {
-    min-height: 50vh;
+/* fica acima de tudo, como antes (a busca abre também por cima da prancha) */
+.sm-veu { z-index: 9999; }
+.sm { min-height: 40vh; display: flex; flex-direction: column; gap: var(--g-e4); }
+.sm-aviso { margin: 0; }
+.sm-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--g-e2); }
+.sm-item {
+    display: flex; align-items: stretch; gap: var(--g-e1); margin: 0;
+    background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio);
+    overflow: hidden;
 }
-
-input, button {
-    border-width: 1px;
+.sm-item:hover, .sm-item:focus-within { border-color: var(--g-folha); }
+.sm-resultado {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--g-e3);
+    margin: 0; padding: var(--g-e2) var(--g-e3); height: auto; min-height: 72px;
+    background: transparent; border: none; border-radius: 0; box-shadow: none;
+    color: var(--g-tinta); font-family: var(--g-fonte); font-size: var(--g-t-grande); font-weight: 400;
+    text-transform: none; letter-spacing: 0; line-height: 1.3; text-align: left; white-space: normal; cursor: pointer;
+}
+.sm-resultado:active { background: var(--g-folha-clara); }
+.sm-resultado:focus-visible { outline: none; box-shadow: inset 0 0 0 3px #1b6fd8; }
+.sm-figura {
+    flex: none; width: 56px; height: 56px; display: grid; place-items: center; overflow: hidden;
+    background: var(--g-superficie-2); border-radius: var(--g-raio-p); color: var(--g-tinta-3);
+}
+.sm-figura img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.sm-figura .ti { font-size: 1.6em; }
+.sm-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sm-rotulo { font-weight: 700; overflow-wrap: anywhere; }
+.sm-rotulo :deep(b) { background: var(--g-girassol-claro); border-radius: 4px; padding: 0 2px; }
+.sm-outra-lingua { font-weight: 400; color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
+.sm-caminho { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--g-e1); color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
+.sm-passo { display: inline-flex; align-items: center; gap: var(--g-e1); }
+.sm-passo .ti { font-size: 1.1em; }
+.sm-sep { color: var(--g-tinta-3); }
+.sm-direto { align-self: center; margin-right: var(--g-e1); flex: none; }
+.sm-estado > .gm-vazio { margin: 0; }
+.sm-mais { text-align: center; margin: 0; }
+.sm-girando { width: 1em; animation: sm-girar 1s linear infinite; }
+@keyframes sm-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .sm-girando { animation: none; }
 }
 </style>

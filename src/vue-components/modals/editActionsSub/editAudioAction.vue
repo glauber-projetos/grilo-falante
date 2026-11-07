@@ -1,65 +1,67 @@
 <template>
-    <div>
-        <div class="row">
-            <div class="col-12 col-md-4">
-                <span>{{ $t('currentRecording') }}</span>:
-            </div>
-            <div class="col-12 col-md-4" v-if="recording">
-                {{ i18nService.t('recordingSeconds', (recordTimeMs / 1000).toFixed(1)) }}
-            </div>
-            <div class="col-12 col-md-4" v-if="!action.dataBase64 && !recording">
-                (none)
-            </div>
-            <div class="col-12 col-md-4" v-if="action.dataBase64 && action.durationMs">
-                {{ i18nService.t('audioWithLengthOfSeconds', (action.durationMs / 1000).toFixed(1)) }}
-            </div>
-            <div class="col-12 col-md-4" v-if="action.dataBase64 && action.filename">
-                {{ i18nService.t('audioFromFileWithName', action.filename) }}
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-12 col-md-8 offset-md-4">
-                <div class="row">
-                    <div class="col-12 col-md">
-                        <button class="col-12" @click="toggleRecord()" :disabled="playing">
-                            <span v-if="!recording"><span class="fas fa-microphone"/> <span>{{ $t('record') }}</span></span>
-                            <span v-if="recording"><span class="fas fa-microphone-slash"/> <span>{{ $t('stopRecording') }}</span></span>
-                        </button>
-                    </div>
-                    <div class="col-12 col-md">
-                        <button onclick="document.getElementById('inputFile').click();" class="file-input col-12">
-                            <input type="file" class="five columns" id="inputFile" @change="changedFile" accept="audio/*"/>
-                            <span><i class="fas fa-file-upload"/> <span>{{ $t('chooseFile') }}</span></span>
-                        </button>
-                    </div>
-                    <div class="col-12 col-md">
-                        <button class="col-12" @click="togglePlaying()" :disabled="recording || !action.dataBase64">
-                            <span v-if="!playing"><span class="fas fa-play"/> <span>{{ $t('play') }}</span></span>
-                            <span v-if="playing"><span class="fas fa-stop"/> <span>{{ $t('stop') }}</span></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3" v-if="showError">
-            <span class="col-12 col-md-8 offset-md-4">
-                <span class="fas fa-exclamation-triangle"/> <span>{{ $t('pleaseAllowAccessingMicrophoneInOrderToRecordAudio') }}</span>.
+    <div class="au">
+        <div class="au-estado" :class="{'au-gravando': recording, 'au-tem-som': action.dataBase64 && !recording}" role="status" aria-live="polite">
+            <span class="au-estado-icone" aria-hidden="true">
+                <i :class="recording ? 'ti ti-microphone' : (action.dataBase64 ? 'ti ti-music' : 'ti ti-microphone-off')"></i>
+            </span>
+            <span class="au-estado-texto">
+                <strong v-if="recording">{{ i18nService.t('recordingSeconds', (recordTimeMs / 1000).toFixed(1)) }}</strong>
+                <strong v-else-if="!action.dataBase64">{{ $t('gestaoAcaoAudioNenhum') }}</strong>
+                <strong v-else-if="action.filename">{{ i18nService.t('audioFromFileWithName', action.filename) }}</strong>
+                <strong v-else-if="action.durationMs">{{ $t('gestaoAcaoAudioGravado', [(action.durationMs / 1000).toFixed(1)]) }}</strong>
+                <strong v-else>{{ $t('gestaoAcaoResumoSomPronto') }}</strong>
+                <small v-if="recording">{{ $t('gestaoAcaoAudioToqueParar') }}</small>
+                <small v-else-if="!action.dataBase64">{{ $t('gestaoAcaoAudioComoGravar') }}</small>
             </span>
         </div>
-        <div class="row mt-3" v-if="showError2">
-            <span class="col-12 col-md-8 offset-md-4">
-                <span class="fas fa-exclamation-triangle"/> <span>{{ $t('selectedAudioFileIsTooBig') }}</span>.
-            </span>
+        <div v-if="recording" class="au-barra" aria-hidden="true">
+            <span :style="{width: Math.min(100, recordTimeMs / 100) + '%'}"></span>
         </div>
-        <div class="row mt-3" v-if="globalHasContinuousSpeakAction">
-            <span class="col-12 col-md-8 offset-md-4">
-                <span class="fas fa-info-circle"/> <span>{{ $t('recordedAudioIsOnlyPlayedWithCollectElementActions') }}</span>. <a href="javascript:;" @click="setModePlaySeparately">{{ $t('setActionsOfGlobalGridToModeSpeakSeparately') }}</a>
-            </span>
+
+        <div class="au-botoes">
+            <button type="button" class="g-btn g-btn-grande au-btn" :class="recording ? 'g-btn-perigo' : 'g-btn-principal'" @click="toggleRecord()" :disabled="playing">
+                <i :class="recording ? 'ti ti-player-stop' : 'ti ti-microphone'" aria-hidden="true"></i>
+                <span>{{ recording ? $t('gestaoAcaoAudioParar') : (action.dataBase64 ? $t('gestaoAcaoAudioGravarDeNovo') : $t('gestaoAcaoAudioGravar')) }}</span>
+            </button>
+            <button type="button" class="g-btn g-btn-grande au-btn" @click="togglePlaying()" :disabled="recording || !action.dataBase64">
+                <i :class="playing ? 'ti ti-player-stop' : 'ti ti-player-play'" aria-hidden="true"></i>
+                <span>{{ playing ? $t('gestaoAcaoAudioParar') : $t('gestaoAcaoAudioOuvir') }}</span>
+            </button>
+            <button type="button" class="g-btn g-btn-grande g-btn-perigo au-btn" @click="clearAll(); $forceUpdate()" :disabled="recording || playing || !action.dataBase64">
+                <i class="ti ti-trash" aria-hidden="true"></i>
+                <span>{{ $t('gestaoAcaoAudioApagar') }}</span>
+            </button>
         </div>
-        <div class="row mt-3" v-if="updatedGlobalSpeakActions">
-            <span class="col-12 col-md-8 offset-md-4">
-                <span class="fas fa-check"/> <span>{{ $t('speakActionsOfGlobalGridWereSetToModeModeSpeak') }}</span>. <a href="javascript:;" @click="undoSetModePlaySeparately">{{ $t('undo') }}</a>
-            </span>
+
+        <div class="au-arquivo">
+            <input type="file" id="inputFile" class="g-oculto-leitor" tabindex="-1" aria-hidden="true" @change="changedFile" accept="audio/*"/>
+            <button type="button" class="g-btn g-btn-leve" onclick="document.getElementById('inputFile').click();" :disabled="recording || playing">
+                <i class="ti ti-file-music" aria-hidden="true"></i><span>{{ $t('gestaoAcaoAudioArquivo') }}</span>
+            </button>
+            <span class="g-dica">{{ $t('gestaoAcaoAudioArquivoDica') }}</span>
+        </div>
+
+        <p class="g-aviso au-aviso" v-if="showError" role="alert">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i><span>{{ $t('pleaseAllowAccessingMicrophoneInOrderToRecordAudio') }}.</span>
+        </p>
+        <p class="g-aviso au-aviso" v-if="showError2" role="alert">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i><span>{{ $t('selectedAudioFileIsTooBig') }}.</span>
+        </p>
+        <div class="g-aviso au-aviso" v-if="globalHasContinuousSpeakAction">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <div>
+                <p class="au-aviso-texto">{{ $t('recordedAudioIsOnlyPlayedWithCollectElementActions') }}.</p>
+                <button type="button" class="g-btn" @click="setModePlaySeparately">{{ $t('setActionsOfGlobalGridToModeSpeakSeparately') }}</button>
+            </div>
+        </div>
+        <div class="g-aviso au-aviso au-ok" v-if="updatedGlobalSpeakActions">
+            <i class="ti ti-circle-check" aria-hidden="true"></i>
+            <div>
+                <p class="au-aviso-texto">{{ $t('speakActionsOfGlobalGridWereSetToModeModeSpeak') }}.</p>
+                <button type="button" class="g-btn g-btn-leve" @click="undoSetModePlaySeparately">
+                    <i class="ti ti-arrow-back-up" aria-hidden="true"></i><span>{{ $t('undo') }}</span>
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -215,4 +217,102 @@ export default {
 </script>
 
 <style scoped>
+.au-estado {
+    display: flex;
+    align-items: center;
+    gap: var(--g-e3);
+    padding: var(--g-e3) var(--g-e4);
+    margin-bottom: var(--g-e3);
+    border-radius: var(--g-raio);
+    border: 2px solid var(--g-borda);
+    background: var(--g-superficie);
+}
+.au-estado-icone {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--g-superficie-2);
+    color: var(--g-tinta-2);
+    font-size: 26px;
+}
+.au-tem-som .au-estado-icone {
+    background: var(--g-folha-clara);
+    color: var(--g-folha-escura);
+}
+.au-gravando {
+    border-color: var(--g-coral);
+}
+.au-gravando .au-estado-icone {
+    background: var(--g-coral);
+    color: #fff;
+    animation: au-pulsar 1.2s ease-in-out infinite;
+}
+.au-estado-texto {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.au-estado-texto strong {
+    display: block;
+    font-size: var(--g-t-grande);
+}
+.au-estado-texto small {
+    display: block;
+    color: var(--g-tinta-2);
+    font-size: var(--g-t-legenda);
+}
+.au-barra {
+    height: 8px;
+    border-radius: var(--g-raio-pilula);
+    background: var(--g-superficie-2);
+    overflow: hidden;
+    margin: calc(-1 * var(--g-e1)) 0 var(--g-e3);
+}
+.au-barra span {
+    display: block;
+    height: 100%;
+    background: var(--g-coral);
+    transition: width 100ms linear;
+}
+.au-botoes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--g-e2);
+    margin-bottom: var(--g-e3);
+}
+.au-btn {
+    padding: 0 var(--g-e3);
+}
+.au-arquivo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--g-e1) var(--g-e3);
+    margin-bottom: var(--g-e2);
+}
+.au-aviso {
+    margin: var(--g-e3) 0 0;
+}
+.au-ok {
+    background: var(--g-folha-clara);
+    color: var(--g-folha-escura);
+}
+.au-aviso-texto {
+    margin: 0 0 var(--g-e2);
+}
+@keyframes au-pulsar {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .au-gravando .au-estado-icone { animation: none; }
+    .au-barra span { transition: none; }
+}
+@media (max-width: 600px) {
+    .au-botoes {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
 </style>

@@ -1,46 +1,42 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" :aria-label="$t('navigateToOtherGrid')" aria-modal="true" role="dialog" @keyup.27="$emit('close')" @keyup.ctrl.enter="save()">
-                    <div class="modal-header">
-                        <edit-element-header :grid-element="gridElement" :header="$t('navigateToOtherGrid')" :close-fn="close" :open-help-fn="openHelp"></edit-element-header>
-                    </div>
+    <gestao-modal :titulo="$t('gestaoEdicaoNavTitulo')" :subtitulo="$t('gestaoEdicaoNavSubtitulo')" icone="door-enter" tamanho="g"
+                  @close="$emit('close')" @keyup.ctrl.enter.native="save()">
+        <template #cabeca>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="openHelp" :aria-label="$t('gestaoEdicaoAjuda')" :title="$t('gestaoEdicaoAjuda')">
+                <i class="ti ti-help" aria-hidden="true"></i>
+            </button>
+        </template>
 
-                    <div class="modal-body container-fluid px-0" v-if="gridElement">
-                        <grid-selector class="mt-4" v-model="selectedGrid" :exclude-id="gridId" :select-label="i18nService.t('navigateToGrid')" :additional-select-options="[NAV_CREATE_NEW_GRID]"></grid-selector>
-
-                        <div class="row mt-3" v-if="selectedGrid === NAV_CREATE_NEW_GRID">
-                            <label for="gridName" class="col-12">{{ $t('newGridName') }}</label>
-                            <div class="col-12 col-md-5">
-                                <input id="gridName" v-model="newName" @change="newName = modelUtil.getNewName(newName, existingGridNames)" autocomplete="off" v-focus class="col-12" type="text"/>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer container-fluid px-0">
-                        <div class="row">
-                            <div class="col-12 col-md-6">
-                                <button class="col-12" @click="$emit('close')" :title="$t('keyboardEsc')">
-                                    <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                                </button>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <button class="col-12" @click="save()" :disabled="selectedGrid === NAV_CREATE_NEW_GRID && !newName" :title="$t('keyboardCtrlEnter')">
-                                    <i class="fas fa-check"/> <span>{{ $t('ok') }}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div v-if="gridElement">
+            <div class="sn-botao">
+                <span class="sn-botao-rotulo">{{ $t('gestaoEdicaoEsteBotao') }}</span>
+                <edit-element-header :grid-element="gridElement"></edit-element-header>
             </div>
+
+            <grid-selector v-model="selectedGrid" :exclude-id="gridId" :select-label="$t('gestaoEdicaoNavEscolha')" :additional-select-options="[NAV_CREATE_NEW_GRID]"></grid-selector>
+
+            <section class="gm-secao sn-nova" v-if="selectedGrid === NAV_CREATE_NEW_GRID">
+                <div class="g-campo">
+                    <label for="gridName">{{ $t('gestaoEdicaoNavNomeNova') }}</label>
+                    <input id="gridName" v-model="newName" @change="newName = modelUtil.getNewName(newName, existingGridNames)" autocomplete="off" v-focus type="text" maxlength="40"/>
+                    <span class="g-dica">{{ $t('gestaoEdicaoNavNomeNovaDica') }}</span>
+                </div>
+            </section>
         </div>
-    </div>
+        <p v-else class="gm-vazio"><i class="ti ti-loader-2" aria-hidden="true"></i>{{ $t('gestaoEdicaoCarregando') }}</p>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :disabled="!gridElement || (selectedGrid === NAV_CREATE_NEW_GRID && !newName)" :title="$t('keyboardCtrlEnter')">
+                <i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoSalvar') }}
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
 import {i18nService} from "../../js/service/i18nService";
-import './../../css/modal.css';
+import GestaoModal from "./gestaoModal.vue";
 import {dataService} from "../../js/service/data/dataService";
 import {imageUtil} from "../../js/util/imageUtil";
 import GridSelector from "../components/gridSelector.vue";
@@ -51,7 +47,7 @@ import {GridActionNavigate} from "../../js/model/GridActionNavigate.js";
 import {GridData} from "../../js/model/GridData.js";
 
 export default {
-    components: {EditElementHeader, GridSelector},
+    components: {EditElementHeader, GridSelector, GestaoModal},
     props: ['gridId', 'gridElementId'],
     data: function () {
         return {
@@ -126,11 +122,12 @@ export default {
 </script>
 
 <style scoped>
-.modal-body {
-    margin-top: 0;
+.sn-botao {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-e2) var(--g-e3);
+    background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio);
+    padding: var(--g-e2) var(--g-e4); margin-bottom: var(--g-e4);
 }
-
-.srow {
-    margin-top: 1em;
-}
+.sn-botao-rotulo { color: var(--g-tinta-2); font-size: var(--g-t-legenda); font-weight: 700; }
+.sn-botao > :last-child { flex: 1; min-width: 0; margin: 0 !important; }
+.sn-nova { margin-top: var(--g-e2); }
 </style>

@@ -1,63 +1,65 @@
 <template>
-    <div class="container-fluid px-0" v-if="metadata">
-        <div v-if="loggedInUser">
-            <div class="mb-3">
+    <div class="matrix-conta" v-if="metadata">
+        <section class="gm-secao" v-if="loggedInUser">
+            <h3><i class="ti ti-user" aria-hidden="true"></i>{{ $t('gestaoMatrixSuaConta') }}</h3>
+            <p>
                 <i18n path="LoggedInAsSentence" tag="span">
                     <template v-slot:user>"<strong>{{loggedInUser}}</strong>"</template>
                 </i18n>
-            </div>
-            <div v-if="e2eeSupported">
-                <i class="fas fa-lock"></i>
-                <span>{{ $t('matrixE2eeSupported') }}.</span>
-            </div>
+            </p>
+            <p v-if="e2eeSupported">
+                <span class="g-pilula g-pilula-ok"><i class="ti ti-lock" aria-hidden="true"></i>{{ $t('gestaoMatrixCripto') }}</span>
+            </p>
             <div v-if="!e2eeSupported">
-                <i class="fas fa-lock-open"></i>
-                <span>{{ $t('matrixE2eeNotSupported') }}.</span>
+                <span class="g-pilula"><i class="ti ti-lock-open" aria-hidden="true"></i>{{ $t('gestaoMatrixSemCripto') }}</span>
+                <p class="g-dica">{{ $t('matrixE2eeNotSupported') }}.</p>
             </div>
-            <div class="mt-4">
-                <button @click="logout">
-                    <i v-if="logoutLoading" class="fas fa-spinner fa-spin"></i>
-                    <i v-if="!logoutLoading" class="fas fa-sign-out-alt"></i>
-                    <span>{{ $t('logout') }}</span>
+            <div class="g-linha">
+                <button type="button" class="g-btn" @click="logout">
+                    <i v-if="logoutLoading" class="ti ti-loader-2 matrix-girando" aria-hidden="true"></i>
+                    <i v-if="!logoutLoading" class="ti ti-logout" aria-hidden="true"></i>
+                    <span>{{ $t('gestaoMatrixSair') }}</span>
                 </button>
             </div>
-        </div>
+        </section>
+
         <div v-if="!loggedInUser">
-            <div class="row mb-5">
-                <div class="col">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <i18n path="ifNoUserCreateMatrixAccount" tag="span">
-                        <template v-slot:link><a href="https://app.element.io/#/register" target="_blank">app.element.io</a></template>
-                    </i18n>
+            <div class="g-aviso">
+                <i class="ti ti-info-circle" aria-hidden="true"></i>
+                <i18n path="ifNoUserCreateMatrixAccount" tag="span">
+                    <template v-slot:link><a href="https://app.element.io/#/register" target="_blank" rel="noopener">app.element.io</a></template>
+                </i18n>
+            </div>
+            <form class="gm-secao" @submit.prevent="login">
+                <h3><i class="ti ti-login" aria-hidden="true"></i>{{ $t('gestaoMatrixEntrar') }}</h3>
+                <div class="g-campo">
+                    <label for="matrixUser">{{ $t('gestaoMatrixUsuario') }}</label>
+                    <input type="text" id="matrixUser" v-model="syncConfig.user" autocomplete="username"/>
                 </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-3" for="matrixUser">{{ $t('username') }}</label>
-                <div class="col-sm-7">
-                    <input type="text" class="col-12" id="matrixUser" v-model="syncConfig.user"/>
+                <div class="g-campo">
+                    <label for="matrixPassword">{{ $t('gestaoMatrixSenha') }}</label>
+                    <input type="password" id="matrixPassword" v-model="syncConfig.password" autocomplete="current-password"/>
                 </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-3" for="matrixPassword">{{ $t('password') }}</label>
-                <div class="col-sm-7">
-                    <input type="password" class="col-12" id="matrixPassword" v-model="syncConfig.password"/>
+                <details class="gm-avancado">
+                    <summary>{{ $t('gestaoAcessoAvancado') }}</summary>
+                    <div class="gm-avancado-corpo">
+                        <div class="g-campo">
+                            <label for="homeserver">{{ $t('gestaoMatrixServidor') }}</label>
+                            <input type="text" id="homeserver" v-model="syncConfig.homeserver" placeholder="https://matrix.org"/>
+                            <span class="g-dica">{{ $t('gestaoMatrixServidorDica') }}</span>
+                        </div>
+                    </div>
+                </details>
+                <div class="g-linha">
+                    <button type="submit" class="g-btn g-btn-principal" :disabled="!loginEnabled">
+                        <i v-if="loginLoading" class="ti ti-loader-2 matrix-girando" aria-hidden="true"></i>
+                        <i v-if="!loginLoading" class="ti ti-login" aria-hidden="true"></i>
+                        <span>{{ $t('gestaoMatrixEntrarBotao') }}</span>
+                    </button>
+                    <p v-if="loginResult === LOGIN_RESULTS.UNAUTHORIZED" class="g-erro matrix-resultado" role="alert"><i class="ti ti-x" aria-hidden="true"></i>{{ $t('ERROR_CODE_UNAUTHORIZED') }}</p>
+                    <p v-if="loginResult === LOGIN_RESULTS.NETWORK_ERROR" class="g-erro matrix-resultado" role="alert"><i class="ti ti-x" aria-hidden="true"></i>{{ $t('ERROR_CODE_NETWORK_ERROR') }}</p>
                 </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-3" for="homeserver">{{ $t('homeserver') }}</label>
-                <div class="col-sm-7">
-                    <input type="text" class="col-12" id="homeserver" v-model="syncConfig.homeserver" placeholder="https://matrix.org"/>
-                </div>
-            </div>
-            <div class="mt-4">
-                <button class="me-4" @click="login" :disabled="!loginEnabled">
-                    <i v-if="loginLoading" class="fas fa-spinner fa-spin"></i>
-                    <i v-if="!loginLoading" class="fas fa-sign-in-alt"></i>
-                    <span>{{ $t('login') }}</span>
-                </button>
-                <span v-if="loginResult === LOGIN_RESULTS.UNAUTHORIZED" style="color: red"><i class="fas fa-times"></i> {{ $t('ERROR_CODE_UNAUTHORIZED') }}</span>
-                <span v-if="loginResult === LOGIN_RESULTS.NETWORK_ERROR" style="color: red"><i class="fas fa-times"></i> {{ $t('ERROR_CODE_NETWORK_ERROR') }}</span>
-            </div>
+            </form>
         </div>
     </div>
 </template>
@@ -121,7 +123,13 @@
 </script>
 
 <style scoped>
-.row {
-    margin-bottom: 1em;
-}
+    .matrix-conta .g-linha { margin-top: var(--g-e3); }
+    .matrix-conta .g-pilula .ti { font-size: 1.2em; }
+    .matrix-conta .g-aviso { margin-bottom: var(--g-e4); }
+    .matrix-conta .g-aviso a { color: inherit; font-weight: 700; }
+    .matrix-conta form .gm-avancado { margin-top: 0; }
+    .matrix-resultado { display: inline-flex; align-items: center; gap: var(--g-e1); margin: 0; }
+    .matrix-girando { display: inline-block; animation: matrix-girar 1s linear infinite; }
+    @keyframes matrix-girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .matrix-girando { animation: none; } }
 </style>

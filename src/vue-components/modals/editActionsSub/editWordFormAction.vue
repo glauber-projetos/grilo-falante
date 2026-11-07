@@ -1,28 +1,31 @@
 <template>
-    <div>
-        <div class="srow">
-            <label for="selectMode" class="four columns">{{ $t('actionType') }}</label>
-            <select id="selectMode" class="eight columns" v-model="action.type">
-                <option v-for="mode in GridActionWordForm.MODES" :value="mode">{{ mode | translate }}</option>
-            </select>
-        </div>
-        <div class="srow" v-if="action.type === GridActionWordForm.WORDFORM_MODE_NEXT_FORM">
-            <label for="selectMode2" class="four columns">{{ $t('secondaryActionType') }}</label>
-            <select id="selectMode2" class="eight columns" v-model="action.secondaryType">
-                <option :value="undefined">{{ $t('noneSelected') }}</option>
-                <option v-for="mode in GridActionWordForm.MODES_SECONDARY" :value="mode">{{ mode | translate }}</option>
-            </select>
+    <div class="wf">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label for="selectMode">{{ $t('gestaoAcaoOQueFazer') }}</label>
+                <select id="selectMode" v-model="action.type">
+                    <option v-for="mode in GridActionWordForm.MODES" :value="mode">{{ mode | translate }}</option>
+                </select>
+            </div>
+            <div class="g-campo" v-if="action.type === GridActionWordForm.WORDFORM_MODE_NEXT_FORM">
+                <label for="selectMode2">{{ $t('gestaoAcaoFormaDepois') }}</label>
+                <select id="selectMode2" v-model="action.secondaryType">
+                    <option :value="undefined">{{ $t('noneSelected') }}</option>
+                    <option v-for="mode in GridActionWordForm.MODES_SECONDARY" :value="mode">{{ mode | translate }}</option>
+                </select>
+            </div>
         </div>
         <div v-if="![GridActionWordForm.WORDFORM_MODE_NEXT_FORM, GridActionWordForm.WORDFORM_MODE_RESET_FORMS].includes(action.type)">
-            <div class="srow">
-                <label class="four columns">{{ $t('tags') }}</label>
-                <multiselect class="eight columns" v-model="action.tags" :options="TAGS" :multiple="true" :close-on-select="false" :clear-on-select="false" :taggable="true" @tag="addTag($event)" placeholder="Choose tags">
+            <div class="g-campo">
+                <label for="wfEtiquetas">{{ $t('gestaoAcaoFormaEtiquetas') }}</label>
+                <multiselect id="wfEtiquetas" v-model="action.tags" :options="TAGS" :multiple="true" :close-on-select="false" :clear-on-select="false" :taggable="true" @tag="addTag($event)" :placeholder="$t('gestaoAcaoEscolherEtiquetas')">
                 </multiselect>
+                <span class="g-dica">{{ $t('gestaoAcaoFormaEtiquetasDica') }}</span>
             </div>
-            <div class="srow mt-4">
+            <label class="g-marcar">
                 <input type="checkbox" id="chkToggle" v-model="action.toggle"/>
-                <label for="chkToggle">{{ $t('toggleTagOnSelectingItMultipleTimes') }}</label>
-            </div>
+                <span>{{ $t('toggleTagOnSelectingItMultipleTimes') }}</span>
+            </label>
         </div>
     </div>
 </template>
@@ -57,4 +60,22 @@ export default {
 </script>
 
 <style scoped>
+.wf ::v-deep .multiselect__tags {
+    min-height: var(--g-alvo);
+    border: 2px solid var(--g-borda);
+    border-radius: var(--g-raio);
+    font-family: var(--g-fonte);
+    font-size: var(--g-t-corpo);
+}
+.wf ::v-deep .multiselect--active .multiselect__tags {
+    border-color: var(--g-folha);
+}
+.wf ::v-deep .multiselect__tag {
+    background: var(--g-folha);
+    border-radius: var(--g-raio-pilula);
+}
+.wf ::v-deep .multiselect__option--highlight,
+.wf ::v-deep .multiselect__option--highlight::after {
+    background: var(--g-folha);
+}
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="teste">
         <div class="area">
             <div class="area-row" v-for="i in rows">
                 <div class="area-column" v-for="j in columns">
@@ -52,10 +52,19 @@
 </script>
 
 <style scoped>
+    .teste {
+        display: flex;
+        justify-content: center;
+        padding: var(--g-e2) 0;
+    }
+
     .area {
-        width: 60%;
-        padding-top: 60%;
+        width: 100%;
+        max-width: 420px;
+        padding-top: min(100%, 420px);
         position: relative;
+        border-radius: var(--g-raio);
+        background: var(--g-superficie-2);
     }
 
     .area-row, .area-column {
@@ -71,22 +80,24 @@
     }
 
     .area-element-inner {
-        border: 1px solid gray;
-        border-radius: 5px;
+        border: 1px solid var(--g-borda-forte);
+        border-radius: var(--g-raio-p);
         position: relative;
-        width: 90%;
-        height: 90%;
-        margin: 5%;
-        background-color: lightblue;
+        width: 84%;
+        height: 84%;
+        margin: 8%;
+        background-color: var(--g-ceu);
         z-index: 100;
     }
 
     .active {
-        outline: 3px solid red;
+        outline: 3px solid var(--g-coral-escuro);
+        outline-offset: 1px;
     }
 
     .inactive {
-        background-color: whitesmoke !important;
+        background-color: var(--g-superficie) !important;
+        border-color: var(--g-borda);
         animation: none !important;
     }
 
@@ -96,17 +107,17 @@
     }
 
     .mouseentered {
-        outline: 3px solid green !important;
-        background-color: lightgreen;
+        outline: 3px solid var(--g-folha) !important;
+        background-color: var(--g-folha-clara);
     }
 
     @-webkit-keyframes background {
-        0% { background-color: dodgerblue; }
-        100% { background-color: lightblue; }
+        0% { background-color: var(--g-folha); }
+        100% { background-color: var(--g-ceu); }
     }
 
     @keyframes background {
-        0% { background-color: dodgerblue; }
-        100% { background-color: lightblue; }
+        0% { background-color: var(--g-folha); }
+        100% { background-color: var(--g-ceu); }
     }
 </style>

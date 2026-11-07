@@ -1,29 +1,28 @@
 <template>
-    <div class="container-fluid px-0">
-        <div class="row">
-            <label class="col-sm-3" for="matrixRoom">{{ $t('selectRoom') }}</label>
-            <div class="col-sm-7">
-                <select class="col-12" id="matrixRoom" v-model="matrixRoom">
+    <div class="matrix-mensagens">
+        <div class="matrix-sala-topo">
+            <div class="g-campo">
+                <label for="matrixRoom">{{ $t('gestaoMatrixSala') }}</label>
+                <select id="matrixRoom" v-model="matrixRoom">
                     <option v-for="room in matrixRooms" :value="room">{{ room.name }}</option>
                 </select>
             </div>
+            <span v-if="matrixRoom && matrixRoom.hasEncryptionStateEvent()" class="g-pilula g-pilula-ok" :title="$t('endToEndEncrypted')"><i class="ti ti-lock" aria-hidden="true"></i>{{ $t('gestaoMatrixProtegida') }}</span>
+            <span v-if="matrixRoom && !matrixRoom.hasEncryptionStateEvent()" class="g-pilula matrix-pilula-alerta" :title="$t('notEndToEndEncrypted')"><i class="ti ti-lock-open" aria-hidden="true"></i>{{ $t('gestaoMatrixNaoProtegida') }}</span>
         </div>
-        <div class="row mb-4">
-            <div class="col d-inline-block">
-                <h2 class="d-inline-block me-3">{{ $t('TAB_MESSAGES') }}</h2>
-                <span><i v-if="matrixRoom && matrixRoom.hasEncryptionStateEvent()" class="fas fa-lock" style="color: darkgreen" :title="$t('endToEndEncrypted')"></i></span>
-                <span><i v-if="matrixRoom && !matrixRoom.hasEncryptionStateEvent()" class="fas fa-lock-open" style="color: darkred" :title="$t('notEndToEndEncrypted')"></i></span>
+        <div class="matrix-conversa">
+            <matrix-conversation :matrix-room-prop="matrixRoom" style="max-height: 20em; overflow-y: scroll"/>
+        </div>
+        <form class="matrix-envio" @submit.prevent="sendMatrixMessage">
+            <div class="g-campo">
+                <label for="matrixTexto" class="g-oculto-leitor">{{ $t('gestaoMatrixEscrever') }}</label>
+                <input id="matrixTexto" type="text" v-model="matrixText" :placeholder="$t('gestaoMatrixEscrever')" :disabled="sendDisabled" autocomplete="off"/>
             </div>
-        </div>
-        <matrix-conversation :matrix-room-prop="matrixRoom" style="max-height: 20em; overflow-y: scroll"/>
-        <div class="row">
-            <search-bar v-model="matrixText" :placeholder="$t('typeMessagePlaceholder')" fa-symbol="fa-paper-plane" @submit="sendMatrixMessage" :disabled="sendDisabled" label="sendMessage"></search-bar>
-        </div>
-        <div class="row" v-if="sendDisabled">
-            <div class="col">
-                <span><i class="fas fa-info-circle"></i></span>
-                <span>{{ $t('cannotSendToEncryptedRoom') }}.</span>
-            </div>
+            <button type="submit" class="g-btn g-btn-principal" :disabled="sendDisabled"><i class="ti ti-send" aria-hidden="true"></i>{{ $t('gestaoMatrixEnviar') }}</button>
+        </form>
+        <div class="g-aviso matrix-aviso" v-if="sendDisabled">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span>{{ $t('gestaoMatrixNaoEnvia') }}</span>
         </div>
     </div>
 </template>
@@ -31,11 +30,10 @@
 <script>
     import '../../../css/modal.css';
     import { matrixService } from '../../../js/service/matrixMessenger/matrixService';
-    import SearchBar from '../../components/searchBar.vue';
     import MatrixConversation from '../../components/matrix-conversation.vue';
 
     export default {
-        components: { MatrixConversation, SearchBar },
+        components: { MatrixConversation },
         props: [],
         data: function () {
             return {
@@ -68,7 +66,17 @@
 </script>
 
 <style scoped>
-.row {
-    margin-bottom: 1em;
-}
+    .matrix-sala-topo { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--g-e2) var(--g-e3); }
+    .matrix-sala-topo .g-campo { flex: 1 1 240px; min-width: 0; margin-bottom: 0; }
+    .matrix-sala-topo .g-pilula { margin-bottom: var(--g-e2); }
+    .matrix-pilula-alerta { background: var(--g-perigo-claro); color: var(--g-perigo); }
+    .matrix-conversa {
+        max-height: 20em; overflow-y: auto; margin: var(--g-e4) 0;
+        padding: var(--g-e3); border: 2px solid var(--g-borda); border-radius: var(--g-raio);
+        background: var(--g-superficie);
+    }
+    .matrix-envio { display: flex; gap: var(--g-e2); align-items: stretch; margin: 0; }
+    .matrix-envio .g-campo { flex: 1; min-width: 0; margin-bottom: 0; }
+    .matrix-envio > .g-btn { align-self: flex-end; }
+    .matrix-aviso { margin-top: var(--g-e3); }
 </style>

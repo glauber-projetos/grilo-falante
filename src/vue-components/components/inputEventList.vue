@@ -1,147 +1,159 @@
 <template>
-    <div>
-        <ul>
-            <li v-for="(input, index) in inputs">
-                <div class="srow nomargin">
-                    <label class="three columns input-label" :for="input.label + index">
-                        <span>{{input.label  | translate}}</span>
-                        <span v-show="input.label === InputConfig.GENERAL_INPUT">{{index + 1}}</span>
-                    </label>
-                    <select :id="input.label + index" @change="typeChange(index, $event.target.value)" class="five columns">
-                        <option value=""><span>{{ $t('notDefined') }}</span></option>
-                        <option v-for="inputEvent in inputEventTypes" :value="inputEvent.getModelName()" :selected="inputEvent.getModelName() === input.modelName">
-                            {{inputEvent.getModelName() | translate}}
-                        </option>
-                    </select>
-                    <span class="two columns" v-show="errorInputs.indexOf(input.label) > -1"><i class="warn fas fa-exclamation-triangle"></i></span>
+    <div class="acionadores">
+        <ul class="gm-lista acionadores-lista">
+            <li v-for="(input, index) in inputs" :class="{'acionador-erro': errorInputs.indexOf(input.label) > -1}">
+                <div class="acionador-topo">
+                    <div class="g-campo acionador-tipo">
+                        <label :for="input.label + index">{{ $t('gestaoAcessoPapel' + input.label, [index + 1]) }}</label>
+                        <select :id="input.label + index" @change="typeChange(index, $event.target.value)">
+                            <option value="">{{ $t('gestaoAcessoTipoNenhum') }}</option>
+                            <option v-for="inputEvent in inputEventTypes" :value="inputEvent.getModelName()" :selected="inputEvent.getModelName() === input.modelName">
+                                {{ $t('gestaoAcessoTipo' + inputEvent.getModelName()) }}
+                            </option>
+                        </select>
+                    </div>
+                    <span class="g-erro acionador-falta" v-show="errorInputs.indexOf(input.label) > -1">
+                        <i class="ti ti-alert-triangle" aria-hidden="true"></i>{{ $t('gestaoAcessoFalta') }}
+                    </span>
                 </div>
-                <div v-if="input.modelName === InputEventKey.getModelName()">
-                    <div class="srow">
-                        <button @click="recordKey(input, index)" class="five columns offset-by-three">
-                            <i class="fas fa-keyboard"></i>
-                            <span v-show="!keyRecording[input.label+index]">{{ $t('recordKey') }}</span>
-                            <span v-show="keyRecording[input.label+index]">{{ $t('pressKey') }}</span>
+
+                <!-- tecla, toque ou clique -->
+                <div v-if="input.modelName === InputEventKey.getModelName()" class="acionador-corpo">
+                    <div class="g-linha">
+                        <button type="button" class="g-btn" :class="{'g-btn-principal': keyRecording[input.label+index]}" @click="recordKey(input, index)">
+                            <i class="ti ti-keyboard" aria-hidden="true"></i>
+                            <span v-show="!keyRecording[input.label+index]">{{ $t('gestaoAcessoGravarTecla') }}</span>
+                            <span v-show="keyRecording[input.label+index]">{{ $t('gestaoAcessoGravando') }}</span>
                         </button>
-                        <span class="four columns">
-                            <b>{{ $t('currentKey') }}</b>
-                            <span v-show="!input.keyCode">{{ $t('noKey') }}</span>
-                            <span v-show="input.keyCode && InputEventKey.SPECIAL_KEYS.includes(input.keyCode)">{{input.keyCode | translate}}</span>
-                            <span v-show="input.keyCode && !InputEventKey.SPECIAL_KEYS.includes(input.keyCode)">{{input.keyName + ' (' + input.keyCode + ')'}}</span>
+                        <span class="acionador-atual" aria-live="polite">
+                            <span class="g-apoio">{{ $t('gestaoAcessoTeclaAtual') }}</span>
+                            <strong v-show="!input.keyCode" class="g-pilula">{{ $t('gestaoAcessoSemTecla') }}</strong>
+                            <strong v-show="input.keyCode && InputEventKey.SPECIAL_KEYS.includes(input.keyCode)" class="g-pilula g-pilula-ok">{{input.keyCode | translate}}</strong>
+                            <strong v-show="input.keyCode && !InputEventKey.SPECIAL_KEYS.includes(input.keyCode)" class="g-pilula g-pilula-ok">{{input.keyName + ' (' + input.keyCode + ')'}}</strong>
                         </span>
                     </div>
-                    <div class="srow">
-                        <accordion :acc-label="$t('more')" class="nine columns offset-by-three">
-                            <div class="srow">
-                                <label class="one-third column" :for="'inTimeout' + index">{{ $t('timeoutMs') }}</label>
-                                <input class="two-thirds column" :id="'inTimeout' + index" type="number" min="0" max="5000" step="100" v-model.number="input.timeout" @input="modelChanged"/>
+                    <details class="gm-avancado acionador-mais">
+                        <summary>{{ $t('gestaoAcessoMaisOpcoes') }}</summary>
+                        <div class="gm-avancado-corpo gm-grade gm-grade-3">
+                            <div class="g-campo">
+                                <label :for="'inTimeout' + index">{{ $t('gestaoAcessoEsperaMs') }}</label>
+                                <input :id="'inTimeout' + index" type="number" min="0" max="5000" step="100" v-model.number="input.timeout" @input="modelChanged"/>
                             </div>
-                            <div class="srow">
-                                <label class="one-third column" :for="'inRepeat' + index">{{ $t('repetitions') }}</label>
-                                <input v-show="input.holdDuration === 0" class="two-thirds column" :id="'inRepeat' + index" type="number" min="1" max="9" v-model.number="input.repeat" @input="modelChanged"/>
-                                <span v-show="input.holdDuration > 0" class="two-thirds column">
-                                    <span>{{ $t('disabledIfHoldDurationIsSet') }}</span>
-                                    <a href="javascript:;" @click="input.holdDuration = 0; modelChanged();">{{ $t('enable') }}</a>
+                            <div class="g-campo">
+                                <label :for="'inRepeat' + index">{{ $t('gestaoAcessoRepeticoes') }}</label>
+                                <input v-show="input.holdDuration === 0" :id="'inRepeat' + index" type="number" min="1" max="9" v-model.number="input.repeat" @input="modelChanged"/>
+                                <span v-show="input.holdDuration > 0" class="g-dica">
+                                    <span>{{ $t('gestaoAcessoDesligadoSegurar') }}</span>
+                                    <button type="button" class="g-btn g-btn-leve" @click="input.holdDuration = 0; modelChanged();">{{ $t('gestaoAcessoLigar') }}</button>
                                 </span>
                             </div>
-                            <div class="srow">
-                                <label class="one-third column" :for="'inRepeat' + index">{{ $t('holdDurationMs') }}</label>
-                                <input v-show="input.repeat === 1" class="two-thirds column" :id="'inRepeat' + index" type="number" min="0" max="5000" step="100" v-model.number="input.holdDuration" :disabled="input.repeat > 1" @input="modelChanged"/>
-                                <span v-show="input.repeat > 1" class="two-thirds column">
-                                    <span>{{ $t('disabledIfRepetitionsAreSet') }}</span>
-                                    <a href="javascript:;" @click="input.repeat = 1; modelChanged();">{{ $t('enable') }}</a>
+                            <div class="g-campo">
+                                <label :for="'inHold' + index">{{ $t('gestaoAcessoSegurar') }}</label>
+                                <input v-show="input.repeat === 1" :id="'inHold' + index" type="number" min="0" max="5000" step="100" v-model.number="input.holdDuration" :disabled="input.repeat > 1" @input="modelChanged"/>
+                                <span v-show="input.repeat > 1" class="g-dica">
+                                    <span>{{ $t('gestaoAcessoDesligadoRepeticoes') }}</span>
+                                    <button type="button" class="g-btn g-btn-leve" @click="input.repeat = 1; modelChanged();">{{ $t('gestaoAcessoLigar') }}</button>
                                 </span>
                             </div>
-                        </accordion>
-                    </div>
+                        </div>
+                    </details>
                 </div>
-                <div v-if="input.modelName === InputEventAudio.getModelName()">
-                    <div class="srow">
-                        <button @click="toggleMicRecording" class="five columns offset-by-three">
-                            <span v-if="!micRecording"><span class="fas fa-microphone"/> <span>{{ $t('startListeningToMicrophone') }}</span></span>
-                            <span v-if="micRecording"><span class="fas fa-microphone-slash"/> <span>{{ $t('stopListening') }}</span></span>
+
+                <!-- som no microfone -->
+                <div v-if="input.modelName === InputEventAudio.getModelName()" class="acionador-corpo">
+                    <div class="g-linha">
+                        <button type="button" class="g-btn" :class="{'g-btn-principal': micRecording}" @click="toggleMicRecording">
+                            <template v-if="!micRecording"><i class="ti ti-microphone" aria-hidden="true"></i><span>{{ $t('gestaoAcessoOuvir') }}</span></template>
+                            <template v-if="micRecording"><i class="ti ti-microphone-off" aria-hidden="true"></i><span>{{ $t('gestaoAcessoPararOuvir') }}</span></template>
                         </button>
                     </div>
-                    <div class="srow" v-if="micRecordError">
-                        <span class="five columns offset-by-three">
-                            <span class="fas fa-exclamation-triangle"/> <span>{{ $t('pleaseAllowAccessingMicrophoneInOrderToRecordAudio') }}</span>.
-                        </span>
-                    </div>
-                    <div class="srow">
-                        <div class="nine columns offset-by-three">
-                            <h3 class="mt-0">{{ $t('volume') }}</h3>
-                            <div>
-                                <label :for="'volThresholdHigh' + index"><span class="sr-only">{{ $t('volume') }}</span>{{ $t('thresholdHigh') }}</label>
+                    <p class="g-erro" role="alert" v-if="micRecordError">
+                        <i class="ti ti-alert-triangle" aria-hidden="true"></i> {{ $t('gestaoAcessoMicPermitir') }}
+                    </p>
+                    <p class="g-dica" v-show="!micRecording">{{ $t('gestaoAcessoNaoOuvindo') }}</p>
+
+                    <div class="acionador-grupo">
+                        <h4><i class="ti ti-volume" aria-hidden="true"></i>{{ $t('gestaoAcessoVolume') }}</h4>
+                        <div class="g-campo">
+                            <label :for="'volThresholdHigh' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoVolume') }}: </span>{{ $t('gestaoAcessoLimiteAlto') }}</label>
+                            <div class="gm-campo-linha acionador-faixa">
+                                <input :id="'volThresholdHigh' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" v-model.number="input.volThresholdHigh" @input="validateChange(input, true); modelChanged();"/>
+                                <span class="acionador-valor">{{ input.volThresholdHigh.toFixed(1) }} %</span>
                             </div>
-                            <div class="srow mb-4 mt-0">
-                                <input class="eight columns" :id="'volThresholdHigh' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" v-model.number="input.volThresholdHigh" @input="validateChange(input, true); modelChanged();"/>
-                                <span class="three columns">{{ input.volThresholdHigh.toFixed(1) }} %</span>
+                        </div>
+                        <div class="g-campo" v-show="micRecording">
+                            <label :for="'volAgora' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoVolume') }}: </span>{{ $t('gestaoAcessoAgora') }}</label>
+                            <div class="gm-campo-linha acionador-faixa">
+                                <input :id="'volAgora' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" disabled v-model.number="micValues.volLive"/>
+                                <span class="acionador-valor">{{ (Math.round(micValues.volLive * 100) / 100).toFixed(1) }} %</span>
                             </div>
-                            <div>
-                                <label :for="'currentValue' + index"><span class="sr-only">{{ $t('volume') }}</span>{{ $t('currentValue') }}</label>
-                            </div>
-                            <div class="srow mb-4 mt-0" v-show="micRecording">
-                                <input class="eight columns" :id="'currentValue' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" disabled v-model.number="micValues.volLive"/>
-                                <span class="three columns">{{ (Math.round(micValues.volLive * 100) / 100).toFixed(1) }} %</span>
-                            </div>
-                            <div class="srow mb-4 mt-0" v-show="!micRecording">{{ $t('currentlyNotListeningToMicrophone') }}</div>
-                            <div>
-                                <label :for="'volThresholdLow' + index"><span class="sr-only">{{ $t('volume') }}</span>{{ $t('thresholdLow') }}</label>
-                            </div>
-                            <div class="srow mb-4 mt-0">
-                                <input class="eight columns" :id="'volThresholdLow' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" v-model.number="input.volThresholdLow" @input="validateChange(input, false); modelChanged();"/>
-                                <span class="three columns">{{ input.volThresholdLow.toFixed(1) }} %</span>
+                        </div>
+                        <div class="g-campo">
+                            <label :for="'volThresholdLow' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoVolume') }}: </span>{{ $t('gestaoAcessoLimiteBaixo') }}</label>
+                            <div class="gm-campo-linha acionador-faixa">
+                                <input :id="'volThresholdLow' + index" type="range" min="0.1" :max="getMicVolMaxRange(input)" step="0.1" v-model.number="input.volThresholdLow" @input="validateChange(input, false); modelChanged();"/>
+                                <span class="acionador-valor">{{ input.volThresholdLow.toFixed(1) }} %</span>
                             </div>
                         </div>
                     </div>
-                    <div class="srow">
-                        <div class="nine columns offset-by-three">
-                            <h3 class="mt-0">{{ $t('frequency') }}</h3>
-                            <div>
-                                <label :for="'freqThresholdHigh' + index"><span class="sr-only">{{ $t('frequency') }}</span>{{ $t('thresholdHigh') }}</label>
+
+                    <details class="gm-avancado acionador-mais">
+                        <summary>{{ $t('gestaoAcessoTom') }}</summary>
+                        <div class="gm-avancado-corpo">
+                            <div class="g-campo">
+                                <label :for="'freqThresholdHigh' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoTom') }}: </span>{{ $t('gestaoAcessoLimiteAlto') }}</label>
+                                <div class="gm-campo-linha acionador-faixa">
+                                    <input :id="'freqThresholdHigh' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" v-model.number="input.freqThresholdHigh" @input="validateChange(input, true); modelChanged();"/>
+                                    <span class="acionador-valor">{{ input.freqThresholdHigh }} Hz</span>
+                                </div>
                             </div>
-                            <div class="srow mb-4 mt-0">
-                                <input class="eight columns" :id="'freqThresholdHigh' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" v-model.number="input.freqThresholdHigh" @input="validateChange(input, true); modelChanged();"/>
-                                <span class="three columns">{{ input.freqThresholdHigh }} Hz</span>
+                            <div class="g-campo" v-show="micRecording">
+                                <label :for="'freqAgora' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoTom') }}: </span>{{ $t('gestaoAcessoAgora') }}</label>
+                                <div class="gm-campo-linha acionador-faixa">
+                                    <input :id="'freqAgora' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" disabled v-model.number="micValues.inputMaxFreqMap[input]"/>
+                                    <span class="acionador-valor">{{ Math.round(micValues.inputMaxFreqMap[input]) }} Hz</span>
+                                </div>
                             </div>
-                            <div>
-                                <label :for="'currentValue' + index"><span class="sr-only">{{ $t('frequency') }}</span>{{ $t('currentValue') }}</label>
-                            </div>
-                            <div class="srow mb-4 mt-0" v-show="micRecording">
-                                <input class="eight columns" :id="'currentValue' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" disabled v-model.number="micValues.inputMaxFreqMap[input]"/>
-                                <span class="three columns">{{ Math.round(micValues.inputMaxFreqMap[input]) }} Hz</span>
-                            </div>
-                            <div class="srow mb-4 mt-0" v-show="!micRecording">{{ $t('currentlyNotListeningToMicrophone') }}</div>
-                            <div>
-                                <label :for="'freqThresholdLow' + index"><span class="sr-only">{{ $t('frequency') }}</span>{{ $t('thresholdLow') }}</label>
-                            </div>
-                            <div class="srow mb-4 mt-0">
-                                <input class="eight columns" :id="'freqThresholdLow' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" v-model.number="input.freqThresholdLow" @input="validateChange(input, false); modelChanged();"/>
-                                <span class="three columns">{{ input.freqThresholdLow }} Hz</span>
+                            <div class="g-campo">
+                                <label :for="'freqThresholdLow' + index"><span class="g-oculto-leitor">{{ $t('gestaoAcessoTom') }}: </span>{{ $t('gestaoAcessoLimiteBaixo') }}</label>
+                                <div class="gm-campo-linha acionador-faixa">
+                                    <input :id="'freqThresholdLow' + index" type="range" min="0" :max="getMicFreqMaxRange(input)" step="100" v-model.number="input.freqThresholdLow" @input="validateChange(input, false); modelChanged();"/>
+                                    <span class="acionador-valor">{{ input.freqThresholdLow }} Hz</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </details>
                 </div>
-                <div v-if="input.modelName === InputEventARE.getModelName()">
-                    <div class="srow">
-                        <button @click="recordAREEvent(input, index)" class="five columns offset-by-three">
-                            <i class="fas fa-bolt"></i>
-                            <span v-show="!keyRecording[input.label+index]">{{ $t('recordAreEvent') }}</span>
-                            <span v-show="keyRecording[input.label+index]">{{ $t('waitingForEvent') }}</span>
+
+                <!-- sistema externo -->
+                <div v-if="input.modelName === InputEventARE.getModelName()" class="acionador-corpo">
+                    <div class="g-linha">
+                        <button type="button" class="g-btn" :class="{'g-btn-principal': keyRecording[input.label+index]}" @click="recordAREEvent(input, index)">
+                            <i class="ti ti-bolt" aria-hidden="true"></i>
+                            <span v-show="!keyRecording[input.label+index]">{{ $t('gestaoAcessoGravarExterno') }}</span>
+                            <span v-show="keyRecording[input.label+index]">{{ $t('gestaoAcessoEsperandoSinal') }}</span>
                         </button>
-                        <label class="four columns" for="inputAreUrl">{{ $t('areUrl') }}</label>
-                        <input class="four columns" id="inputAreUrl" type="text" v-model="input.areURL" :placeholder="$t('emptyIsAutomatic')" @change="changedAreURL(input)" @input="areError[input.label+index] = false"/>
                     </div>
-                    <div class="srow">
-                        <span class="nine columns offset-by-three" v-show="areError[input.label+index]">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            {{ $t('errorConnectingToARE') }} {{'(' + areService.getRestURL(input.areURL) + ')'}}
-                        </span>
-                    </div>
-                    <div class="srow">
-                        <span v-for="(eventName, index) in input.eventNames" class="nine columns offset-by-three">
-                            <b>{{ $t('event') }}</b> {{formatAreEvent(eventName)}} <button @click="removeAREEvent(input, index)" :title="$t('delete')" style="margin-left: 1em; padding: 0 0.5em"><i class="fas fa-trash"></i></button>
-                        </span>
-                    </div>
+                    <p class="g-erro" role="alert" v-show="areError[input.label+index]">
+                        <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+                        {{ $t('gestaoAcessoErroExterno', [areService.getRestURL(input.areURL)]) }}
+                    </p>
+                    <ul class="acionador-sinais" v-if="input.eventNames && input.eventNames.length">
+                        <li v-for="(eventName, index) in input.eventNames">
+                            <span class="acionador-sinal-texto"><span class="g-apoio">{{ $t('gestaoAcessoSinal') }}:</span> {{formatAreEvent(eventName)}}</span>
+                            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="removeAREEvent(input, index)" :aria-label="$t('gestaoAcessoApagarSinal')" :title="$t('gestaoAcessoApagarSinal')"><i class="ti ti-trash" aria-hidden="true"></i></button>
+                        </li>
+                    </ul>
+                    <details class="gm-avancado acionador-mais">
+                        <summary>{{ $t('gestaoAcessoEnderecoExterno') }}</summary>
+                        <div class="gm-avancado-corpo">
+                            <div class="g-campo">
+                                <label :for="'inputAreUrl' + index">{{ $t('gestaoAcessoEnderecoExterno') }}</label>
+                                <input :id="'inputAreUrl' + index" type="text" v-model="input.areURL" @change="changedAreURL(input)" @input="areError[input.label+index] = false"/>
+                                <span class="g-dica">{{ $t('gestaoAcessoVazioAutomatico') }}</span>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </li>
         </ul>
@@ -155,12 +167,10 @@
     import {InputEventAudio} from "../../js/model/InputEventAudio";
     import {InputEventARE} from "../../js/model/InputEventARE";
     import {inputEventHandler} from "../../js/input/inputEventHandler";
-    import Accordion from "./accordion.vue";
     import {areService} from "../../js/service/areService";
     import {audioUtil} from "../../js/util/audioUtil.js";
 
     export default {
-        components: {Accordion},
         props: {
             value: Array,
             inputLabels: Array,
@@ -399,30 +409,38 @@
 </script>
 
 <style scoped>
-    ul {
-        list-style: none;
+    .acionadores-lista > li {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--g-e2);
+        padding: var(--g-e3) var(--g-e4);
     }
-    ul li:first-child {
-        margin-top: 1em !important;
-    }
+    .acionadores-lista > li.acionador-erro { border-color: var(--g-perigo); }
 
-    li {
-        margin-bottom: 2em;
-        margin-top: 2em;
-    }
-    .srow.nomargin {
-        margin: 0;
-    }
+    .acionador-topo { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--g-e2) var(--g-e4); }
+    .acionador-tipo { flex: 1 1 240px; min-width: 0; margin-bottom: 0; }
+    .acionador-falta { display: inline-flex; align-items: center; gap: var(--g-e1); min-height: var(--g-alvo); }
+    .acionador-falta .ti { font-size: 1.3em; }
 
-    .input-label {
-        font-weight: bold;
-        margin-bottom: 0.7em;
-    }
+    .acionador-corpo { display: flex; flex-direction: column; gap: var(--g-e2); }
+    .acionador-corpo > p { margin: 0; }
+    .acionador-atual { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--g-e2); }
+    .acionador-mais { margin: 0; }
+    .acionador-mais .g-dica { display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-e2); }
 
-    @media (max-width: 850px) {
-        li {
-            outline: 1px solid lightgray;
-            padding: 0.5em;
-        }
+    .acionador-grupo h4 {
+        display: flex; align-items: center; gap: var(--g-e2);
+        font-size: var(--g-t-corpo); font-weight: 700; margin: var(--g-e2) 0;
     }
+    .acionador-grupo h4 .ti { color: var(--g-folha-escura); font-size: 1.3em; }
+    .acionador-faixa { align-items: center; }
+    .g-campo .acionador-faixa > input[type="range"] { flex: 1 1 auto; width: auto; }
+    .acionador-valor { flex: 0 0 80px; text-align: right; color: var(--g-tinta-2); font-variant-numeric: tabular-nums; }
+
+    .acionador-sinais { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--g-e1); }
+    .acionador-sinais > li {
+        display: flex; align-items: center; gap: var(--g-e2); margin: 0;
+        padding-left: var(--g-e3); border-radius: var(--g-raio-p); background: var(--g-superficie-2);
+    }
+    .acionador-sinal-texto { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 </style>

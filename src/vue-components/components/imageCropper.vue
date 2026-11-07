@@ -1,8 +1,8 @@
 <template>
     <div class="image-cropper">
-        <p class="cropper-hint"><i class="fas fa-hand-pointer"></i> {{ $t('cropImageHint') }}</p>
+        <p class="cropper-hint"><i class="ti ti-hand-move" aria-hidden="true"></i> {{ $t('cropImageHint') }}</p>
         <div class="cropper-aspects" v-if="cellAspect && Math.abs(cellAspect - 1) > 0.05">
-            <button :class="{'button-primary': !square}" @click="setSquare(false)">{{ $t('cropAspectCell') }}</button>
+            <button :class="{'button-primary': !square}" @click="setSquare(false)">{{ $t('gestaoBotaoFormatoBotao') }}</button>
             <button :class="{'button-primary': square}" @click="setSquare(true)">{{ $t('cropAspectSquare') }}</button>
         </div>
         <div class="cropper-frame" ref="frame" :style="{'aspect-ratio': String(aspect), width: `min(100%, ${Math.round(55 * aspect)}vh)`}"
@@ -12,14 +12,14 @@
             <div class="cropper-guides"></div>
         </div>
         <div class="cropper-zoom">
-            <i class="fas fa-search-minus"></i>
+            <i class="ti ti-zoom-out" aria-hidden="true"></i>
             <input type="range" min="1" max="4" step="0.01" v-model.number="zoom" @input="clamp()" :aria-label="$t('cropZoom')"/>
-            <i class="fas fa-search-plus"></i>
+            <i class="ti ti-zoom-in" aria-hidden="true"></i>
         </div>
         <div class="cropper-actions">
-            <button @click="$emit('cancel')"><i class="fas fa-times"></i> {{ $t('cropCancel') }}</button>
-            <button @click="reset()"><i class="fas fa-undo"></i> {{ $t('cropReset') }}</button>
-            <button class="button-primary" @click="apply()" :disabled="!loaded"><i class="fas fa-check"></i> {{ $t('cropApply') }}</button>
+            <button @click="$emit('cancel')"><i class="ti ti-x" aria-hidden="true"></i> {{ $t('cropCancel') }}</button>
+            <button @click="reset()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i> {{ $t('gestaoBotaoComecarDeNovo') }}</button>
+            <button class="button-primary" @click="apply()" :disabled="!loaded"><i class="ti ti-check" aria-hidden="true"></i> {{ $t('cropApply') }}</button>
         </div>
     </div>
 </template>

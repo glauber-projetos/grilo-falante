@@ -1,105 +1,140 @@
 <template>
-    <div class="overflow-content box">
-        <div :aria-hidden="showWordsModal || showImportModal">
-            <div class="all-dicts-view">
-                <header class="srow header" role="toolbar">
-                    <header-icon></header-icon>
-                    <button tabindex="32" @click="addDictionary()" :aria-label="$t('newEmptyDictionary')" class="small spaced"><i class="fas fa-plus"/> <span class="hide-mobile">{{ $t('newEmptyDictionary') }}</span></button>
-                    <button tabindex="31" @click="showImportModal = true" :aria-label="$t('importDictionary')" class="small spaced"><i class="fas fa-file-import"/> <span class="hide-mobile">{{ $t('importDictionary') }}</span></button>
-                </header>
-                <div class="srow content text-content">
-                    <div v-if="!dicts" class="grid-container grid-mask">
-                        <i class="fas fa-4x fa-spinner fa-spin"/>
-                    </div>
-                    <h2>{{ $t('savedDictionaries') }}</h2>
-                    <ul id="dictList" v-show="dicts && dicts.length > 0">
-                        <li class="hide-mobile table-headers">
-                            <span class="four columns">{{ $t('dictionaryName') }}</span>
-                            <span class="four columns">{{ $t('actions') }}</span><br/>
-                        </li>
-                        <li v-for="dict in dicts" class="dict-table-elem">
-                            <div class="srow">
-                                <div class="four columns">
-                                    <div v-if="editModeId !== dict.id">
-                                        {{ dict.dictionaryKey }}
-                                        <button class="small-button" :title="$t('editName')" @click="enableEditName(dict)"><i class="far fa-edit"/>
-                                        </button>
-                                    </div>
-                                    <div v-if="editModeId === dict.id">
-                                        <input type="text" v-focus="" v-model="dict.dictionaryKey"/>
-                                        <div class="inline">
-                                            <button class="small-button" :title="$t('cancelEditName')" v-if="originalLabel" @click="cancelEditName()"><i
-                                                class="fas fa-times"/></button>
-                                            <button class="small-button" :title="$t('saveName')" @click="finishEditName(dict)"
-                                                    :disabled="isLabelDuplicate(dict.dictionaryKey)"><i class="fas fa-check"/>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="eight columns actionbuttons" style="display: flex; padding-right: 1em">
-                                    <div class="four columns show-mobile" style="margin: 0.5em 0 0 0.2em">{{ $t('actions') }}
-                                    </div>
-                                    <button @click="edit(dict)" :aria-label="$t('edit')"><i class="far fa-edit"/> <span class="hide-mobile">{{ $t('edit') }}</span>
-                                    </button>
-                                    <button @click="clone(dict.id)" :aria-label="$t('clone')"><i class="far fa-clone"/> <span class="hide-mobile"
-                                    >{{ $t('clone') }}</span>
-                                    </button>
-                                    <button @click="deleteDict(dict.id, dict.dictionaryKey)" :aria-label="$t('delete')"><i class="far fa-trash-alt"/> <span
-                                        class="hide-mobile">{{ $t('delete') }}</span></button>
-                                    <button @click="downloadDict(dict.id, dict.dictionaryKey)" :aria-label="$t('save')"><i class="fas fa-download"/> <span
-                                        class="hide-mobile">{{ $t('save') }}</span></button>
-                                </div>
-                            </div>
-                            <div class="edit-container" v-if="editId === dict.id">
-                                <div class="srow">
-                                    <label class="three columns">{{ $t('language') }}</label>
-                                    <select class="four columns" v-model="dict.lang">
-                                        <option v-for="lang in languages" :value="lang.code">{{ lang | extractTranslationAppLang }}</option>
-                                    </select>
-                                    <button @click="showWordsModal = true; modalDict = dict" class="five columns">
-                                        <i class="fas fa-file-import"/>
-                                        <span>{{ $t('importWords') }}</span>
-                                    </button>
-                                </div>
-                                <div class="srow mt-3 mb-4">
-                                    <search-bar v-model="searchWord" placeholder="searchWord" @input="inputSearchWord()"></search-bar>
-                                </div>
-                                <div class="srow">
-                                    <span>{{ $t('words') }}</span>
-                                    <ul style="margin-left: 0">
-                                        <li v-for="word in wordlist">
-                                            <button class="small-button" :title="$t('deleteWordParam', [word])" @click="deleteWord(word, dict)" style="margin-right: 0.5em"><i class="far fa-trash-alt"/></button>
-                                            <span>{{word}}</span>
-                                        </li>
-                                    </ul>
-                                    <span v-show="totalWords > wordlist.length && searchWord === ''">
-                                    {{totalWords - wordlist.length}}
-                                    <span>{{ $t('moreWordsAvailableTypeInSearchFieldToFilter') }}</span>
-                                </span>
-                                    <span v-show="filterWords > wordlist.length && searchWord !== ''">
-                                    {{filterWords - wordlist.length}}
-                                    <span>{{ $t('moreWordsForThisFilterRefineSearchToShowMore') }}</span>
-                                </span>
-                                    <div v-show="searchWord && totalWords > 0 && wordlist.length === 0">
-                                        <span>{{ $t('noWordsForThisFilterClearSearchField') }}</span>
-                                        <button @click="inputSearchWord('')"><i class="fas fa-times"/> <span>{{ $t('clear') }}</span></button>
-                                    </div>
-                                    <span v-show="totalWords === 0">{{ $t('thisDictionaryContainsNoWords') }}</span>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                    <p v-if="!dicts || dicts.length === 0">
-                        {{ $t('noDictionariesFound') }}
-                    </p>
+    <div class="g-tela pal-tela">
+        <g-topo :titulo="$t('gestaoPalavrasTitulo')">
+            <button type="button" class="g-btn pal-topo-btn" @click="showImportModal = true" :aria-label="$t('gestaoPalavrasTrazer')" :title="$t('gestaoPalavrasTrazer')">
+                <i class="ti ti-file-import" aria-hidden="true"></i><span class="pal-topo-texto">{{ $t('gestaoPalavrasTrazerCurto') }}</span>
+            </button>
+            <button type="button" class="g-btn g-btn-principal pal-topo-btn" @click="addDictionary()" :disabled="!dicts" :aria-label="$t('gestaoPalavrasNovaLista')" :title="$t('gestaoPalavrasNovaLista')">
+                <i class="ti ti-plus" aria-hidden="true"></i><span class="pal-topo-texto">{{ $t('gestaoPalavrasNovaLista') }}</span>
+            </button>
+        </g-topo>
+
+        <main class="g-conteudo">
+            <section class="pal-intro">
+                <span class="pal-intro-icone" aria-hidden="true"><i class="ti ti-abc"></i></span>
+                <div>
+                    <p class="pal-intro-texto">{{ $t('gestaoPalavrasIntro') }}</p>
+                    <p class="g-dica pal-intro-dica">{{ $t('gestaoPalavrasIntroDica') }}</p>
                 </div>
-                <div class="bottom-spacer"></div>
+            </section>
+
+            <div v-if="!dicts" class="pal-carregando" role="status">
+                <i class="ti ti-loader-2 pal-girar" aria-hidden="true"></i>
+                <span>{{ $t('gestaoPalavrasCarregando') }}</span>
             </div>
-        </div>
+
+            <template v-if="dicts && dicts.length > 0">
+                <h2 class="pal-subtitulo">{{ $t('gestaoPalavrasSuasListas', [dicts.length]) }}</h2>
+                <ul class="pal-lista">
+                    <li v-for="dict in dicts" :key="dict.id" class="pal-cartao" :class="{'pal-cartao-aberto': editId === dict.id}">
+                        <div class="pal-cartao-cabeca">
+                            <span class="pal-cartao-icone" aria-hidden="true"><i class="ti ti-book-2"></i></span>
+
+                            <div v-if="editModeId !== dict.id" class="pal-cartao-nome">
+                                <h3>{{ dict.dictionaryKey }}</h3>
+                                <span class="g-pilula" v-if="nomeIdioma(dict.lang)"><i class="ti ti-language" aria-hidden="true"></i>{{ nomeIdioma(dict.lang) }}</span>
+                            </div>
+
+                            <form v-if="editModeId === dict.id" class="pal-nome-form" @submit.prevent="!isLabelDuplicate(dict.dictionaryKey) && finishEditName(dict)" @keydown.esc.stop="cancelEditName()">
+                                <div class="g-campo" :class="{'g-campo-erro': isLabelDuplicate(dict.dictionaryKey)}">
+                                    <label :for="'nomeLista' + dict.id">{{ $t('gestaoPalavrasNomeDaLista') }}</label>
+                                    <div class="gm-campo-linha">
+                                        <input :id="'nomeLista' + dict.id" type="text" v-focus="" v-model="dict.dictionaryKey" autocomplete="off"/>
+                                        <button type="button" class="g-btn g-btn-icone" v-if="originalLabel" @click="cancelEditName()" :aria-label="$t('gestaoCancelar')" :title="$t('gestaoCancelar')"><i class="ti ti-x" aria-hidden="true"></i></button>
+                                        <button type="submit" class="g-btn g-btn-principal g-btn-icone" :disabled="isLabelDuplicate(dict.dictionaryKey)" :aria-label="$t('gestaoSalvar')" :title="$t('gestaoSalvar')"><i class="ti ti-check" aria-hidden="true"></i></button>
+                                    </div>
+                                    <span v-if="isLabelDuplicate(dict.dictionaryKey)" class="g-erro" role="alert">{{ $t('gestaoPalavrasNomeRepetido') }}</span>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="pal-acoes">
+                            <button type="button" class="g-btn" :class="{'g-btn-principal': editId === dict.id}" @click="edit(dict)" :aria-expanded="(editId === dict.id).toString()">
+                                <i :class="editId === dict.id ? 'ti ti-chevron-up' : 'ti ti-pencil'" aria-hidden="true"></i>{{ editId === dict.id ? $t('gestaoPalavrasFechar') : $t('gestaoPalavrasAbrirEditar') }}
+                            </button>
+                            <button type="button" class="g-btn g-btn-leve" @click="enableEditName(dict)" v-if="editModeId !== dict.id">
+                                <i class="ti ti-forms" aria-hidden="true"></i>{{ $t('gestaoMudarNome') }}
+                            </button>
+                            <button type="button" class="g-btn g-btn-leve" @click="clone(dict.id)">
+                                <i class="ti ti-copy" aria-hidden="true"></i>{{ $t('gestaoDuplicar') }}
+                            </button>
+                            <button type="button" class="g-btn g-btn-leve" @click="downloadDict(dict.id, dict.dictionaryKey)">
+                                <i class="ti ti-download" aria-hidden="true"></i>{{ $t('gestaoPalavrasGuardarArquivo') }}
+                            </button>
+                            <button type="button" class="g-btn g-btn-leve pal-apagar" @click="pedirApagar(dict)">
+                                <i class="ti ti-trash" aria-hidden="true"></i>{{ $t('gestaoApagar') }}
+                            </button>
+                        </div>
+
+                        <div class="pal-editar" v-if="editId === dict.id">
+                            <div class="pal-editar-topo">
+                                <div class="g-campo pal-idioma">
+                                    <label :for="'idiomaLista' + dict.id">{{ $t('gestaoPalavrasIdioma') }}</label>
+                                    <select :id="'idiomaLista' + dict.id" v-model="dict.lang">
+                                        <option v-for="lang in languages" :value="lang.code" :key="lang.code">{{ lang | extractTranslationAppLang }}</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="g-btn g-btn-principal pal-acrescentar" @click="showWordsModal = true; modalDict = dict">
+                                    <i class="ti ti-text-plus" aria-hidden="true"></i><span>{{ $t('gestaoPalavrasAcrescentar') }}</span>
+                                </button>
+                            </div>
+
+                            <div class="pal-busca">
+                                <p class="pal-busca-rotulo" aria-hidden="true">{{ $t('gestaoPalavrasProcurar') }}</p>
+                                <search-bar v-model="searchWord" placeholder="gestaoPalavrasProcurarDica" label="gestaoPalavrasProcurar" @input="inputSearchWord()"></search-bar>
+                            </div>
+
+                            <p class="pal-contagem">{{ $t('gestaoPalavrasTotal', [totalWords]) }}</p>
+                            <ul class="pal-palavras" v-if="wordlist.length > 0" :aria-label="$t('gestaoPalavrasLista')">
+                                <li v-for="word in wordlist" :key="word" class="pal-palavra">
+                                    <span>{{word}}</span>
+                                    <button type="button" class="pal-palavra-x" @click="deleteWord(word, dict)" :aria-label="$t('gestaoPalavrasApagarPalavra', [word])" :title="$t('gestaoPalavrasApagarPalavra', [word])">
+                                        <i class="ti ti-x" aria-hidden="true"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <p class="g-dica" v-show="totalWords > wordlist.length && searchWord === ''">
+                                {{ $t('gestaoPalavrasMaisPalavras', [totalWords - wordlist.length]) }}
+                            </p>
+                            <p class="g-dica" v-show="filterWords > wordlist.length && searchWord !== ''">
+                                {{ $t('gestaoPalavrasMaisNaBusca', [filterWords - wordlist.length]) }}
+                            </p>
+                            <div class="g-aviso" v-show="searchWord && totalWords > 0 && wordlist.length === 0">
+                                <i class="ti ti-mood-empty" aria-hidden="true"></i>
+                                <div class="g-linha">
+                                    <span>{{ $t('gestaoPalavrasNadaNaBusca') }}</span>
+                                    <button type="button" class="g-btn" @click="inputSearchWord('')"><i class="ti ti-x" aria-hidden="true"></i><span>{{ $t('gestaoLimparBusca') }}</span></button>
+                                </div>
+                            </div>
+                            <p class="gm-vazio" v-show="totalWords === 0"><i class="ti ti-abc" aria-hidden="true"></i>{{ $t('gestaoPalavrasListaVazia') }}</p>
+                        </div>
+                    </li>
+                </ul>
+            </template>
+
+            <section v-if="dicts && dicts.length === 0" class="pal-vazio">
+                <img src="app/img/grilo/mascote/grilo-duvida.webp" alt="" width="140" height="140"/>
+                <h2>{{ $t('gestaoPalavrasNenhumaTitulo') }}</h2>
+                <p class="g-apoio">{{ $t('gestaoPalavrasNenhumaTexto') }}</p>
+                <div class="g-linha pal-vazio-botoes">
+                    <button type="button" class="g-btn g-btn-principal g-btn-grande" @click="showImportModal = true"><i class="ti ti-file-import" aria-hidden="true"></i>{{ $t('gestaoPalavrasTrazer') }}</button>
+                    <button type="button" class="g-btn g-btn-grande" @click="addDictionary()"><i class="ti ti-plus" aria-hidden="true"></i>{{ $t('gestaoPalavrasNovaLista') }}</button>
+                </div>
+            </section>
+        </main>
+
         <import-words-modal v-if="showWordsModal" v-bind:dict-data="modalDict"
                             @close="showWordsModal = false" @reload="reload"/>
         <import-dictionary-modal v-if="showImportModal" :dicts="dicts"
                                  @close="showImportModal = false" @reload="reload"/>
+
+        <gestao-modal v-if="apagarDict" tamanho="p" :titulo="$t('gestaoPalavrasApagarTitulo')" icone="trash" perigo @close="apagarDict = null">
+            <p>{{ $t('gestaoPalavrasApagarTexto', [apagarDict.dictionaryKey]) }}</p>
+            <template #rodape>
+                <button type="button" class="g-btn" @click="apagarDict = null" autofocus>{{ $t('gestaoCancelar') }}</button>
+                <button type="button" class="g-btn g-btn-perigo" @click="confirmarApagar()"><i class="ti ti-trash" aria-hidden="true"></i>{{ $t('gestaoApagarConfirmar') }}</button>
+            </template>
+        </gestao-modal>
     </div>
 </template>
 
@@ -116,7 +151,8 @@
     import Predictionary from 'predictionary'
     import ImportWordsModal from '../modals/importWordsModal.vue'
     import ImportDictionaryModal from '../modals/importDictionaryModal.vue'
-    import HeaderIcon from '../../vue-components/components/headerIcon.vue'
+    import GTopo from '../components/gTopo.vue';
+    import GestaoModal from '../modals/gestaoModal.vue';
     import {helpService} from "../../js/service/helpService";
     import SearchBar from '../components/searchBar.vue';
 
@@ -137,22 +173,41 @@
                 showImportModal: false,
                 totalWords: 0,
                 filterWords: 0,
-                languages: i18nService.getAllLanguages()
+                languages: i18nService.getAllLanguages(),
+                apagarDict: null
             };
         },
         components: {
             SearchBar,
-            ImportDictionaryModal, ImportWordsModal, HeaderIcon
+            ImportDictionaryModal, ImportWordsModal, GTopo, GestaoModal
         },
         methods: {
+            // Grilo Falante: a confirmação agora é o modal "Apagar a lista?" (pedirApagar / confirmarApagar)
             deleteDict: function (id, label) {
                 let thiz = this;
-                if (!confirm(i18nService.t('CONFIRM_DELETE_DICT', label))) {
-                    return;
-                }
                 dataService.deleteObject(id).then(() => {
                     thiz.reload();
                 });
+            },
+            pedirApagar(dict) {
+                this.apagarDict = dict;
+            },
+            confirmarApagar() {
+                let dict = this.apagarDict;
+                this.apagarDict = null;
+                if (dict) {
+                    if (this.editId === dict.id) {
+                        this.editFinished();
+                    }
+                    this.deleteDict(dict.id, dict.dictionaryKey);
+                }
+            },
+            nomeIdioma(code) {
+                if (!code) {
+                    return '';
+                }
+                let lang = this.languages.find(l => l.code === code);
+                return lang ? i18nService.getTranslationAppLang(lang) : code;
             },
             downloadDict: function (id, label) {
                 let blob = new Blob([this.dicts.filter(d => d.id === id)[0].data], {type: "application/json;charset=utf-8"});
@@ -162,7 +217,7 @@
                 log.debug('add dictionary!');
                 let existingNames = this.dicts.map(dict => dict.dictionaryKey);
                 let dictData = new Dictionary({
-                    dictionaryKey: modelUtil.getNewName('newDictionary', existingNames),
+                    dictionaryKey: modelUtil.getNewName(i18nService.t('gestaoPalavrasNovaListaNome'), existingNames),
                     lang: i18nService.getContentLang()
                 });
                 dataService.saveDictionary(dictData).then(() => {
@@ -278,69 +333,86 @@
 </script>
 
 <style scoped>
-    input {
-        margin-bottom: 1em;
+    .pal-tela { height: 100%; overflow-y: auto; }
+
+    .pal-intro {
+        display: flex; align-items: flex-start; gap: var(--g-e4);
+        padding: var(--g-e4) var(--g-e5); margin-bottom: var(--g-e5);
+        background: var(--g-ceu); color: var(--g-ceu-escuro); border-radius: var(--g-raio-g);
     }
-
-    .all-dicts-view li {
-        list-style-type: none;
+    .pal-intro-icone {
+        width: 48px; height: 48px; flex: none; border-radius: 50%;
+        display: grid; place-items: center; background: var(--g-superficie); font-size: 28px;
     }
+    .pal-intro-texto { margin: 0; font-size: var(--g-t-grande); font-weight: 700; color: var(--g-ceu-escuro); }
+    .pal-intro-dica { margin: var(--g-e1) 0 0; color: var(--g-ceu-escuro); }
 
-    .all-dicts-view a {
-        font-size: 1.2em;
+    .pal-carregando { display: flex; flex-direction: column; align-items: center; gap: var(--g-e3); padding: var(--g-e6) 0; color: var(--g-tinta-2); }
+    .pal-carregando .ti { font-size: 40px; color: var(--g-folha); }
+    .pal-girar { animation: pal-giro 1s linear infinite; }
+    @keyframes pal-giro { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .pal-girar { animation: none; } }
+
+    .pal-subtitulo { font-size: var(--g-t-h3); }
+    .pal-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--g-e3); }
+    .pal-cartao {
+        margin: 0; padding: var(--g-e4);
+        background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio-g);
     }
-
-    .actionbuttons button {
-        width: 25%;
-        padding: 0 1vh;
-        margin: 0.5vh 0.5vw;
+    .pal-cartao-aberto { border-color: var(--g-folha); }
+    .pal-cartao-cabeca { display: flex; align-items: flex-start; gap: var(--g-e3); }
+    .pal-cartao-icone {
+        width: 48px; height: 48px; flex: none; border-radius: var(--g-raio);
+        display: grid; place-items: center; font-size: 26px;
+        background: var(--g-folha-clara); color: var(--g-folha-escura);
     }
+    .pal-cartao-nome { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-e1) var(--g-e3); min-height: 48px; }
+    .pal-cartao .pal-cartao-nome h3 { margin: 0; font-size: var(--g-t-h3); overflow-wrap: anywhere; }
+    .pal-nome-form { flex: 1; min-width: 0; }
+    .pal-nome-form .g-campo { margin: 0; }
+    .gm-campo-linha { display: flex; gap: var(--g-e2); align-items: stretch; }
+    .gm-campo-linha > input { flex: 1; min-width: 0; }
 
-    .all-dicts-view .small-button {
-        padding: 0;
-        margin-left: 0.5em;
-        line-height: normal;
-        width: 25px;
-        height: 25px;
+    .pal-acoes { display: flex; flex-wrap: wrap; gap: var(--g-e2); margin-top: var(--g-e3); padding-left: 60px; }
+    .pal-acoes .g-btn { padding: 0 var(--g-e4); }
+    .pal-acoes .pal-apagar { color: var(--g-perigo); }
+    .pal-acoes .pal-apagar:hover { background: var(--g-perigo-claro); }
+
+    .pal-editar {
+        margin-top: var(--g-e4); padding: var(--g-e4);
+        background: var(--g-superficie-2); border-radius: var(--g-raio);
     }
-
-    .all-dicts-view .table-headers {
-        margin-top: 1.0em;
+    .pal-editar-topo { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--g-e3) var(--g-e4); margin-bottom: var(--g-e4); }
+    .pal-idioma { flex: 1 1 220px; margin: 0; }
+    .pal-acrescentar { flex: 0 1 auto; }
+    .pal-busca { margin-bottom: var(--g-e3); }
+    .pal-busca-rotulo { margin: 0 0 var(--g-e1); font-weight: 700; }
+    .pal-contagem { margin: 0 0 var(--g-e2); color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
+    .pal-palavras { list-style: none; margin: 0 0 var(--g-e2); padding: 0; display: flex; flex-wrap: wrap; gap: var(--g-e2); }
+    .pal-palavra {
+        display: inline-flex; align-items: center; gap: var(--g-e1); margin: 0;
+        min-height: var(--g-alvo); padding: 0 4px 0 var(--g-e4);
+        background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio-pilula);
+        font-size: var(--g-t-grande); font-weight: 700;
     }
-
-    .edit-container {
-        padding: 1em;
+    .pal-palavra-x {
+        display: grid; place-items: center; width: 40px; height: 40px; min-width: 40px; margin: 0; padding: 0;
+        border: 0; border-radius: 50%; background: transparent; color: var(--g-tinta-2); cursor: pointer; line-height: 1;
     }
+    .pal-palavra-x .ti { font-size: 20px; }
+    .pal-palavra-x:hover { background: var(--g-perigo-claro); color: var(--g-perigo); }
+    .pal-palavra-x:focus-visible { outline: none; box-shadow: var(--g-foco); }
 
-    @media (min-width: 751px) {
-        .edit-container {
-            background-color: whitesmoke;
-            margin-right: 1em;
-            padding: 1em;
-        }
-    }
+    .pal-vazio { text-align: center; padding: var(--g-e5) var(--g-e3); }
+    .pal-vazio img { width: 140px; height: 140px; object-fit: contain; margin-bottom: var(--g-e3); }
+    .pal-vazio p { max-width: 520px; margin: 0 auto var(--g-e4); }
+    .pal-vazio-botoes { justify-content: center; }
 
-    /* Smaller than tablet */
-    @media (max-width: 850px) {
-        .all-dicts-view a {
-            font-size: 1.3em;
-            margin-top: 1.5em;
-        }
-
-        .all-dicts-view input[type="text"] {
-            height: 1.3em;
-            font-size: 1.3em;
-        }
-
-        .all-dicts-view .small-button {
-            width: 30px;
-            height: 30px;
-        }
-
-        .dict-table-elem {
-            outline: 1px solid lightgray;
-            padding: 0.5em;
-            margin-right: 1em;
-        }
+    @media (max-width: 600px) {
+        .pal-topo-texto { display: none; }
+        .pal-topo-btn { padding: 0; width: var(--g-alvo); min-width: var(--g-alvo); border-radius: var(--g-raio-pilula); }
+        .pal-intro { padding: var(--g-e4); }
+        .pal-acoes { padding-left: 0; }
+        .pal-acoes .g-btn { flex: 1 1 45%; }
     }
 </style>

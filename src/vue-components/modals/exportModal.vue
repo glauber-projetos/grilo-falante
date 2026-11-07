@@ -1,100 +1,84 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container modal-container-flex" @keydown.esc="$emit('close')" @keydown.ctrl.enter="save()">
-                    <div class="container-fluid px-0 mb-5">
-                        <div class="row">
-                            <div class="modal-header col-8 col-sm-10 col-md-10">
-                                <h1 class="inline">{{ $t('exportToFile') }}</h1>
-                            </div>
-                            <a class="col-2 col-sm-1 col-md black" href="javascript:;" @click="openHelp()"><i class="fas fa-question-circle"></i></a>
-                            <a class="col-2 col-sm-1 col-md black" href="javascript:void(0);" :title="$t('close')" @click="$emit('close')"><i class="fas fa-times"/></a>
-                        </div>
-                    </div>
+    <gestao-modal :titulo="$t('gestaoArquivoGuardarTitulo')" :subtitulo="$t('gestaoArquivoGuardarSubtitulo')" icone="device-floppy"
+                  @close="$emit('close')" @keydown.ctrl.enter.native="save()">
+        <template #cabeca>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="openHelp()" :aria-label="$t('gestaoArquivoAjuda')" :title="$t('gestaoArquivoAjuda')">
+                <i class="ti ti-help-circle" aria-hidden="true"></i>
+            </button>
+        </template>
 
-                    <div class="modal-body mt-2">
-                        <div class="row mb-4">
-                            <label class="col-12 col-md-2" for="selectGrid">{{ $t('selectGrid') }}</label>
-                            <div class="col-12 col-md-4 mb-4">
-                                <select class="col-12" id="selectGrid" v-model="selectedGrid" @change="selectedGridChanged">
-                                    <option :value="null">{{ $t('allGrids') }}</option>
-                                    <option v-for="elem in graphList" :value="elem.grid">{{elem.grid.label | extractTranslation}}</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <img v-if="selectedGrid && selectedGrid.thumbnail" :src="selectedGrid.thumbnail.data">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <label class="col-12 col-md-2" for="selectExportLang">{{ $t('exportLanguages') }}</label>
-                            <div class="col-12 col-md-4 mb-4">
-                                <select class="col-12" id="selectExportLang" v-model="options.exportLang">
-                                    <option v-for="option in options.exportLangOptions" :value="option">{{option | translate}}</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <span v-if="options.exportLang === constants.LANG_EXPORT_CURRENT">{{ $t('currentLanguage', {contentLangReadable: i18nService.getContentLangReadable(), contentLangCode: i18nService.getContentLang()}) }}</span>
-                                <span v-if="options.exportLang === constants.LANG_EXPORT_ALL">
-                                    <span>{{ $t('currentLanguages', {length: currentLanguages.length}) }} </span>
-                                    <span v-for="(lang, index) in currentLanguages" :title="i18nService.getLangReadable(lang)">{{lang + (index < currentLanguages.length -1 ? ', ' : '')}}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <input id="exportDictionaries" type="checkbox" v-model="options.exportDictionaries"/>
-                                <label for="exportDictionaries">{{ $t('exportDictionaries') }}</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <input id="exportUserSettings" type="checkbox" v-model="options.exportUserSettings"/>
-                                <label for="exportUserSettings">{{ $t('exportUserSettingsAndInputConfig') }}</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <input id="exportGlobalGrid" type="checkbox" v-model="options.exportGlobalGrid"/>
-                                <label for="exportGlobalGrid">{{ $t('exportGlobalGrid') }}</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <input id="exportOBZ" type="checkbox" v-model="options.exportOBZ"/>
-                                <label for="exportOBZ">{{ $t('exportOBZ') }}</label>
-                            </div>
-                        </div>
-                        <div class="row" v-show="selectedGrid && allChildren && allChildren.length > 0">
-                            <div>
-                                <input id="exportConnected" type="checkbox" v-model="options.exportConnected"/>
-                                <label for="exportConnected">
-                                    <span>{{ $t('exportAllChildGrids') }}</span>
-                                    <span>({{allChildren ? allChildren.length : 0}} <span>{{ $t('grids') }}</span>)</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer modal-footer-flex">
-                        <div class="button-container srow">
-                            <button class="six columns" @click="$emit('close')" :title="$t('keyboardEsc')">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button class="six columns" @click="save()" :title="$t('keyboardCtrlEnter')">
-                                <i class="fas fa-check"/> <span>{{ $t('downloadBackup') }}</span>
-                            </button>
-                        </div>
-                    </div>
+        <section class="gm-secao">
+            <h3><i class="ti ti-layout-grid" aria-hidden="true"></i>{{ $t('gestaoArquivoQuaisPranchas') }}</h3>
+            <div class="ar-escolha-prancha">
+                <div class="g-campo ar-escolha-campo">
+                    <label for="selectGrid">{{ $t('gestaoArquivoPrancha') }}</label>
+                    <select id="selectGrid" v-model="selectedGrid" @change="selectedGridChanged">
+                        <option :value="null">{{ $t('gestaoArquivoTodasAsPranchas', [graphList.length]) }}</option>
+                        <option v-for="elem in graphList" :value="elem.grid" :key="elem.grid.id">{{elem.grid.label | extractTranslation}}</option>
+                    </select>
+                    <span class="g-dica" v-if="!selectedGrid">{{ $t('gestaoArquivoTodasDica') }}</span>
                 </div>
+                <span class="ar-miniatura" aria-hidden="true">
+                    <img v-if="selectedGrid && selectedGrid.thumbnail && selectedGrid.thumbnail.data" :src="selectedGrid.thumbnail.data" alt=""/>
+                    <i v-else :class="selectedGrid ? 'ti ti-layout-grid' : 'ti ti-stack-2'"></i>
+                </span>
             </div>
-        </div>
-    </div>
+            <label class="g-marcar" v-show="selectedGrid && allChildren && allChildren.length > 0">
+                <input id="exportConnected" type="checkbox" v-model="options.exportConnected"/>
+                <span>{{ $t('gestaoArquivoLevarJunto', [allChildren ? allChildren.length : 0]) }}<small class="g-dica ar-sub">{{ $t('gestaoArquivoLevarJuntoDica') }}</small></span>
+            </label>
+            <p class="g-dica ar-fotos"><i class="ti ti-photo-check" aria-hidden="true"></i>{{ $t('gestaoArquivoFotosVaoJunto') }}</p>
+        </section>
+
+        <section class="gm-secao">
+            <h3><i class="ti ti-list-check" aria-hidden="true"></i>{{ $t('gestaoArquivoOQueMais') }}</h3>
+            <label class="g-marcar">
+                <input id="exportDictionaries" type="checkbox" v-model="options.exportDictionaries"/>
+                <span>{{ $t('gestaoArquivoIncluirPalavras') }}<small class="g-dica ar-sub">{{ $t('gestaoArquivoIncluirPalavrasDica') }}</small></span>
+            </label>
+            <label class="g-marcar">
+                <input id="exportUserSettings" type="checkbox" v-model="options.exportUserSettings"/>
+                <span>{{ $t('gestaoArquivoIncluirAjustes') }}<small class="g-dica ar-sub">{{ $t('gestaoArquivoIncluirAjustesDica') }}</small></span>
+            </label>
+            <label class="g-marcar">
+                <input id="exportGlobalGrid" type="checkbox" v-model="options.exportGlobalGrid"/>
+                <span>{{ $t('gestaoArquivoIncluirBarraFixa') }}<small class="g-dica ar-sub">{{ $t('gestaoArquivoIncluirBarraFixaDica') }}</small></span>
+            </label>
+        </section>
+
+        <details class="gm-avancado">
+            <summary>{{ $t('gestaoArquivoAvancado') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="g-campo">
+                    <label for="selectExportLang">{{ $t('gestaoArquivoIdiomas') }}</label>
+                    <select id="selectExportLang" v-model="options.exportLang">
+                        <option v-for="option in options.exportLangOptions" :value="option" :key="option">{{ option === constants.LANG_EXPORT_CURRENT ? $t('gestaoArquivoIdiomaAtual') : $t('gestaoArquivoIdiomasTodos') }}</option>
+                    </select>
+                    <span class="g-dica" v-if="options.exportLang === constants.LANG_EXPORT_CURRENT">{{ $t('currentLanguage', {contentLangReadable: i18nService.getContentLangReadable(), contentLangCode: i18nService.getContentLang()}) }}</span>
+                    <span class="g-dica" v-if="options.exportLang === constants.LANG_EXPORT_ALL">
+                        <span>{{ $t('gestaoArquivoIdiomasNasPranchas', [currentLanguages.length]) }} </span>
+                        <span v-for="(lang, index) in currentLanguages" :key="lang" :title="i18nService.getLangReadable(lang)">{{lang + (index < currentLanguages.length -1 ? ', ' : '')}}</span>
+                    </span>
+                </div>
+                <label class="g-marcar">
+                    <input id="exportOBZ" type="checkbox" v-model="options.exportOBZ"/>
+                    <span>{{ $t('gestaoArquivoFormatoObz') }}<small class="g-dica ar-sub">{{ $t('gestaoArquivoFormatoObzDica') }}</small></span>
+                </label>
+            </div>
+        </details>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :title="$t('keyboardCtrlEnter')">
+                <i class="ti ti-download" aria-hidden="true"></i>{{ $t('gestaoArquivoGuardarArquivo') }}
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {dataService} from '../../js/service/data/dataService'
-    import './../../css/modal.css';
+    import GestaoModal from './gestaoModal.vue';
     import {helpService} from "../../js/service/helpService";
     import {gridUtil} from "../../js/util/gridUtil.js";
     import {i18nService} from "../../js/service/i18nService.js";
@@ -109,6 +93,7 @@
 
 
     export default {
+        components: {GestaoModal},
         props: ['gridsData', 'exportOptions'],
         data: function () {
             return {
@@ -170,7 +155,7 @@
                     obzFormat: this.options.exportOBZ,
                     progressFn: (percent, text) => {
                         MainVue.showProgressBar(percent, {
-                            header: i18nService.t('exportToFile'),
+                            header: i18nService.t('gestaoArquivoGuardandoCopia'),
                             text: text
                         });
                     }
@@ -205,11 +190,19 @@
 </script>
 
 <style scoped>
-.row {
-    margin-bottom: 1em;
-}
-
-.modal-container {
-    min-height: 50vh;
-}
+    .ar-escolha-prancha { display: flex; align-items: flex-start; gap: var(--g-e4); flex-wrap: wrap; }
+    .ar-escolha-campo { flex: 1 1 240px; min-width: 0; }
+    .ar-miniatura {
+        flex: none; width: 128px; aspect-ratio: 4 / 3; border-radius: var(--g-raio);
+        border: 2px solid var(--g-borda); background: var(--g-superficie-2); overflow: hidden;
+        display: grid; place-items: center; color: var(--g-tinta-3);
+    }
+    .ar-miniatura img { width: 100%; height: 100%; object-fit: contain; background: #fff; display: block; }
+    .ar-miniatura .ti { font-size: 40px; }
+    .ar-sub { display: block; font-weight: 400; }
+    .ar-fotos { display: flex; align-items: center; gap: var(--g-e2); margin: var(--g-e2) 0 0; }
+    .ar-fotos .ti { font-size: 20px; color: var(--g-folha-escura); flex: none; }
+    @media (max-width: 600px) {
+        .ar-miniatura { display: none; }
+    }
 </style>

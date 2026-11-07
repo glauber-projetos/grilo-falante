@@ -1,19 +1,15 @@
 <template>
-    <div class="srow">
-        <div class="four columns">
-            <label for="inputAREURI" class="normal-text">{{ $t('areUrl') }}</label>
+    <div class="g-campo">
+        <label for="inputAREURI">{{ $t('gestaoAcaoAreEndereco') }}</label>
+        <div class="gm-campo-linha ta-linha">
+            <input id="inputAREURI" type="text" spellcheck="false" v-model="areURL" @change="fixAreUrl()"/>
+            <button type="button" class="g-btn" @click="testAREUrl()"><i class="ti ti-plug" aria-hidden="true"></i><span>{{ $t('gestaoAcaoTestarConexao') }}</span></button>
         </div>
-        <div class="eight columns">
-            <div class="srow nomargin">
-                <input id="inputAREURI" class="six columns" type="text" v-model="areURL" @change="fixAreUrl()"/>
-                <div class="six columns">
-                    <button @click="testAREUrl()" style="width: 70%"><i class="fas fa-bolt"/> <span>{{ $t('testUrl') }}</span></button>
-                    <span class="spaced" v-show="areConnected === undefined"><i class="fas fa-spinner fa-spin"/></span>
-                    <span class="spaced" v-show="areConnected" style="color: green" :title="$t('urlIsValid')"><i class="fas fa-check"/></span>
-                    <span class="spaced" v-show="areConnected === false" style="color: red" :title="$t('urlIsInvalid')"><i class="fas fa-times"/></span>
-                </div>
-            </div>
-        </div>
+        <span class="ta-estado" role="status" aria-live="polite">
+            <span v-show="areConnected === undefined"><i class="ti ti-loader-2 ta-girar" aria-hidden="true"></i> {{ $t('gestaoAcaoTestando') }}</span>
+            <span v-show="areConnected" class="ta-ok"><i class="ti ti-circle-check" aria-hidden="true"></i> {{ $t('urlIsValid') }}</span>
+            <span v-show="areConnected === false" class="g-erro"><i class="ti ti-circle-x" aria-hidden="true"></i> {{ $t('urlIsInvalid') }}</span>
+        </span>
     </div>
 </template>
 
@@ -57,7 +53,27 @@
 </script>
 
 <style scoped>
-    .normal-text {
-        font-weight: normal;
-    }
+.ta-linha {
+    flex-wrap: wrap;
+}
+.ta-linha > input {
+    min-width: 200px;
+}
+.ta-estado {
+    font-size: var(--g-t-legenda);
+    font-weight: 700;
+}
+.ta-ok {
+    color: var(--g-folha-escura);
+}
+.ta-girar {
+    display: inline-block;
+    animation: ta-girar 1s linear infinite;
+}
+@keyframes ta-girar {
+    to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ta-girar { animation: none; }
+}
 </style>

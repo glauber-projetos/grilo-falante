@@ -1,28 +1,32 @@
 <template>
-    <div>
-        <div class="srow">
-            <label for="selectLang" class="three columns">{{ $t('language') }}</label>
-            <select id="selectLang" class="nine columns" v-model="wordForm.lang">
-                <option :value="undefined">{{ $t('noneSelected') }}</option>
-                <option v-for="lang in langs" :value="lang.code">{{lang | extractTranslationAppLang}} ({{ lang.code }})</option>
-            </select>
-        </div>
-        <div class="srow">
-            <label for="selectTags" class="three columns">{{ $t('tags') }}</label>
-            <multiselect id="selectTags" class="nine columns" v-model="wordForm.tags" :options="TAGS" :multiple="true" :close-on-select="false" :clear-on-select="false" :taggable="true" @tag="addTag(wordForm, $event)" placeholder="Choose tags">
-            </multiselect>
-        </div>
-        <div class="srow">
-            <label for="wordValue" class="three columns">{{ $t('wordFormValue') }}</label>
-            <input id="wordValue" class="three columns" type="text" v-model="wordForm.value" @change="lastValidValue = wordForm.value || lastValidValue" @focusout="lostFocus"/>
-            <label for="pronunciation" class="two columns">{{ $t('pronunciation') }}</label>
-            <div class="four columns">
-                <div class="d-flex">
-                    <input id="pronunciation" :placeholder="$t('optionalBracket')" type="text" v-model="wordForm.pronunciation" class="flex-grow-1 align-self-baseline"/>
-                    <button :disabled="!wordForm.pronunciation && !wordForm.value" @click="speechService.speak(wordForm.pronunciation || wordForm.value)" class="px-1 py-0" style="line-height: inherit;"><i class="fas fa-play"/></button>
+    <div class="ewfo">
+        <div class="gm-grade">
+            <div class="g-campo">
+                <label :for="idBase + 'Valor'">{{ $t('gestaoBotaoFormaPalavra') }}</label>
+                <input :id="idBase + 'Valor'" type="text" v-model="wordForm.value" @change="lastValidValue = wordForm.value || lastValidValue" @focusout="lostFocus" :placeholder="$t('gestaoBotaoFormaExemplo')" autocomplete="off"/>
+            </div>
+            <div class="g-campo">
+                <label :for="idBase + 'Pron'">{{ $t('gestaoBotaoComoFalarOpcional') }}</label>
+                <div class="gm-campo-linha">
+                    <input :id="idBase + 'Pron'" type="text" v-model="wordForm.pronunciation" autocomplete="off"/>
+                    <button type="button" class="g-btn g-btn-icone" :disabled="!wordForm.pronunciation && !wordForm.value" @click="speechService.speak(wordForm.pronunciation || wordForm.value)" :aria-label="$t('gestaoBotaoOuvir')" :title="$t('gestaoBotaoOuvir')">
+                        <i class="ti ti-volume" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
-
+            <div class="g-campo">
+                <label :for="idBase + 'Idioma'">{{ $t('gestaoBotaoIdioma') }}</label>
+                <select :id="idBase + 'Idioma'" v-model="wordForm.lang">
+                    <option :value="undefined">{{ $t('gestaoBotaoQualquerIdioma') }}</option>
+                    <option v-for="lang in langs" :value="lang.code">{{lang | extractTranslationAppLang}} ({{ lang.code }})</option>
+                </select>
+            </div>
+            <div class="g-campo">
+                <label :for="idBase + 'Marcas'">{{ $t('gestaoBotaoMarcas') }}</label>
+                <multiselect :id="idBase + 'Marcas'" v-model="wordForm.tags" :options="TAGS" :multiple="true" :close-on-select="false" :clear-on-select="false" :taggable="true" @tag="addTag(wordForm, $event)" :placeholder="$t('gestaoBotaoEscolhaMarcas')">
+                </multiselect>
+                <span class="g-dica">{{ $t('gestaoBotaoMarcasDica') }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -43,6 +47,12 @@
                 TAGS: JSON.parse(JSON.stringify(constants.WORDFORM_TAGS)),
                 speechService: speechService,
                 lastValidValue: this.value.value
+            }
+        },
+        computed: {
+            idBase() {
+                // só apresentação: ids únicos quando há mais de um formulário na tela
+                return 'ewfo' + this._uid;
             }
         },
         watch: {
@@ -71,4 +81,8 @@
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
+.ewfo .g-campo >>> .multiselect { min-height: var(--g-alvo); font-family: var(--g-fonte); }
+.ewfo .g-campo >>> .multiselect__tags { min-height: var(--g-alvo); border: 2px solid var(--g-borda); border-radius: var(--g-raio); background: var(--g-superficie); }
+.ewfo .g-campo >>> .multiselect__tag { background: var(--g-folha); }
+.ewfo .g-campo >>> .multiselect__option--highlight { background: var(--g-folha); }
 </style>

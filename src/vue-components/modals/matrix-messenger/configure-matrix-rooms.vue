@@ -1,81 +1,60 @@
 <template>
-    <div class="container-fluid px-0">
-        <h2 class="mb-4">{{ $t('TAB_ROOMS') }}</h2>
-        <div class="row d-sm-flex d-none">
-            <strong class="col-4">{{ $t('roomName') }}</strong>
-            <strong class="col-5">{{ $t('members') }}</strong>
-            <strong class="col-3">{{ $t('actions') }}</strong>
-        </div>
-        <ul>
-            <li class="row mb-sm-2 mb-5" v-for="room in rooms">
-                <div class="col-sm-4">
-                    <i v-if="room.hasEncryptionStateEvent()" class="fas fa-lock" style="color: darkgreen" :title="$t('endToEndEncrypted')"></i>
-                    <i v-if="!room.hasEncryptionStateEvent()" class="fas fa-lock-open" style="color: darkred" :title="$t('notEndToEndEncrypted')"></i>
-                    <span class="ms-2 d-sm-inline d-none">{{ room.name }}</span>
-                    <strong class="ms-2 d-sm-none d-inline">{{ room.name }}</strong>
-                </div>
-                <div class="col-sm-5">
-                    <matrix-room-description :room="room" :logged-in-user="loggedInUser"/>
-                </div>
-                <div class="col-sm-3 mt-sm-0 mt-2">
-                    <button class="actionBtn" @click="leaveRoom(room)">
-                        <i v-if="leavingRoom.roomId === room.roomId" class="fas fa-spinner fa-spin"/>
-                        <i v-if="leavingRoom.roomId !== room.roomId" class="fas fa-sign-out-alt"/>
-                        <span>{{ $t('leave') }}</span>
+    <div class="matrix-salas">
+        <section class="gm-secao">
+            <h3><i class="ti ti-users" aria-hidden="true"></i>{{ $t('gestaoMatrixSuasSalas') }}</h3>
+            <p v-if="!rooms || rooms.length === 0" class="g-apoio">{{ $t('gestaoMatrixNenhumaSala') }}</p>
+            <ul class="gm-lista" v-if="rooms && rooms.length > 0">
+                <li v-for="room in rooms">
+                    <div class="gm-lista-texto">
+                        <span class="matrix-sala-nome">
+                            <i v-if="room.hasEncryptionStateEvent()" class="ti ti-lock matrix-cadeado" :title="$t('endToEndEncrypted')" aria-hidden="true"></i>
+                            <i v-if="!room.hasEncryptionStateEvent()" class="ti ti-lock-open matrix-cadeado-aberto" :title="$t('notEndToEndEncrypted')" aria-hidden="true"></i>
+                            <span class="g-oculto-leitor">{{ room.hasEncryptionStateEvent() ? $t('gestaoMatrixProtegida') : $t('gestaoMatrixNaoProtegida') }}:</span>
+                            <span>{{ room.name }}</span>
+                        </span>
+                        <div class="matrix-sala-membros"><matrix-room-description :room="room" :logged-in-user="loggedInUser" :full="true"/></div>
+                    </div>
+                    <button type="button" class="g-btn g-btn-leve" @click="leaveRoom(room)" :aria-label="$t('gestaoMatrixSairSala', [room.name])">
+                        <i v-if="leavingRoom.roomId === room.roomId" class="ti ti-loader-2 matrix-girando" aria-hidden="true"></i>
+                        <i v-if="leavingRoom.roomId !== room.roomId" class="ti ti-door-exit" aria-hidden="true"></i>
+                        <span>{{ $t('gestaoMatrixSairCurto') }}</span>
                     </button>
-                </div>
-            </li>
-        </ul>
-        <h2>{{ $t('newRoom') }}</h2>
-        <div class="row my-4">
-            <label class="col-sm-3" for="newRoomUser">{{ $t('newRoomUser') }}</label>
-            <div class="col-sm-4">
-                <input type="text" class="col-12" id="newRoomUser" v-model="newRoomUser" @input="checkUsername"/>
-            </div>
-            <div class="col-sm-5">
-                <div v-if="checking">
-                    <span>{{ $t("searching") }}</span>
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <div v-if="userExists !== undefined">
-                    <i v-if="userExists" class="fas fa-check"></i>
-                    <i v-if="!userExists" class="fas fa-times"></i>
-                    <i18n v-if="userExists" path="valueExists" tag="span">
-                        <template v-slot:value>
-                            <span>{{ $t('username') }}</span>
-                            "<strong>{{ fullUsername }}</strong>"
-                        </template>
-                    </i18n>
-                    <i18n v-if="!userExists" path="valueNotFound" tag="span">
-                        <template v-slot:value>
-                            <span>{{ $t('username') }}</span>
-                            "<strong>{{ fullUsername }}</strong>"
-                        </template>
-                    </i18n>
+                </li>
+            </ul>
+        </section>
+
+        <form class="gm-secao" @submit.prevent="createRoom">
+            <h3><i class="ti ti-plus" aria-hidden="true"></i>{{ $t('gestaoMatrixNovaSala') }}</h3>
+            <div class="g-campo">
+                <label for="newRoomUser">{{ $t('gestaoMatrixComQuem') }}</label>
+                <input type="text" id="newRoomUser" v-model="newRoomUser" @input="checkUsername" autocomplete="off"/>
+                <div aria-live="polite">
+                    <p v-if="checking" class="g-dica matrix-busca">
+                        <i class="ti ti-loader-2 matrix-girando" aria-hidden="true"></i>{{ $t('gestaoMatrixProcurando') }}
+                    </p>
+                    <p v-if="userExists === true" class="matrix-resultado matrix-ok"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoMatrixAchou', [fullUsername]) }}</p>
+                    <p v-if="userExists === false" class="matrix-resultado g-erro"><i class="ti ti-x" aria-hidden="true"></i>{{ $t('gestaoMatrixNaoAchou', [fullUsername]) }}</p>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <label class="col-sm-3" for="roomName">{{ $t('roomName') }}</label>
-            <div class="col-sm-4">
-                <input type="text" class="col-12" id="roomName" v-model="newRoomName" :placeholder="$t('optionalBracket')"/>
+            <div class="g-campo">
+                <label for="roomName">{{ $t('gestaoMatrixNomeSala') }}</label>
+                <input type="text" id="roomName" v-model="newRoomName"/>
+                <span class="g-dica">{{ $t('gestaoMatrixOpcional') }}</span>
             </div>
-        </div>
-        <div class="row" v-if="canUseEncryption">
-            <div class="col-auto">
+            <label class="g-marcar" v-if="canUseEncryption">
                 <input type="checkbox" id="useEncryption" v-model="newRoomEncrypted"/>
+                <span>{{ $t('gestaoMatrixUsarCripto') }}</span>
+            </label>
+            <div class="matrix-acoes">
+                <button type="submit" class="g-btn g-btn-principal" :disabled="!!createRoomDisabled">
+                    <i v-if="createRoomState === CREATE_ROOM_STATES.LOADING" class="ti ti-loader-2 matrix-girando" aria-hidden="true"></i>
+                    <i v-if="createRoomState !== CREATE_ROOM_STATES.LOADING" class="ti ti-plus" aria-hidden="true"></i>
+                    <span>{{ $t('gestaoMatrixCriar') }}</span>
+                </button>
+                <p v-if="createRoomState === CREATE_ROOM_STATES.ERROR" class="matrix-resultado g-erro" role="alert"><i class="ti ti-x" aria-hidden="true"></i>{{ $t('gestaoMatrixErroCriar') }}</p>
+                <p v-if="createRoomState === CREATE_ROOM_STATES.SUCCESS" class="matrix-resultado matrix-ok" role="status"><i class="ti ti-check" aria-hidden="true"></i>{{ $t('gestaoMatrixCriada') }}</p>
             </div>
-            <label class="col" for="useEncryption">{{ $t('useEndToEndEncryption') }}</label>
-        </div>
-        <div class="mt-4">
-            <button class="me-4" @click="createRoom" :disabled="createRoomDisabled">
-                <i v-if="createRoomState === CREATE_ROOM_STATES.LOADING" class="fas fa-spinner fa-spin"></i>
-                <i v-if="createRoomState !== CREATE_ROOM_STATES.LOADING" class="fas fa-plus"></i>
-                <span>{{ $t('createRoom') }}</span>
-            </button>
-            <span v-if="createRoomState === CREATE_ROOM_STATES.ERROR" style="color: red"><i class="fas fa-times"></i> {{ $t('couldNotCreateRoom') }}!</span>
-            <span v-if="createRoomState === CREATE_ROOM_STATES.SUCCESS" style="color: green"><i class="fas fa-check"></i> {{ $t('successfullyCreatedRoom') }}!</span>
-        </div>
+        </form>
     </div>
 </template>
 
@@ -191,13 +170,16 @@
 </script>
 
 <style scoped>
-.row {
-    margin-bottom: 1em;
-}
-
-.actionBtn {
-    margin: 0;
-    padding: 0.25em;
-    line-height: 1;
-}
+    .matrix-sala-nome { display: flex; align-items: center; gap: var(--g-e2); }
+    .matrix-sala-nome .ti { font-size: 1.3em; flex: none; }
+    .matrix-cadeado { color: var(--g-folha-escura); }
+    .matrix-cadeado-aberto { color: var(--g-perigo); }
+    .matrix-sala-membros { display: block; font-weight: 400; color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
+    .matrix-busca { display: flex; align-items: center; gap: var(--g-e1); margin: 0; }
+    .matrix-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-e3); }
+    .matrix-resultado { display: inline-flex; align-items: center; gap: var(--g-e1); margin: 0; }
+    .matrix-ok { color: var(--g-folha-escura); font-weight: 700; }
+    .matrix-girando { display: inline-block; animation: matrix-girar 1s linear infinite; }
+    @keyframes matrix-girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .matrix-girando { animation: none; } }
 </style>

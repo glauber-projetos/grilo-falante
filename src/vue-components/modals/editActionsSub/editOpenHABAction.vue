@@ -1,112 +1,71 @@
 <template>
-    <div class="container-fluid px-0">
-        <div class="row">
-            <div class="col-12 col-md-4">
-                <label class="normal-text" for="inputOpenHABUri">{{ $t('openHABUrl') }}</label>
+    <div class="oh">
+        <div class="g-campo">
+            <label for="inputOpenHABUri">{{ $t('gestaoAcaoOpenHABEndereco') }}</label>
+            <div class="gm-campo-linha oh-linha">
+                <input id="inputOpenHABUri" v-model="action.openHABUrl" type="text" spellcheck="false" @change="fixOpenHABUrl()"/>
+                <button type="button" class="g-btn" @click="fetchItems()"><i class="ti ti-cloud-download" aria-hidden="true"></i><span>{{ $t('gestaoAcaoOpenHABBuscar') }}</span></button>
             </div>
-            <div class="col-12 col-md-4 mb-2">
-                <input class="col-12" id="inputOpenHABUri" v-model="action.openHABUrl" type="text"
-                       @change="fixOpenHABUrl()">
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="row mb-0">
-                    <div class="col-10">
-                        <button class="col-12" @click="fetchItems()"><i class="fas fa-cloud-download-alt"/>
-                            <span>{{ $t('fetchItems') }}</span></button>
-                    </div>
-                    <span v-show="fetchSuccessful === undefined" class="col"><i class="fas fa-spinner fa-spin"/></span>
-                    <span v-show="fetchSuccessful" class="col" style="color: green"><i class="fas fa-check"/></span>
-                    <span v-show="fetchSuccessful === false" class="col" style="color: red"><i
-                        class="fas fa-times"/></span>
-                </div>
-            </div>
+            <span class="oh-estado" role="status" aria-live="polite">
+                <span v-show="fetchSuccessful === undefined"><i class="ti ti-loader-2 oh-girar" aria-hidden="true"></i> {{ $t('gestaoAcaoTestando') }}</span>
+                <span v-show="fetchSuccessful" class="oh-ok"><i class="ti ti-circle-check" aria-hidden="true"></i> {{ $t('gestaoAcaoOpenHABConectado') }}</span>
+                <span v-show="fetchSuccessful === false" class="g-erro"><i class="ti ti-circle-x" aria-hidden="true"></i> {{ $t('gestaoAcaoOpenHABFalhou') }}</span>
+            </span>
         </div>
         <div v-if="fetchSuccessful">
-            <fieldset role="radiogroup" class="p-0 row" style="border: none;">
-                <legend class="col-12 col-md-4 d-inline" style="float: left">{{ $t('filterByType') }}</legend>
-                <div class="col-12 col-md-8">
-                    <div v-for="type in Object.values(OPENHAB_ITEM_TYPES)" class="d-inline">
-                        <input :id="type" v-model="selectedTypeFilter" :value="type" class="custom-radio" type="radio"
-                               @change="setFirstItem()">
-                        <label :for="type" class="button mr-3 mb-2 normal-text">{{ $t(type) }}</label>
-                    </div>
+            <fieldset role="radiogroup" class="oh-tipos">
+                <legend class="oh-legenda">{{ $t('filterByType') }}</legend>
+                <div class="oh-pilulas">
+                    <span v-for="type in Object.values(OPENHAB_ITEM_TYPES)" :key="type" class="oh-pilula">
+                        <input :id="type" v-model="selectedTypeFilter" :value="type" class="oh-radio" type="radio" name="ohTipo"
+                               @change="setFirstItem()"/>
+                        <label :for="type">{{ $t(type) }}</label>
+                    </span>
                 </div>
             </fieldset>
-            <div class="row">
-                <label class="col-12 col-md-4 normal-text" for="searchItems">{{ $t('searchItem') }}</label>
-                <div class="col-9 col-md-4">
-                    <input class="col-12" id="searchItems" v-model="searchText" @input="setFirstItem()"
-                           :placeholder="$t('placeholder-searchItem')" spellcheck="false" autocomplete="true"
-                           type="text">
-                </div>
-                <div class="col-3">
-                    <button class="py-0 px-3 mb-0" @click="searchText = ''; setFirstItem();"
-                            :title="$t('clearSearchText')"><i class="fas fa-trash"/></button>
-                </div>
-            </div>
-            <div v-if="filteredItems.length > 0">
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label class="normal-text" for="selectItem">{{ $t('selectItem') }}</label>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <select class="col-12" id="selectItem" v-model="selectedItem" @change="updateAction()">
-                            <option v-for="item in filteredItems" :value="item">{{ $t(item.type) }}: {{ item.name }}</option>
-                        </select>
+            <div class="gm-grade">
+                <div class="g-campo">
+                    <label for="searchItems">{{ $t('searchItem') }}</label>
+                    <div class="gm-campo-linha">
+                        <input id="searchItems" v-model="searchText" @input="setFirstItem()"
+                               :placeholder="$t('placeholder-searchItem')" spellcheck="false" autocomplete="true"
+                               type="text"/>
+                        <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="searchText = ''; setFirstItem();"
+                                :title="$t('clearSearchText')" :aria-label="$t('clearSearchText')"><i class="ti ti-x" aria-hidden="true"></i></button>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row" v-if="fetchSuccessful && filteredItems.length === 0">
-            <span class="col-12 col-md-6 offset-md-4">(no items)</span>
-        </div>
-        <div v-if="!fetchSuccessful && action.itemName">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <label :for="action.itemName" class="normal-text">{{ $t('selectedItem') }}</label>
-                </div>
-                <div :id="action.itemName" class="col-12 col-md-8">
-                    {{ $t(action.itemType) }}: {{ action.itemName }}
-                </div>
-            </div>
-        </div>
-        <div v-if="(fetchSuccessful && filteredItems.length > 0) || action.itemName">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <label class="normal-text" for="selectAction">{{ $t('selectAction') }}</label>
-                </div>
-                <div class="col-12 col-md-4 mb-2">
-                    <select id="selectAction" class="col-12" v-model="action.actionType"
-                            @change="action.actionValue = '0'">
-                        <option v-for="ohAction in OPENHAB_TYPES_TO_ACTIONS[action.itemType]" :value="ohAction">
-                            {{ $t(`openHAB.${ohAction}`) }}
-                        </option>
+                <div class="g-campo" v-if="filteredItems.length > 0">
+                    <label for="selectItem">{{ $t('selectItem') }}</label>
+                    <select id="selectItem" v-model="selectedItem" @change="updateAction()">
+                        <option v-for="item in filteredItems" :value="item">{{ $t(item.type) }}: {{ item.name }}</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-4">
-                    <button class="col-12 col-md-10" @click="addAllActionElements"><i class="fas fa-plus"/> {{ $t('createGridElements') }}</button>
-                </div>
             </div>
         </div>
-        <div class="row" v-if="action.actionType === 'CUSTOM_VALUE'">
-            <label class="col-12 col-md-4 normal-text" for="customValue">{{ $t('customValue') }}</label>
-            <div class="col-12 col-md-8">
-                <div class="row m-0">
-                    <div class="col-10 col-sm-11">
-                        <input id="customValue" v-model="action.actionValue" class="col-12" max="100" min="0"
-                               type="range">
-                    </div>
-                    <div class="col-2 col-sm-1">
-                        <span>{{ action.actionValue }}</span>
-                    </div>
-                </div>
-            </div>
+        <p class="gm-vazio oh-vazio" v-if="fetchSuccessful && filteredItems.length === 0">{{ $t('gestaoAcaoOpenHABNada') }}</p>
+        <div class="g-campo" v-if="!fetchSuccessful && action.itemName">
+            <span class="oh-rotulo">{{ $t('selectedItem') }}</span>
+            <span>{{ $t(action.itemType) }}: {{ action.itemName }}</span>
         </div>
-        <div class="row" v-if="action.actionType === 'CUSTOM_COLOR'">
-            <label class="col-12 col-md-4 normal-text" for="customColor">{{ $t('customColor') }}</label>
-            <div class="col-12 col-md-8">
-                <input id="customColor" v-model="action.actionValue" type="color">
+        <div v-if="(fetchSuccessful && filteredItems.length > 0) || action.itemName">
+            <div class="g-campo">
+                <label for="selectAction">{{ $t('selectAction') }}</label>
+                <select id="selectAction" v-model="action.actionType"
+                        @change="action.actionValue = '0'">
+                    <option v-for="ohAction in OPENHAB_TYPES_TO_ACTIONS[action.itemType]" :value="ohAction">
+                        {{ $t(`openHAB.${ohAction}`) }}
+                    </option>
+                </select>
             </div>
+            <div class="g-campo" v-if="action.actionType === 'CUSTOM_VALUE'">
+                <label for="customValue">{{ $t('customValue') }}: {{ action.actionValue }}</label>
+                <input id="customValue" v-model="action.actionValue" max="100" min="0" type="range"/>
+            </div>
+            <div class="g-campo" v-if="action.actionType === 'CUSTOM_COLOR'">
+                <label for="customColor">{{ $t('customColor') }}</label>
+                <input id="customColor" v-model="action.actionValue" type="color"/>
+            </div>
+            <button type="button" class="g-btn" @click="addAllActionElements"><i class="ti ti-plus" aria-hidden="true"></i><span>{{ $t('gestaoAcaoCriarBotoes') }}</span></button>
         </div>
     </div>
 </template>
@@ -238,46 +197,81 @@ export default {
 </script>
 
 <style scoped>
-
-.normal-text {
-    font-weight: normal;
+.oh-linha {
+    flex-wrap: wrap;
 }
-
-.custom-radio {
-    opacity: 0;
-    z-index: -1;
-    position: absolute;
+.oh-linha > input {
+    min-width: 200px;
 }
-
-.custom-radio:checked ~ label {
-    border-width: 0.2em;
-    border-color: #33C3F0;
-    background-color: #cceff9;
+.oh-estado {
+    font-size: var(--g-t-legenda);
+    font-weight: 700;
 }
-
-.button {
+.oh-ok {
+    color: var(--g-folha-escura);
+}
+.oh-girar {
     display: inline-block;
-    padding: 0 5px !important;
-    line-height: unset;
-    width: unset;
-    text-transform: none;
-    box-shadow: none;
-    background-color: white;
-    border: 1px solid #bbbbbb;
-    border-radius: 5px;
+    animation: oh-girar 1s linear infinite;
 }
-
-button {
-    line-height: unset;
+@keyframes oh-girar {
+    to { transform: rotate(360deg); }
 }
-
-.button:hover {
-    background-color: #cceff9;
+@media (prefers-reduced-motion: reduce) {
+    .oh-girar { animation: none; }
+}
+.oh-tipos {
+    border: none;
+    margin: 0 0 var(--g-e4);
+    padding: 0;
+    min-width: 0;
+}
+.oh-legenda, .oh-rotulo {
+    font-weight: 700;
+    font-size: var(--g-t-corpo);
+    margin: 0 0 var(--g-e2);
+    padding: 0;
+}
+.oh-pilulas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--g-e2);
+}
+.oh-pilula {
+    position: relative;
+}
+.oh-radio {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+}
+.oh-pilula label {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--g-alvo);
+    padding: 0 var(--g-e4);
+    margin: 0;
+    border-radius: var(--g-raio-pilula);
+    border: 2px solid var(--g-borda);
+    background: var(--g-superficie);
+    color: var(--g-tinta);
+    font-weight: 700;
     cursor: pointer;
 }
-
-.row {
-    margin-bottom: 1em;
+.oh-pilula label:hover {
+    border-color: var(--g-borda-forte);
 }
-
+.oh-radio:checked + label {
+    background: var(--g-folha);
+    border-color: var(--g-folha);
+    color: #fff;
+}
+.oh-radio:focus-visible + label {
+    box-shadow: var(--g-foco);
+}
+.oh-vazio {
+    padding: var(--g-e3);
+}
 </style>

@@ -1,51 +1,119 @@
 <template>
-    <div class="box">
-        <header class="srow header" role="toolbar" v-show="!propTransferObject">
-            <header-icon class="left"></header-icon>
-            <button tabindex="30" @click="back" :aria-label="$t('editingOff')" class="spaced small left">
-                <i class="fas fa-eye"></i>
-                <span class="hide-mobile">{{ $t('editingOff') }}</span>
-            </button>
-            <button tabindex="33" id="moreButton" :aria-label="$t('more')" class="spaced"><i class="fas fa-ellipsis-v"></i> <span class="hide-mobile">{{ $t('more') }}</span></button>
-            <div class="spaced btn-group">
-                <button tabindex="31" @click="undo" :aria-label="$t('undo')" :disabled="doingUndoRedo|| !undoService.canUndo()" class="small"><i class="fas fa-undo"></i> <span class="hide-mobile">{{ $t('undo') }}</span></button>
-                <button tabindex="32" @click="redo"  :aria-label="$t('redo')" :disabled="doingUndoRedo || !undoService.canRedo()" class="small spaced"><i class="fas fa-redo"></i> <span class="hide-mobile">{{ $t('redo') }}</span></button>
+    <div class="box g-tela edicao-tela">
+        <header class="edicao-barra no-print" role="toolbar" :aria-label="$t('gestaoFerrBarra')" v-show="!propTransferObject">
+            <div class="edicao-nome">
+                <span class="g-pilula edicao-selo"><i class="ti ti-pencil" aria-hidden="true"></i>{{ isEditingGlobalGrid ? $t('gestaoFerrBarraFixa') : $t('gestaoFerrEditando') }}</span>
+                <span class="edicao-nome-texto" v-if="gridData">{{ nomePrancha }}</span>
+            </div>
+            <div class="edicao-ferramentas">
+                <button type="button" class="edicao-ferr edicao-ferr-destaque" @click="newElement(GridElement.ELEMENT_TYPE_NORMAL, false)" :aria-label="$t('gestaoFerrAdicionar')" :title="$t('gestaoFerrAdicionar')">
+                    <i class="ti ti-square-plus" aria-hidden="true"></i><span>{{ $t('gestaoFerrAdicionar') }}</span>
+                </button>
+                <button type="button" class="edicao-ferr" @click="undo" :disabled="doingUndoRedo || !undoService.canUndo()" :aria-label="$t('gestaoFerrDesfazer')" :title="$t('gestaoFerrDesfazer')">
+                    <i class="ti ti-arrow-back-up" aria-hidden="true"></i><span>{{ $t('gestaoFerrDesfazer') }}</span>
+                </button>
+                <button type="button" class="edicao-ferr" @click="redo" :disabled="doingUndoRedo || !undoService.canRedo()" :aria-label="$t('gestaoFerrRefazer')" :title="$t('gestaoFerrRefazer')">
+                    <i class="ti ti-arrow-forward-up" aria-hidden="true"></i><span>{{ $t('gestaoFerrRefazer') }}</span>
+                </button>
+                <button type="button" class="edicao-ferr" @click="abrirCor" :aria-label="$t('gestaoFerrCor')" :title="$t('gestaoFerrCor')" aria-haspopup="dialog">
+                    <i class="ti ti-palette" aria-hidden="true"></i><span>{{ $t('gestaoFerrCor') }}</span>
+                </button>
+                <button type="button" class="edicao-ferr" @click="showGridSettingsModal = true" :aria-label="$t('gestaoFerrLinhasColunas')" :title="$t('gestaoFerrLinhasColunas')" aria-haspopup="dialog">
+                    <i class="ti ti-layout-grid" aria-hidden="true"></i><span>{{ $t('gestaoFerrLinhasColunas') }}</span>
+                </button>
+                <button type="button" class="edicao-ferr" @click="abrirMais" :aria-label="$t('gestaoFerrMais')" :title="$t('gestaoFerrMais')" aria-haspopup="dialog">
+                    <i class="ti ti-dots" aria-hidden="true"></i><span>{{ $t('gestaoFerrMais') }}</span>
+                </button>
+                <button type="button" class="g-btn g-btn-principal edicao-concluir" @click="back" :aria-label="$t('gestaoFerrConcluir')">
+                    <i class="ti ti-check" aria-hidden="true"></i><span>{{ $t('gestaoFerrConcluir') }}</span>
+                </button>
             </div>
         </header>
-        <header class="d-flex align-items-center transfer-props-header" role="toolbar" v-if="propTransferObject">
-            <div class="me-5">
-                <strong class="me-2">
-                    <i class="fas fa-angle-double-right"></i>&nbsp;<span class="d-none d-sm-inline-block"><span>{{ $t('transferProperties') }}</span>:</span>
-                </strong>
-                <span><span>{{ $t('selectTargetElements') }}</span>...</span>
-            </div>
-            <button class="mb-0 me-2" @click="stopPropTransfer" :title="$t('cancel')"><i class="fas fa-times"/> <span class="d-none d-lg-inline-block">{{ $t('cancel') }}</span></button>
-            <button class="mb-0" @click="applyPropTransfer" :title="$t('ok')"><i class="fas fa-check"/> <span class="d-none d-lg-inline-block">{{ $t('ok') }}</span></button>
+
+        <div class="edicao-selecao no-print" v-if="markedElementIds.length > 0 && !propTransferObject" role="toolbar" :aria-label="$t('gestaoFerrEscolhidosBarra')">
+            <span class="edicao-selecao-texto" aria-live="polite">{{ markedElementIds.length === 1 ? $t('gestaoFerrUmEscolhido') : $t('gestaoFerrVariosEscolhidos', [markedElementIds.length]) }}</span>
+            <button type="button" class="g-btn edicao-sel-btn" v-if="markedElementIds.length === 1" @click="editElement()"><i class="ti ti-pencil" aria-hidden="true"></i><span>{{ $t('gestaoEditar') }}</span></button>
+            <button type="button" class="g-btn edicao-sel-btn" @click="abrirCor"><i class="ti ti-palette" aria-hidden="true"></i><span>{{ $t('gestaoFerrCor') }}</span></button>
+            <button type="button" class="g-btn edicao-sel-btn" @click="duplicateElements()"><i class="ti ti-copy" aria-hidden="true"></i><span>{{ $t('gestaoDuplicar') }}</span></button>
+            <button type="button" class="g-btn edicao-sel-btn" @click="hideUnhideElements()"><i class="ti ti-eye-off" aria-hidden="true"></i><span>{{ $t('gestaoFerrEsconder') }}</span></button>
+            <button type="button" class="g-btn g-btn-perigo edicao-sel-btn" @click="removeElements()"><i class="ti ti-trash" aria-hidden="true"></i><span>{{ $t('gestaoApagar') }}</span></button>
+            <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="unmarkAll()" :aria-label="$t('gestaoFerrDesmarcar')" :title="$t('gestaoFerrDesmarcar')"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <p class="edicao-dica no-print" v-else-if="!propTransferObject && gridData">
+            <i class="ti ti-hand-finger" aria-hidden="true"></i><span>{{ $t('gestaoFerrDica') }}</span>
+        </p>
+
+        <header class="edicao-transferir no-print" role="toolbar" v-if="propTransferObject">
+            <i class="ti ti-brush" aria-hidden="true"></i>
+            <span class="edicao-transferir-texto"><strong>{{ $t('gestaoFerrCopiarAparencia') }}</strong> {{ $t('gestaoFerrCopiarAparenciaDica') }}</span>
+            <button type="button" class="g-btn" @click="stopPropTransfer"><i class="ti ti-x" aria-hidden="true"></i><span>{{ $t('gestaoCancelar') }}</span></button>
+            <button type="button" class="g-btn g-btn-principal" @click="applyPropTransfer"><i class="ti ti-check" aria-hidden="true"></i><span>{{ $t('gestaoFerrAplicar') }}</span></button>
         </header>
-        <div>
-            <edit-element v-if="showEditModal" v-bind:edit-element-id-param="editElementId" :undo-service="undoService" :grid-data-id="gridData.id" :new-position="newPosition" @reload="reload" @close="showEditModal = false" @mark="markElement" @actions="(id) => {editElementId = id; showActionsModal = true}"/>
-        </div>
-        <div>
-            <add-multiple-modal v-if="showMultipleModal" v-bind:grid-data="gridData" :undo-service="undoService" @reload="reload" @close="showMultipleModal = false"/>
-        </div>
-        <div>
-            <grid-settings-modal v-if="showGridSettingsModal" :grid-data-param="gridData" :is-global-grid="isEditingGlobalGrid" @reload="reload" @close="showGridSettingsModal = false;" :undo-service="undoService"/>
-        </div>
-        <div>
-            <grid-translate-modal v-if="showTranslateModal" :grid-data-id="gridData.id" @close="showTranslateModal = false" @reload="reload"/>
-        </div>
-        <div>
-            <set-navigation-modal v-if="showNavigateModal" :grid-id="gridData.id" :grid-element-id="editElementId" @close="showNavigateModal = false" @reload="reload"></set-navigation-modal>
-        </div>
-        <div>
-            <transfer-props-modal v-if="showPropTransferModal" :grid-id="gridData.id" :grid-element-id="editElementId" @start="(propTransferObject) => startPropTransfer(propTransferObject)" @close="showPropTransferModal = false"></transfer-props-modal>
-        </div>
-        <div class="srow content" id="contentContainer" v-if="!(metadata && gridData)">
-            <div v-if="!showGrid" class="grid-container grid-mask">
-                <i class="fas fa-4x fa-spinner fa-spin"/>
+
+        <edit-element v-if="showEditModal" v-bind:edit-element-id-param="editElementId" :undo-service="undoService" :grid-data-id="gridData.id" :new-position="newPosition" @reload="reload" @close="showEditModal = false" @mark="markElement" @actions="(id) => {editElementId = id; showActionsModal = true}"/>
+        <add-multiple-modal v-if="showMultipleModal" v-bind:grid-data="gridData" :undo-service="undoService" @reload="reload" @close="showMultipleModal = false"/>
+        <grid-settings-modal v-if="showGridSettingsModal" :grid-data-param="gridData" :is-global-grid="isEditingGlobalGrid" @reload="reload" @close="showGridSettingsModal = false;" :undo-service="undoService"/>
+        <grid-translate-modal v-if="showTranslateModal" :grid-data-id="gridData.id" @close="showTranslateModal = false" @reload="reload"/>
+        <set-navigation-modal v-if="showNavigateModal" :grid-id="gridData.id" :grid-element-id="editElementId" @close="showNavigateModal = false" @reload="reload"></set-navigation-modal>
+        <transfer-props-modal v-if="showPropTransferModal" :grid-id="gridData.id" :grid-element-id="editElementId" @start="(propTransferObject) => startPropTransfer(propTransferObject)" @close="showPropTransferModal = false"></transfer-props-modal>
+
+        <!-- painel "Cor" -->
+        <div v-if="painel === 'cor'" class="edicao-camada" @keydown.esc="fecharPainel">
+            <div class="g-veu" @click="fecharPainel"></div>
+            <div class="g-painel g-tela edicao-painel" role="dialog" aria-modal="true" aria-labelledby="edicaoCorTitulo" ref="painel">
+                <div class="g-painel-alca" aria-hidden="true"></div>
+                <div class="edicao-painel-cabeca">
+                    <h2 id="edicaoCorTitulo"><i class="ti ti-palette" aria-hidden="true"></i>{{ $t('gestaoFerrCor') }}</h2>
+                    <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="fecharPainel" :aria-label="$t('gestaoFechar')"><i class="ti ti-x" aria-hidden="true"></i></button>
+                </div>
+                <div class="gm-abas edicao-cor-alvo" role="tablist">
+                    <button type="button" role="tab" class="gm-aba" :aria-selected="(corAlvo === 'botoes').toString()" @click="corAlvo = 'botoes'" :disabled="corBotoes.length === 0">
+                        <i class="ti ti-square" aria-hidden="true"></i>{{ corBotoes.length === 1 ? $t('gestaoFerrCorBotaoEscolhido') : $t('gestaoFerrCorBotoesEscolhidos', [corBotoes.length]) }}
+                    </button>
+                    <button type="button" role="tab" class="gm-aba" :aria-selected="(corAlvo === 'fundo').toString()" @click="corAlvo = 'fundo'">
+                        <i class="ti ti-background" aria-hidden="true"></i>{{ $t('gestaoFerrCorFundo') }}
+                    </button>
+                </div>
+                <p class="g-dica" v-if="corBotoes.length === 0">{{ $t('gestaoFerrCorDicaEscolher') }}</p>
+                <div class="edicao-cores" role="group" :aria-label="$t('gestaoFerrCorEscolha')">
+                    <button v-for="cor in CORES" :key="cor.valor || 'nenhuma'" type="button" class="edicao-cor" @click="aplicarCor(cor.valor)" :aria-label="$t(cor.nome)" :title="$t(cor.nome)">
+                        <span class="edicao-cor-amostra" :class="{'edicao-cor-nenhuma': !cor.valor}" :style="{background: cor.valor || undefined}" aria-hidden="true"><i v-if="!cor.valor" class="ti ti-ban"></i></span>
+                        <span class="edicao-cor-nome">{{ $t(cor.nome) }}</span>
+                    </button>
+                </div>
+                <div class="g-campo edicao-cor-livre">
+                    <label for="edicaoCorLivre">{{ $t('gestaoFerrCorOutra') }}</label>
+                    <input id="edicaoCorLivre" type="color" v-model="corLivre" @change="aplicarCor(corLivre)"/>
+                </div>
             </div>
         </div>
-        <div class="srow content d-flex" v-if="metadata && gridData" style="min-height: 0">
+
+        <!-- painel "Mais" -->
+        <div v-if="painel === 'mais'" class="edicao-camada" @keydown.esc="fecharPainel">
+            <div class="g-veu" @click="fecharPainel"></div>
+            <div class="g-painel g-tela edicao-painel" role="dialog" aria-modal="true" aria-labelledby="edicaoMaisTitulo" ref="painel">
+                <div class="g-painel-alca" aria-hidden="true"></div>
+                <div class="edicao-painel-cabeca">
+                    <h2 id="edicaoMaisTitulo">{{ $t('gestaoFerrMaisTitulo') }}</h2>
+                    <button type="button" class="g-btn g-btn-leve g-btn-icone" @click="fecharPainel" :aria-label="$t('gestaoFechar')"><i class="ti ti-x" aria-hidden="true"></i></button>
+                </div>
+                <div v-for="grupo in gruposMais" :key="grupo.titulo" class="edicao-grupo">
+                    <h3>{{ $t(grupo.titulo) }}</h3>
+                    <div class="edicao-itens">
+                        <button v-for="item in grupo.itens" :key="item.chave" type="button" class="edicao-item" :class="{'edicao-item-perigo': item.perigo}" :disabled="item.desligado" @click="executarMais(item.chave)">
+                            <i :class="'ti ti-' + item.icone" aria-hidden="true"></i><span>{{ $t(item.nome) }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="contentContainer" v-if="!(metadata && gridData)">
+            <div v-if="!showGrid" class="grid-container grid-mask edicao-carregando" role="status">
+                <i class="ti ti-loader-2" aria-hidden="true"></i><span class="g-oculto-leitor">{{ $t('gestaoCarregando') }}</span>
+            </div>
+        </div>
+        <div class="content d-flex edicao-area" v-if="metadata && gridData" style="min-height: 0">
             <app-grid-display id="grid-container" @changed="handleChange" :grid-data="gridData" :metadata="metadata" :editable="true" @interacted="onInteracted" @interactstart="onInteractStart" @interactend="onInteractEnd"/>
         </div>
     </div>
@@ -89,6 +157,20 @@
 
     let vueApp = null;
 
+    // cores prontas do painel "Cor" (tons claros, combinam com o texto escuro dos botões)
+    const CORES = [
+        {nome: 'gestaoCorAmarelo', valor: '#fff3c4'},
+        {nome: 'gestaoCorVerde', valor: '#d9f7e8'},
+        {nome: 'gestaoCorLaranja', valor: '#ffe1cf'},
+        {nome: 'gestaoCorAzul', valor: '#dcefff'},
+        {nome: 'gestaoCorLilas', valor: '#ece5ff'},
+        {nome: 'gestaoCorVermelho', valor: '#ffd9d9'},
+        {nome: 'gestaoCorRosa', valor: '#ffe0f0'},
+        {nome: 'gestaoCorCinza', valor: '#ececec'},
+        {nome: 'gestaoCorBranco', valor: '#ffffff'},
+        {nome: 'gestaoCorSemCor', valor: null}
+    ];
+
     let vueConfig = {
         props: ['gridId', 'highlightId'],
         data() {
@@ -117,7 +199,13 @@
                 shiftKeyHold: false,
                 ctrlKeyHold: false,
                 usingTouchscreen: false,
-                propTransferObject: null
+                propTransferObject: null,
+                painel: null,
+                corAlvo: 'botoes',
+                corBotoes: [],
+                corLivre: '#ffffff',
+                CORES: CORES,
+                GridElement: GridElement
             }
         },
         components: {
@@ -128,6 +216,60 @@
             GridSettingsModal, EditElement, AddMultipleModal, HeaderIcon
         },
         computed: {
+            nomePrancha() {
+                return this.gridData ? i18nService.getTranslation(this.gridData.label) : '';
+            },
+            gruposMais() {
+                let marcados = this.markedElementIds.length;
+                let cheio = this.gridData ? new GridData({}, this.gridData).isFull() : false;
+                let temEspacoReservado = this.gridData ? !!this.gridData.gridElements.find(e => e.type === GridElement.ELEMENT_TYPE_DYNAMIC_GRID_PLACEHOLDER) : false;
+                let grupos = [];
+                if (marcados > 0) {
+                    let itens = [
+                        {chave: 'CONTEXT_ACTION_COPY', nome: 'gestaoFerrCopiar', icone: 'copy'},
+                        {chave: 'CONTEXT_ACTION_CUT', nome: 'gestaoFerrRecortar', icone: 'cut'}
+                    ];
+                    if (marcados === 1) {
+                        itens.push({chave: 'CONTEXT_PROPERTY_TRANSFER_APPEARANCE', nome: 'gestaoFerrCopiarAparencia', icone: 'brush'});
+                        itens.push({chave: 'CONTEXT_PROPERTY_TRANSFER', nome: 'gestaoFerrCopiarEscolhendo', icone: 'list-check'});
+                        itens.push({chave: 'CONTEXT_GRID_NAVIGATION', nome: 'gestaoFerrQualPrancha', icone: 'arrow-right'});
+                        itens.push({chave: 'CONTEXT_ACTION_DO_ACTION', nome: 'gestaoFerrTestar', icone: 'player-play'});
+                    }
+                    grupos.push({titulo: 'gestaoFerrGrupoEscolhidos', itens: itens});
+                }
+                let novos = [
+                    {chave: 'CONTEXT_NEW_MASS', nome: 'gestaoFerrVarios', icone: 'layout-grid-add'},
+                    {chave: 'CONTEXT_NEW_COLLECT', nome: 'gestaoFerrNovaBarraFrase', icone: 'message-2'},
+                    {chave: 'CONTEXT_NEW_PREDICT', nome: 'gestaoFerrNovaSugestao', icone: 'bulb'},
+                    {chave: 'CONTEXT_NEW_YT_PLAYER', nome: 'gestaoFerrNovoVideo', icone: 'brand-youtube'},
+                    {chave: 'CONTEXT_NEW_LIVE', nome: 'gestaoFerrNovoAoVivo', icone: 'activity'},
+                    {chave: 'CONTEXT_NEW_MATRIX_CONVERSATION', nome: 'gestaoFerrNovaConversa', icone: 'messages'}
+                ];
+                if (this.isEditingGlobalGrid) {
+                    novos.push({chave: 'CONTEXT_NEW_CHILD_PLACEHOLDER', nome: 'gestaoFerrNovoEspacoPrancha', icone: 'layout-board', desligado: temEspacoReservado});
+                }
+                grupos.push({titulo: 'gestaoFerrGrupoNovos', itens: novos});
+                grupos.push({titulo: 'gestaoFerrGrupoCopiar', itens: [
+                    {chave: 'CONTEXT_COPY_ALL', nome: 'gestaoFerrCopiarTodos', icone: 'copy'},
+                    {chave: 'CONTEXT_ACTION_PASTE', nome: 'gestaoFerrColar', icone: 'clipboard'}
+                ]});
+                grupos.push({titulo: 'gestaoFerrGrupoArrumar', itens: [
+                    {chave: 'CONTEXT_LAYOUT_ALL_UP', nome: 'gestaoFerrMoverCima', icone: 'arrow-bar-up'},
+                    {chave: 'CONTEXT_LAYOUT_ALL_DOWN', nome: 'gestaoFerrMoverBaixo', icone: 'arrow-bar-down'},
+                    {chave: 'CONTEXT_LAYOUT_ALL_LEFT', nome: 'gestaoFerrMoverEsquerda', icone: 'arrow-bar-left'},
+                    {chave: 'CONTEXT_LAYOUT_ALL_RIGHT', nome: 'gestaoFerrMoverDireita', icone: 'arrow-bar-right'},
+                    {chave: 'CONTEXT_FILL_EMPTY', nome: 'gestaoFerrPreencher', icone: 'square-plus-2', desligado: cheio},
+                    {chave: 'CONTEXT_LAYOUT_NORMALIZE', nome: 'gestaoFerrArrumarEspacos', icone: 'layout-distribute-horizontal'},
+                    {chave: 'CONTEXT_DELETE_ALL', nome: 'gestaoFerrApagarTodos', icone: 'trash', perigo: true}
+                ]});
+                grupos.push({titulo: 'gestaoFerrGrupoPrancha', itens: [
+                    {chave: 'CONTEXT_SEARCH', nome: 'gestaoFerrProcurar', icone: 'search'},
+                    {chave: 'CONTEXT_GRID_TRANSLATION', nome: 'gestaoFerrTraduzir', icone: 'language'},
+                    this.isEditingGlobalGrid ? {chave: 'CONTEXT_END_EDIT_GLOBAL_GRID', nome: 'gestaoFerrSairBarraFixa', icone: 'layout-navbar'}
+                        : {chave: 'CONTEXT_EDIT_GLOBAL_GRID', nome: 'gestaoFerrEditarBarraFixa', icone: 'layout-navbar'}
+                ]});
+                return grupos;
+            },
             isEditingGlobalGrid() {
                 if (!this.metadata || !this.gridData || !this.metadata.globalGridId) {
                     return false;
@@ -136,6 +278,43 @@
             }
         },
         methods: {
+            abrirPainel(nome) {
+                this.painel = nome;
+                this.$nextTick(() => {
+                    let alvo = this.$refs.painel ? this.$refs.painel.querySelector('.edicao-cor, .edicao-item:not([disabled])') : null;
+                    if (alvo) alvo.focus();
+                });
+            },
+            abrirCor() {
+                this.corBotoes = this.markedElementIds.slice();
+                this.corAlvo = this.corBotoes.length > 0 ? 'botoes' : 'fundo';
+                this.abrirPainel('cor');
+            },
+            abrirMais() {
+                this.abrirPainel('mais');
+            },
+            fecharPainel() {
+                this.painel = null;
+            },
+            async aplicarCor(valor) {
+                if (this.corAlvo === 'botoes' && this.corBotoes.length > 0) {
+                    for (let element of this.getElements(this.corBotoes)) {
+                        element.backgroundColor = valor || null;
+                    }
+                } else {
+                    this.gridData.backgroundColor = valor || null;
+                }
+                this.painel = null;
+                await this.updateGridWithUndo();
+                this.unmarkAll(); // the reload redraws the buttons, so the marks would be lost anyway
+                await this.reload(); // the grid layout keeps its own element copies; reload so the new color shows
+            },
+            executarMais(chave) {
+                this.painel = null;
+                if (this.acaoMenu) {
+                    this.acaoMenu(chave);
+                }
+            },
             configPropTransfer(id) {
                 if (!id && this.markedElementIds.length !== 1) {
                     return;
@@ -819,108 +998,108 @@
 
         let childPlaceholderDisabledFn = () => !!vueApp.gridData.gridElements.find(e => e.type === GridElement.ELEMENT_TYPE_DYNAMIC_GRID_PLACEHOLDER);
         let contextMenuNewGroup = {
-            name: i18nService.t('new'), icon: "fas fa-plus-circle", items: {
-                'CONTEXT_NEW_SINGLE': {name: i18nService.t('newElement'), icon: "fas fa-plus"},
-                'CONTEXT_NEW_MASS': {name: i18nService.t('manyNewElements'), icon: "fas fa-clone"},
+            name: i18nService.t('gestaoFerrGrupoNovos'), icon: "ti ti-circle-plus", items: {
+                'CONTEXT_NEW_SINGLE': {name: i18nService.t('gestaoFerrAdicionar'), icon: "ti ti-square-plus"},
+                'CONTEXT_NEW_MASS': {name: i18nService.t('gestaoFerrVarios'), icon: "ti ti-layout-grid-add"},
                 'CONTEXT_NEW_CHILD_PLACEHOLDER': {
-                    name: i18nService.t('newDynamicGridPlaceholder'),
-                    icon: "fas fa-th",
+                    name: i18nService.t('gestaoFerrNovoEspacoPrancha'),
+                    icon: "ti ti-layout-board",
                     visible: vueApp.isEditingGlobalGrid,
                     disabled: childPlaceholderDisabledFn
                 },
                 'CONTEXT_NEW_COLLECT': {
-                    name: i18nService.t('newCollectElement'),
-                    icon: "fas fa-ellipsis-h"
+                    name: i18nService.t('gestaoFerrNovaBarraFrase'),
+                    icon: "ti ti-message-2"
                 },
                 'CONTEXT_NEW_PREDICT': {
-                    name: i18nService.t('newPredictionElement'),
-                    icon: "fas fa-magic"
+                    name: i18nService.t('gestaoFerrNovaSugestao'),
+                    icon: "ti ti-bulb"
                 },
                 'CONTEXT_NEW_YT_PLAYER': {
-                    name: i18nService.t('newYouTubePlayer'),
-                    icon: "fab fa-youtube"
+                    name: i18nService.t('gestaoFerrNovoVideo'),
+                    icon: "ti ti-brand-youtube"
                 },
                 'CONTEXT_NEW_LIVE': {
-                    name: i18nService.t('newLiveElement'),
-                    icon: "fas fa-star-of-life"
+                    name: i18nService.t('gestaoFerrNovoAoVivo'),
+                    icon: "ti ti-activity"
                 },
                 'CONTEXT_NEW_MATRIX_CONVERSATION': {
-                    name: i18nService.t('newMatrixConversation'),
-                    icon: "fas fa-comments"
+                    name: i18nService.t('gestaoFerrNovaConversa'),
+                    icon: "ti ti-messages"
                 }
             }
         };
 
         var itemsGlobal = {
-            'CONTEXT_NEW_SINGLE': {name: i18nService.t('newElement'), icon: "fas fa-plus"},
-            'CONTEXT_NEW_MASS': {name: i18nService.t('manyNewElements'), icon: "fas fa-clone"},
-            CONTEXT_ACTION_PASTE: {name: i18nService.t('paste'), icon: "far fa-clipboard"},
+            'CONTEXT_NEW_SINGLE': {name: i18nService.t('gestaoFerrAdicionar'), icon: "ti ti-square-plus"},
+            'CONTEXT_NEW_MASS': {name: i18nService.t('gestaoFerrVarios'), icon: "ti ti-layout-grid-add"},
+            CONTEXT_ACTION_PASTE: {name: i18nService.t('gestaoFerrColar'), icon: "ti ti-clipboard"},
             CONTEXT_NEW_GROUP_REDUCED: JSON.parse(JSON.stringify(contextMenuNewGroup))
         };
         itemsGlobal[CONTEXT_NEW_GROUP_REDUCED].items[CONTEXT_NEW_SINGLE].visible = false;
         itemsGlobal[CONTEXT_NEW_GROUP_REDUCED].items[CONTEXT_NEW_MASS].visible = false;
         itemsGlobal[CONTEXT_NEW_GROUP_REDUCED].items[CONTEXT_NEW_CHILD_PLACEHOLDER].disabled = childPlaceholderDisabledFn;
-        itemsGlobal[CONTEXT_NEW_GROUP_REDUCED].name = i18nService.t('newSpecialElement');
+        itemsGlobal[CONTEXT_NEW_GROUP_REDUCED].name = i18nService.t('gestaoFerrGrupoNovos');
 
         let itemsTransferProps = {
-            'CONTEXT_PROPERTY_TRANSFER_ALL': { name: i18nService.t('transferAll'), icon: 'fas fa-angle-double-right' },
-            'CONTEXT_PROPERTY_TRANSFER_APPEARANCE': { name: i18nService.t('transferAppearance'), icon: 'fas fa-angle-double-right' },
-            'CONTEXT_PROPERTY_TRANSFER': { name: i18nService.t('transferCustom'), icon: 'fas fa-angle-double-right' }
+            'CONTEXT_PROPERTY_TRANSFER_ALL': { name: i18nService.t('gestaoFerrCopiarTudo'), icon: "ti ti-brush" },
+            'CONTEXT_PROPERTY_TRANSFER_APPEARANCE': { name: i18nService.t('gestaoFerrCopiarAparencia'), icon: "ti ti-brush" },
+            'CONTEXT_PROPERTY_TRANSFER': { name: i18nService.t('gestaoFerrCopiarEscolhendo'), icon: "ti ti-brush" }
         };
 
         let visibleNormalFn = () => vueApp && vueApp.markedElementIds.length <= 1;
         let visibleTransferPropsFn = () => vueApp && vueApp.markedElementIds.length === 1;
         let itemsElemNormal = {
-            CONTEXT_ACTION_EDIT: {name: i18nService.t('edit'), icon: "fas fa-edit", visible: visibleNormalFn},
-            CONTEXT_ACTION_DELETE: {name: i18nService.t('delete'), icon: "far fa-trash-alt"},
-            CONTEXT_ACTION_DUPLICATE: {name: i18nService.t('clone'), icon: "far fa-clone"},
-            CONTEXT_QUICK_HIDE: { name: i18nService.t('hideUnhide'), icon: 'fas fa-eye-slash' },
-            TRANSFER_PROPS: {name: i18nService.t('transferProperties'), icon: "fas fa-angle-double-right", items: itemsTransferProps, visible: visibleTransferPropsFn},
+            CONTEXT_ACTION_EDIT: {name: i18nService.t('gestaoEditar'), icon: "ti ti-pencil", visible: visibleNormalFn},
+            CONTEXT_ACTION_DELETE: {name: i18nService.t('gestaoApagar'), icon: "ti ti-trash"},
+            CONTEXT_ACTION_DUPLICATE: {name: i18nService.t('gestaoDuplicar'), icon: "ti ti-copy"},
+            CONTEXT_QUICK_HIDE: { name: i18nService.t('gestaoFerrEsconderMostrar'), icon: "ti ti-eye-off" },
+            TRANSFER_PROPS: {name: i18nService.t('gestaoFerrCopiarAparenciaMenu'), icon: "ti ti-brush", items: itemsTransferProps, visible: visibleTransferPropsFn},
             SEP1: "---------",
-            CONTEXT_ACTION_COPY: {name: i18nService.t('copy'), icon: "far fa-copy"},
-            CONTEXT_ACTION_CUT: {name: i18nService.t('cut'), icon: "fas fa-cut"},
-            CONTEXT_ACTION_PASTE: {name: i18nService.t('paste'), icon: "far fa-clipboard"},
+            CONTEXT_ACTION_COPY: {name: i18nService.t('gestaoFerrCopiar'), icon: "ti ti-copy"},
+            CONTEXT_ACTION_CUT: {name: i18nService.t('gestaoFerrRecortar'), icon: "ti ti-cut"},
+            CONTEXT_ACTION_PASTE: {name: i18nService.t('gestaoFerrColar'), icon: "ti ti-clipboard"},
             separator: { "type": "cm_separator", visible: visibleNormalFn},
-            CONTEXT_GRID_NAVIGATION: {name: i18nService.t('navigateToOtherGrid'), icon: "fas fa-arrow-right", visible: visibleNormalFn},
-            CONTEXT_ACTION_DO_ACTION: {name: i18nService.t('doElementAction'), icon: "fas fa-bolt", visible: visibleNormalFn},
+            CONTEXT_GRID_NAVIGATION: {name: i18nService.t('gestaoFerrQualPrancha'), icon: "ti ti-arrow-right", visible: visibleNormalFn},
+            CONTEXT_ACTION_DO_ACTION: {name: i18nService.t('gestaoFerrTestar'), icon: "ti ti-player-play", visible: visibleNormalFn},
         };
 
         let disabledFnFill = () => new GridData({}, vueApp.gridData).isFull();
         let itemsLayout = {
-            name: i18nService.t('layout'), icon: 'fas fa-th-large', items: {
-                'CONTEXT_LAYOUT_ALL_UP': { name: i18nService.t('moveAllUp'), icon: 'fas fa-angle-double-up' },
-                'CONTEXT_LAYOUT_ALL_RIGHT': { name: i18nService.t('moveAllRight'), icon: 'fas fa-angle-double-right' },
-                'CONTEXT_LAYOUT_ALL_DOWN': { name: i18nService.t('moveAllDown'), icon: 'fas fa-angle-double-down' },
-                'CONTEXT_LAYOUT_ALL_LEFT': { name: i18nService.t('moveAllLeft'), icon: 'fas fa-angle-double-left' },
+            name: i18nService.t('gestaoFerrGrupoArrumar'), icon: "ti ti-layout-grid", items: {
+                'CONTEXT_LAYOUT_ALL_UP': { name: i18nService.t('gestaoFerrMoverCima'), icon: "ti ti-arrow-bar-up" },
+                'CONTEXT_LAYOUT_ALL_RIGHT': { name: i18nService.t('gestaoFerrMoverDireita'), icon: "ti ti-brush" },
+                'CONTEXT_LAYOUT_ALL_DOWN': { name: i18nService.t('gestaoFerrMoverBaixo'), icon: "ti ti-arrow-bar-down" },
+                'CONTEXT_LAYOUT_ALL_LEFT': { name: i18nService.t('gestaoFerrMoverEsquerda'), icon: "ti ti-arrow-bar-left" },
                 SEP1: "---------",
-                'CONTEXT_FILL_EMPTY': {name: i18nService.t('fillWithEmptyElements'), icon: "fas fa-fill", disabled: disabledFnFill},
-                'CONTEXT_DELETE_ALL': {name: i18nService.t('deleteAllElements'), icon: "fas fa-minus-circle"},
-                'CONTEXT_LAYOUT_NORMALIZE': { name: i18nService.t('normalizeGridLayout'), icon: 'fas fa-th' }
+                'CONTEXT_FILL_EMPTY': {name: i18nService.t('gestaoFerrPreencher'), icon: "ti ti-square-plus-2", disabled: disabledFnFill},
+                'CONTEXT_DELETE_ALL': {name: i18nService.t('gestaoFerrApagarTodos'), icon: "ti ti-trash"},
+                'CONTEXT_LAYOUT_NORMALIZE': { name: i18nService.t('gestaoFerrArrumarEspacos'), icon: "ti ti-layout-board" }
             }
         };
 
         let visibleFn = () => vueApp.markedElementIds.length >= 1;
         var itemsMoreMenuButton = {
-            "SELECTED_ELEM_ACTIONS": {name: i18nService.t('selectedElementsContextMenu'), icon: "far fa-square", visible: visibleFn, items: itemsElemNormal},
+            "SELECTED_ELEM_ACTIONS": {name: i18nService.t('gestaoFerrGrupoEscolhidos'), icon: "ti ti-square-check", visible: visibleFn, items: itemsElemNormal},
             separator: { "type": "cm_separator", visible: visibleFn},
             CONTEXT_NEW_GROUP: contextMenuNewGroup,
             SEP0: "---------",
-            'CONTEXT_COPY_ALL': {name: i18nService.t('copyAllElements'), icon: "fas fa-copy"},
-            CONTEXT_ACTION_PASTE: {name: i18nService.t('paste'), icon: "far fa-clipboard"},
+            'CONTEXT_COPY_ALL': {name: i18nService.t('gestaoFerrCopiarTodos'), icon: "ti ti-copy"},
+            CONTEXT_ACTION_PASTE: {name: i18nService.t('gestaoFerrColar'), icon: "ti ti-clipboard"},
             SEP1: "---------",
             CONTEXT_GROUP_LAYOUT: itemsLayout,
             'CONTEXT_GRID_SETTINGS': {
-                name: i18nService.t('gridSettings'),
-                icon: "fas fa-expand-arrows-alt"
+                name: i18nService.t('gestaoFerrLinhasColunas'),
+                icon: "ti ti-layout-grid"
             },
             'CONTEXT_GRID_TRANSLATION': {
-                name: i18nService.t('translateGrid'),
-                icon: "fas fa-language"
+                name: i18nService.t('gestaoFerrTraduzir'),
+                icon: "ti ti-language"
             },
-            'CONTEXT_EDIT_GLOBAL_GRID': {name: i18nService.t('editGlobalGrid'), icon: "fas fa-globe", visible: !vueApp.isEditingGlobalGrid},
-            'CONTEXT_END_EDIT_GLOBAL_GRID': {name: i18nService.t('endEditGlobalGrid'), icon: "fas fa-globe", visible: vueApp.isEditingGlobalGrid},
+            'CONTEXT_EDIT_GLOBAL_GRID': {name: i18nService.t('gestaoFerrEditarBarraFixa'), icon: "ti ti-layout-navbar", visible: !vueApp.isEditingGlobalGrid},
+            'CONTEXT_END_EDIT_GLOBAL_GRID': {name: i18nService.t('gestaoFerrSairBarraFixa'), icon: "ti ti-layout-navbar", visible: vueApp.isEditingGlobalGrid},
             SEP2: "---------",
-            'CONTEXT_SEARCH': {name: i18nService.t('searchBtnTitle'), icon: "fas fa-search"},
+            'CONTEXT_SEARCH': {name: i18nService.t('gestaoFerrProcurar'), icon: "ti ti-search"},
         };
 
         let ORIGIN_MORE_BTN = "ORIGIN_MORE_BTN";
@@ -932,7 +1111,7 @@
                 handleContextMenu(key, elementId);
             },
             items: {
-                CONTEXT_ACTION_DELETE: {name: i18nService.t('delete'), icon: "far fa-trash-alt"}
+                CONTEXT_ACTION_DELETE: {name: i18nService.t('gestaoApagar'), icon: "ti ti-trash"}
             },
             zIndex: 100
         });
@@ -956,15 +1135,7 @@
             zIndex: 100
         });
 
-        $.contextMenu({
-            selector: '#moreButton',
-            callback: function (key, options) {
-                handleContextMenu(key, null, ORIGIN_MORE_BTN);
-            },
-            trigger: 'left',
-            items: itemsMoreMenuButton,
-            zIndex: 100
-        });
+        vueApp.acaoMenu = (key) => handleContextMenu(key, null, ORIGIN_MORE_BTN);
 
         function handleContextMenu(key, elementId, origin) {
             elementId = elementId || vueApp.markedElementIds[0];
@@ -1102,10 +1273,175 @@
 </script>
 
 <style scoped>
-header {
-    border: 0;
+.edicao-tela.g-tela { min-height: 0; }
+
+/* barra de ferramentas */
+.edicao-barra {
+    flex: none;
+    display: flex; align-items: center; gap: var(--g-e3); flex-wrap: wrap;
+    padding: var(--g-e2) var(--g-e4);
+    background: var(--g-superficie);
+    border-bottom: 1px solid var(--g-borda);
+    position: relative; z-index: 20;
 }
-.content {
-    outline: 2px solid lightgray;
+.edicao-nome { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; flex: 1 1 160px; }
+.edicao-selo { min-height: 26px; background: var(--g-girassol-claro); color: #4a3b00; }
+.edicao-nome-texto { font-family: var(--g-fonte-titulo); font-weight: 700; font-size: var(--g-t-h3); line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.edicao-ferramentas { display: flex; align-items: center; gap: var(--g-e1); flex-wrap: wrap; justify-content: flex-end; }
+.edicao-ferr {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-width: 64px; min-height: 56px; height: auto; padding: var(--g-e1) var(--g-e2); margin: 0;
+    border: 2px solid transparent; border-radius: var(--g-raio); background: transparent;
+    font-family: var(--g-fonte); font-size: var(--g-t-legenda); font-weight: 700; color: var(--g-tinta);
+    text-transform: none; letter-spacing: 0; line-height: 1.1; white-space: nowrap; cursor: pointer;
 }
+.edicao-ferr .ti { font-size: 25.6px; color: var(--g-folha-escura); }
+.edicao-ferr:hover { background: var(--g-folha-clara); }
+.edicao-ferr:active { transform: scale(0.97); }
+.edicao-ferr:focus-visible { outline: none; box-shadow: var(--g-foco); }
+.edicao-ferr[disabled] { opacity: 0.4; cursor: not-allowed; background: transparent; transform: none; }
+.edicao-ferr-destaque { background: var(--g-folha-clara); border-color: var(--g-folha); }
+.edicao-concluir { margin-left: var(--g-e2); min-height: 56px; }
+/* the old global "header" rules (max-height 40px, floating buttons) do not apply to this bar */
+header.edicao-barra { max-height: none; height: auto; }
+header.edicao-barra div { display: flex; }
+header.edicao-barra button { float: none; height: auto; font-size: var(--g-t-legenda); }
+header.edicao-barra button.edicao-concluir { font-size: var(--g-t-corpo); }
+@media (max-width: 420px) {
+    .edicao-concluir span { display: none; }
+    .edicao-concluir .ti { margin: 0; }
+}
+
+/* faixa dos botões escolhidos / dica */
+.edicao-selecao {
+    flex: none;
+    display: flex; align-items: center; gap: var(--g-e2); flex-wrap: wrap;
+    padding: var(--g-e2) var(--g-e4);
+    background: var(--g-girassol-claro);
+    border-bottom: 1px solid var(--g-borda);
+}
+.edicao-selecao-texto { font-weight: 700; margin-right: auto; }
+.edicao-sel-btn { padding: 0 var(--g-e3); }
+.edicao-dica {
+    flex: none; margin: 0;
+    display: flex; align-items: center; gap: var(--g-e2);
+    padding: var(--g-e2) var(--g-e4);
+    color: var(--g-tinta-2); font-size: var(--g-t-legenda);
+    background: var(--g-fundo);
+}
+.edicao-dica .ti { font-size: 19.2px; color: var(--g-folha-escura); }
+.edicao-transferir {
+    flex: none;
+    display: flex; align-items: center; gap: var(--g-e3); flex-wrap: wrap;
+    padding: var(--g-e2) var(--g-e4);
+    background: var(--g-ceu); color: var(--g-ceu-escuro);
+    border-bottom: 1px solid var(--g-borda);
+}
+.edicao-transferir > .ti { font-size: 25.6px; }
+.edicao-transferir-texto { flex: 1 1 200px; }
+
+.edicao-area { flex: 1 1 auto; position: relative; }
+.edicao-carregando { display: grid; place-items: center; height: 100%; }
+.edicao-carregando .ti { font-size: 48px; color: var(--g-folha); animation: edicao-giro 1s linear infinite; }
+@keyframes edicao-giro { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .edicao-carregando .ti { animation: none; } }
+
+/* painéis (Cor e Mais) */
+.edicao-painel.g-tela { min-height: 0; }
+.edicao-painel-cabeca { display: flex; align-items: center; gap: var(--g-e2); margin-bottom: var(--g-e3); }
+.edicao-painel-cabeca h2 { flex: 1; margin: 0; font-size: var(--g-t-h3); display: flex; align-items: center; gap: var(--g-e2); }
+.edicao-painel-cabeca h2 .ti { color: var(--g-folha-escura); }
+.edicao-cor-alvo { margin-bottom: var(--g-e3); }
+.edicao-cor-alvo .gm-aba[disabled] { opacity: 0.5; cursor: not-allowed; }
+.edicao-cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: var(--g-e2); margin: var(--g-e3) 0 var(--g-e4); }
+.edicao-cor {
+    display: flex; flex-direction: column; align-items: center; gap: var(--g-e1);
+    min-height: 88px; height: auto; margin: 0; padding: var(--g-e2);
+    background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio);
+    font-family: var(--g-fonte); font-size: var(--g-t-legenda); font-weight: 700; color: var(--g-tinta);
+    text-transform: none; letter-spacing: 0; line-height: 1.2; cursor: pointer;
+}
+.edicao-cor:hover { border-color: var(--g-borda-forte); }
+.edicao-cor:focus-visible { outline: none; box-shadow: var(--g-foco); }
+.edicao-cor-amostra { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(38, 59, 28, 0.18); display: grid; place-items: center; }
+.edicao-cor-nenhuma { background: repeating-linear-gradient(45deg, #fff, #fff 6px, var(--g-superficie-2) 6px, var(--g-superficie-2) 12px); color: var(--g-tinta-3); font-size: 20.8px; }
+.edicao-cor-livre { max-width: 240px; }
+.edicao-cor-livre input[type="color"] { width: 100%; min-height: var(--g-alvo); border-radius: var(--g-raio); border: 2px solid var(--g-borda); padding: 4px; background: var(--g-superficie); margin: 0; }
+
+.edicao-grupo { margin-bottom: var(--g-e4); }
+.edicao-grupo h3 { font-size: var(--g-t-corpo); color: var(--g-tinta-2); margin: 0 0 var(--g-e2); }
+.edicao-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--g-e2); }
+.edicao-item {
+    display: flex; align-items: center; gap: var(--g-e3);
+    min-height: var(--g-alvo-g); height: auto; margin: 0; padding: var(--g-e2) var(--g-e4);
+    background: var(--g-superficie); border: 2px solid var(--g-borda); border-radius: var(--g-raio);
+    font-family: var(--g-fonte); font-size: var(--g-t-corpo); font-weight: 700; color: var(--g-tinta);
+    text-transform: none; letter-spacing: 0; text-align: left; line-height: 1.2; white-space: normal; cursor: pointer;
+}
+.edicao-item .ti { font-size: 24px; color: var(--g-folha-escura); flex: none; }
+.edicao-item:hover { border-color: var(--g-borda-forte); background: var(--g-folha-clara); }
+.edicao-item:focus-visible { outline: none; box-shadow: var(--g-foco); }
+.edicao-item[disabled] { opacity: 0.45; cursor: not-allowed; background: var(--g-superficie); }
+.edicao-item-perigo { color: var(--g-perigo); }
+.edicao-item-perigo .ti { color: var(--g-perigo); }
+.edicao-item-perigo:hover { background: var(--g-perigo-claro); border-color: var(--g-perigo); }
+
+/* tablet em pé e celular: só ícones na barra, nome em cima */
+@media (max-width: 900px) {
+    .edicao-ferr { min-width: 52px; }
+}
+@media (max-width: 720px) {
+    .edicao-barra { padding: var(--g-e2); gap: var(--g-e2); }
+    .edicao-nome { flex: 1 1 100%; flex-direction: row; align-items: center; gap: var(--g-e2); }
+    .edicao-nome-texto { font-size: var(--g-t-grande); }
+    .edicao-ferramentas { flex: 1 1 100%; justify-content: space-between; gap: 0; flex-wrap: nowrap; }
+    .edicao-ferr { min-width: 44px; min-height: var(--g-alvo); padding: 2px; flex: 1 1 0; }
+    .edicao-ferr span { display: none; }
+    .edicao-concluir { margin-left: var(--g-e1); padding: 0 var(--g-e3); min-height: var(--g-alvo); flex: none; }
+    .edicao-selecao { padding: var(--g-e2); }
+    .edicao-selecao-texto { flex: 1 1 100%; }
+    .edicao-sel-btn { flex: 1 1 auto; padding: 0 var(--g-e2); }
+    .edicao-sel-btn span { display: none; }
+    .edicao-dica { padding: var(--g-e1) var(--g-e3); }
+    .edicao-itens { grid-template-columns: minmax(0, 1fr); }
+}
+@media print {
+    .no-print { display: none !important; }
+}
+</style>
+
+<style>
+/* menu de toque longo / botão direito (jQuery contextMenu, fica fora do componente) com o visual novo */
+.context-menu-list {
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+    border-radius: 16px;
+    border: 2px solid var(--g-borda, #e6dcc3);
+    box-shadow: 0 1px 2px rgba(38, 59, 28, 0.06), 0 4px 14px rgba(38, 59, 28, 0.08);
+    padding: 6px;
+    min-width: 15em;
+}
+.context-menu-item {
+    border-radius: 10px;
+    padding: 0.7em 1em 0.7em 2.8em;
+    font-size: 16px;
+    color: var(--g-tinta, #263b1c);
+    background: transparent;
+}
+.context-menu-item.context-menu-hover, .context-menu-item.context-menu-visible {
+    background: var(--g-folha-clara, #e4f2dc);
+    color: var(--g-tinta, #263b1c);
+}
+.context-menu-separator { border-bottom: 1px solid var(--g-borda, #e6dcc3); padding: 0; margin: 4px 6px; }
+.context-menu-list .context-menu-item.context-menu-icon { padding-left: 2.8em; }
+.context-menu-icon.context-menu-icon-ti::before {
+    font-family: "tabler-icons-outline" !important;
+    font-size: 1.3em;
+    width: 1.4em;
+    text-align: center;
+    left: 0.4em;
+    color: var(--g-folha-escura, #2f6b1f);
+}
+.context-menu-icon.context-menu-icon-ti.context-menu-hover::before { color: var(--g-folha-escura, #2f6b1f); }
+.context-menu-icon.context-menu-icon-ti.context-menu-disabled::before { color: #bbb; }
+.context-menu-submenu:after { border-color: transparent transparent transparent var(--g-tinta-2, #55594f); }
 </style>

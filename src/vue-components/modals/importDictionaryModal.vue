@@ -1,69 +1,62 @@
 <template>
-    <div class="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-                <div class="modal-container" @keyup.27="$emit('close')">
-                    <a class="inline close-button" href="javascript:void(0);" @click="$emit('close')"><i class="fas fa-times"/></a>
-                    <div class="modal-header">
-                        <h1 name="header">
-                            {{ $t('importDictionary') }}
-                        </h1>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="srow" style="margin-bottom: 3em">
-                            <input type="radio" id="radiopredef" name="importType" :value="c.SELECT_ONLINE" v-model="importType">
-                            <label for="radiopredef">{{ $t('importFromOnlineDictionaries') }}</label><br/>
-                            <input type="radio" id="radiofile" name="importType" :value="c.SELECT_FILE" v-model="importType">
-                            <label for="radiofile">{{ $t('importFromFile') }}</label>
-                        </div>
-                        <div v-show="importType === c.SELECT_ONLINE">
-                            <div class="srow">
-                                <label class="three columns" for="selectDict">{{ $t('selectDictionary') }}</label>
-                                <select id="selectDict" class="nine columns" type="file" v-model="selectedOption" @change="console.log(selectedOption.lang)">
-                                    <option disabled selected hidden :value="null">{{ $t('pleaseSelect') }}</option>
-                                    <option v-for="option in options" :value="option">{{ option.name }}</option>
-                                </select>
-                            </div>
-                            <div class="srow" v-show="selectedOption && selectedOption.type === c.OPTION_TYPE_GITHUB_FREQUENCYWORDS">
-                                <div class="nine columns offset-by-three">
-                                    <span>{{ $t('thanksToHermitDaveForSupplyingDataForThis') }} </span>
-                                    <a href="https://github.com/hermitdave/FrequencyWords" target="_blank">Github.com</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-show="importType === c.SELECT_FILE">
-                            <div class="srow">
-                                <label class="three columns" for="fileInput">{{ $t('selectFile') }}</label>
-                                <input id="fileInput" class="nine columns" type="file" accept=".json" @change="onFileSelect"/>
-                            </div>
-                        </div>
-                        <div v-show="!!error" class="srow" style="color: darkred; margin-top: 2.5em">
-                            <i class="fas fa-exclamation-triangle"/> <span>{{error | translate}}</span>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <div class="button-container srow">
-                            <button class="six columns" @click="$emit('close')" :title="$t('keyboardEsc')">
-                                <i class="fas fa-times"/> <span>{{ $t('cancel') }}</span>
-                            </button>
-                            <button class="six columns" @click="save()" :title="$t('keyboardCtrlEnter')" :disabled="importType === c.SELECT_ONLINE && !selectedOption || importType === c.SELECT_FILE && !selectedFile">
-                                <i class="fas fa-check"/> <span>{{ $t('importDictionary') }}</span> <i class="fas fa-spinner fa-spin" v-show="loading"/>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <gestao-modal :titulo="$t('gestaoPalavrasTrazerTitulo')" :subtitulo="$t('gestaoPalavrasTrazerSubtitulo')" icone="file-import" @close="$emit('close')">
+        <div class="gm-escolhas" role="group" :aria-label="$t('gestaoPalavrasDeOnde')">
+            <button type="button" class="gm-escolha" :aria-pressed="(importType === c.SELECT_ONLINE).toString()" @click="importType = c.SELECT_ONLINE">
+                <i class="ti ti-books" aria-hidden="true"></i>
+                <span>{{ $t('gestaoPalavrasListasProntas') }}</span>
+                <small>{{ $t('gestaoPalavrasListasProntasDica') }}</small>
+            </button>
+            <button type="button" class="gm-escolha" :aria-pressed="(importType === c.SELECT_FILE).toString()" @click="importType = c.SELECT_FILE">
+                <i class="ti ti-file-upload" aria-hidden="true"></i>
+                <span>{{ $t('gestaoPalavrasDeArquivo') }}</span>
+                <small>{{ $t('gestaoPalavrasDeArquivoDica') }}</small>
+            </button>
         </div>
-    </div>
+
+        <div v-show="importType === c.SELECT_ONLINE" class="g-campo">
+            <label for="selectDict">{{ $t('gestaoPalavrasQualLista') }}</label>
+            <select id="selectDict" v-model="selectedOption">
+                <option disabled selected hidden :value="null">{{ $t('gestaoPalavrasEscolhaUma') }}</option>
+                <option v-for="(option, index) in options" :value="option" :key="index">{{ option.name }}</option>
+            </select>
+            <span class="g-dica" v-if="!selectedOption || selectedOption.type !== c.OPTION_TYPE_GITHUB_FREQUENCYWORDS">{{ $t('gestaoPalavrasPortuguesNoApp') }}</span>
+            <span class="g-dica" v-show="selectedOption && selectedOption.type === c.OPTION_TYPE_GITHUB_FREQUENCYWORDS">
+                <i class="ti ti-world" aria-hidden="true"></i> {{ $t('gestaoPalavrasPrecisaInternet') }}
+                {{ $t('thanksToHermitDaveForSupplyingDataForThis') }}
+                <a href="https://github.com/hermitdave/FrequencyWords" target="_blank" rel="noopener">Github.com</a>
+            </span>
+        </div>
+
+        <div v-show="importType === c.SELECT_FILE">
+            <label class="pa-arquivo" for="fileInput" :class="{'pa-arquivo-pronto': !!selectedFile}">
+                <input id="fileInput" class="g-oculto-leitor" type="file" accept=".json" @change="onFileSelect"/>
+                <i :class="selectedFile ? 'ti ti-file-check' : 'ti ti-file-upload'" aria-hidden="true"></i>
+                <span class="pa-arquivo-texto">
+                    <strong>{{ selectedFile ? selectedFile.name : $t('gestaoArquivoTocarParaEscolher') }}</strong>
+                    <small>{{ selectedFile ? $t('gestaoArquivoTrocarArquivo') : $t('gestaoPalavrasArquivoJson') }}</small>
+                </span>
+            </label>
+        </div>
+
+        <div v-show="!!error" class="g-aviso pa-erro" role="alert">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+            <span>{{error | translate}}</span>
+        </div>
+
+        <template #rodape>
+            <button type="button" class="g-btn" @click="$emit('close')" :title="$t('keyboardEsc')">{{ $t('gestaoCancelar') }}</button>
+            <button type="button" class="g-btn g-btn-principal" @click="save()" :disabled="loading || importType === c.SELECT_ONLINE && !selectedOption || importType === c.SELECT_FILE && !selectedFile">
+                <i :class="loading ? 'ti ti-loader-2 pa-girar' : 'ti ti-check'" aria-hidden="true"></i>{{ loading ? $t('gestaoPalavrasTrazendo') : $t('gestaoPalavrasTrazerBotao') }}
+            </button>
+        </template>
+    </gestao-modal>
 </template>
 
 <script>
     import {dataService} from '../../js/service/data/dataService'
     import Predictionary from 'predictionary';
     import {i18nService} from "../../js/service/i18nService";
-    import './../../css/modal.css';
+    import GestaoModal from './gestaoModal.vue';
     import {Dictionary} from "../../js/model/Dictionary.js";
     import {modelUtil} from "../../js/util/modelUtil.js";
 
@@ -77,6 +70,7 @@
     let githubFrequencyWordsURLRaw = 'https://raw.githubusercontent.com/klues/FrequencyWords/master';
 
     export default {
+        components: {GestaoModal},
         props: ['dicts'],
         data: function () {
             return {
@@ -155,7 +149,7 @@
                         dictionaryKey: modelUtil.getNewName(name, existingNames),
                         data: dictData,
                         isDefault: true,
-                        lang: thiz.selectedOption.lang
+                        lang: thiz.selectedOption ? thiz.selectedOption.lang : i18nService.getContentLang()
                     });
                     return dataService.saveDictionary(dict).then(() => {
                         thiz.$emit('reload', dict);
@@ -220,13 +214,22 @@
     }
 </script>
 
-
 <style scoped>
-    .srow {
-        margin-top: 1em;
+    .pa-arquivo {
+        display: flex; align-items: center; gap: var(--g-e4);
+        min-height: 88px; padding: var(--g-e4); margin: 0 0 var(--g-e4);
+        border: 2px dashed var(--g-borda-forte); border-radius: var(--g-raio-g);
+        background: var(--g-superficie); cursor: pointer; font-weight: 400;
     }
-
-    h2 {
-        margin-top: 2em;
-    }
+    .pa-arquivo:hover { border-color: var(--g-folha); }
+    .pa-arquivo:focus-within { box-shadow: var(--g-foco); }
+    .pa-arquivo > .ti { font-size: 36px; color: var(--g-folha-escura); flex: none; }
+    .pa-arquivo-pronto { border-style: solid; border-color: var(--g-folha); background: var(--g-folha-clara); }
+    .pa-arquivo-texto { display: flex; flex-direction: column; min-width: 0; }
+    .pa-arquivo-texto strong { font-size: var(--g-t-grande); overflow-wrap: anywhere; }
+    .pa-arquivo-texto small { color: var(--g-tinta-2); font-size: var(--g-t-legenda); }
+    .pa-erro { background: var(--g-perigo-claro); color: var(--g-perigo); font-weight: 700; }
+    .pa-girar { animation: pa-giro 1s linear infinite; }
+    @keyframes pa-giro { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .pa-girar { animation: none; } }
 </style>

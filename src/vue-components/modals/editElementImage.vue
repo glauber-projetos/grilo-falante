@@ -1,145 +1,155 @@
 <template>
-    <div @dragenter="preventDefault" @dragover="preventDefault" @drop="imageDropped">
-        <div class="srow">
-            <label for="inputImg" class="two columns">{{ $t('image') }}</label>
-            <div class="ten columns">
-                <div class="row gx-3">
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <button onclick="document.getElementById('inputImg').click();" class="u-full-width file-input">
-                            <input type="file" id="inputImg" @change="changedImg($event.target)" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"/>
-                            <span><i class="fas fa-file-upload"/> <span>{{ $t('chooseFile') }}</span></span>
+    <div class="ei" @dragenter="preventDefault" @dragover="preventDefault" @drop="imageDropped">
+        <input type="file" id="inputImg" class="ei-arquivo" tabindex="-1" aria-hidden="true" @change="changedImg($event.target)" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"/>
+        <input type="file" id="inputImgCamera" class="ei-arquivo" tabindex="-1" aria-hidden="true" @change="changedImg($event.target)" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif" capture="environment"/>
+
+        <section class="gm-secao">
+            <h3><i class="ti ti-photo" aria-hidden="true"></i>{{ $t('gestaoBotaoImagemAtual') }}</h3>
+
+            <image-cropper v-if="hasImage && showCropper"
+                           :src="gridElement.image.data || gridElement.image.url"
+                           :cell-aspect="cellAspect"
+                           :output-width="cropOutputWidth"
+                           @apply="onCropApplied" @cancel="showCropper = false" @error="showCropper = false"/>
+
+            <div v-else class="ei-atual">
+                <div class="ei-previa-area">
+                    <div v-if="hasImage" class="img-preview-cell" :style="{'aspect-ratio': String(cellAspect)}">
+                        <img id="imgPreview" :class="{'cover': previewCover}" :src="gridElement.image.data || gridElement.image.url" :alt="$t('gestaoBotaoImagemAtual')"/>
+                    </div>
+                    <div v-else class="ei-sem-imagem">
+                        <i class="ti ti-photo-off" aria-hidden="true"></i>
+                        <span>{{ $t('gestaoBotaoSemImagem') }}</span>
+                        <span class="ei-arraste">{{ $t('gestaoBotaoArrasteAqui') }}</span>
+                    </div>
+                    <p v-if="hasImage && gridElement.image.author" class="g-dica ei-autor">
+                        {{ $t('gestaoBotaoFiguraDe') }} <a :href="gridElement.image.authorURL" target="_blank" rel="noopener">{{ gridElement.image.author }}</a>
+                    </p>
+                </div>
+
+                <div class="ei-acoes">
+                    <button type="button" class="g-btn g-btn-grande g-btn-bloco take-photo" @click="abrirArquivo('inputImgCamera')">
+                        <i class="ti ti-camera" aria-hidden="true"></i>{{ $t('gestaoBotaoTirarFoto') }}
+                    </button>
+                    <button type="button" class="g-btn g-btn-grande g-btn-bloco" @click="abrirArquivo('inputImg')">
+                        <i class="ti ti-upload" aria-hidden="true"></i>{{ $t('gestaoBotaoEscolherAparelho') }}
+                    </button>
+                    <button type="button" class="g-btn g-btn-grande g-btn-bloco" @click="focarBusca()">
+                        <i class="ti ti-photo-search" aria-hidden="true"></i>{{ $t('gestaoBotaoProcurarFiguraBanco') }}
+                    </button>
+                    <template v-if="hasImage">
+                        <button v-if="canCrop" type="button" class="g-btn g-btn-bloco" @click="showCropper = true">
+                            <i class="ti ti-crop" aria-hidden="true"></i>{{ $t('gestaoBotaoEnquadrar') }}
                         </button>
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3 take-photo">
-                        <button onclick="document.getElementById('inputImgCamera').click();" class="u-full-width file-input">
-                            <input type="file" id="inputImgCamera" @change="changedImg($event.target)" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif" capture="environment"/>
-                            <span><i class="fas fa-camera"/> <span>{{ $t('takePhoto') }}</span></span>
+                        <div class="g-campo ei-encaixe">
+                            <label for="imageFit">{{ $t('gestaoBotaoComoCabe') }}</label>
+                            <select id="imageFit" :value="gridElement.image.fit || ''" @change="$set(gridElement.image, 'fit', $event.target.value)">
+                                <option value="">{{ $t('gestaoBotaoCabeAutomatico') }}</option>
+                                <option :value="GridImage.FIT_COVER">{{ $t('gestaoBotaoCabePreencher') }}</option>
+                                <option :value="GridImage.FIT_CONTAIN">{{ $t('gestaoBotaoCabeInteira') }}</option>
+                            </select>
+                        </div>
+                        <button type="button" class="g-btn g-btn-perigo g-btn-bloco" @click="clearImage">
+                            <i class="ti ti-trash" aria-hidden="true"></i>{{ $t('gestaoBotaoTirarImagem') }}
                         </button>
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <button class="u-full-width" @click="searchText = gridElement.label[i18nService.getContentLang()]; searchInput(0);">
-                            <i class="fas fa-search"></i>
-                            <span>{{ $t('searchByLabel') }}</span>
-                        </button>
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3" v-show="hasImage">
-                        <button class="u-full-width" @click="clearImage"><i class="fas fa-times"/> <span>{{ $t('clearImage') }}</span></button>
-                    </div>
+                    </template>
+                    <button type="button" class="g-btn g-btn-leve g-btn-bloco" @click="pasteImage()">
+                        <i class="ti ti-clipboard" aria-hidden="true"></i>{{ $t('gestaoBotaoColarImagem') }}
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="srow d-flex align-items-center">
-            <div class="offset-by-two five columns">
-                <div class="drop-placeholder" v-show="!hasImage">
-                    <span class="show-mobile"><i class="fas fa-image"/> <span>{{ $t('noImageChosen') }}</span></span>
-                    <span class="hide-mobile"><i class="fas fa-arrow-down"/> <span>{{ $t('dropImageHere') }}</span></span>
-                    <button @click="pasteImage()" :title="$t('pasteFromClipboard')" class="paste-btn"><i class="far fa-clipboard"/></button>
+        </section>
+
+        <section class="gm-secao">
+            <h3><i class="ti ti-photo-search" aria-hidden="true"></i>{{ $t('gestaoBotaoProcurarFiguraBanco') }}</h3>
+            <div class="g-campo">
+                <label for="inputSearch">{{ $t('gestaoBotaoBuscarQual') }}</label>
+                <div class="gm-campo-linha">
+                    <input id="inputSearch" ref="busca" type="search" v-focus v-model="searchText" @input="searchInput(500, $event)" :placeholder="$t('gestaoBotaoBuscarExemplo')" autocomplete="off"/>
+                    <button type="button" class="g-btn g-btn-icone" @click="clearSearch" :aria-label="$t('gestaoBotaoLimparBusca')" :title="$t('gestaoBotaoLimparBusca')">
+                        <i class="ti ti-x" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <image-cropper v-if="hasImage && showCropper"
-                               :src="gridElement.image.data || gridElement.image.url"
-                               :cell-aspect="cellAspect"
-                               :output-width="cropOutputWidth"
-                               @apply="onCropApplied" @cancel="showCropper = false" @error="showCropper = false"/>
-                <div v-if="hasImage && !showCropper" class="img-preview-wrapper">
-                    <div class="img-preview-cell" :style="{'aspect-ratio': String(cellAspect)}">
-                        <img id="imgPreview" :class="{'cover': previewCover}" :src="gridElement.image.data || gridElement.image.url"/>
+                <span class="g-dica">{{ $t('gestaoBotaoBuscarDica', [searchProvider ? searchProvider.name : 'ARASAAC']) }}</span>
+            </div>
+            <button v-if="gridElement.label[i18nService.getContentLang()]" type="button" class="g-btn ei-pelo-texto" @click="searchText = gridElement.label[i18nService.getContentLang()]; searchInput(0);">
+                <i class="ti ti-search" aria-hidden="true"></i>{{ $t('gestaoBotaoBuscarPeloTexto', [gridElement.label[i18nService.getContentLang()]]) }}
+            </button>
+
+            <ul v-if="searchResults && searchResults.length > 0" class="ei-resultados" :aria-label="$t('gestaoBotaoResultados')">
+                <template v-for="(imgElement, index) in searchResults"><li v-if="imgElement.url" :key="index">
+                    <button type="button" class="ei-figura" :aria-pressed="(gridElement.image.url === imgElement.url).toString()"
+                            :aria-label="$t('gestaoBotaoUsarFigura', [index + 1, imgElement.author || ''])" :title="$t('byAuthor', [imgElement.author])"
+                            @click="gridElement.image = imgElement;">
+                        <img :src="imgElement.url" alt="" loading="lazy"/>
+                        <i v-if="gridElement.image.url === imgElement.url" class="ti ti-check ei-escolhida" aria-hidden="true"></i>
+                    </button>
+                </li></template>
+                <li v-show="hasNextChunk">
+                    <button type="button" class="ei-figura ei-mais" @click="searchMore">
+                        <i class="ti ti-plus" aria-hidden="true"></i><span>{{ $t('gestaoBotaoMostrarMais') }}</span>
+                    </button>
+                </li>
+            </ul>
+            <p v-show="searchLoading" class="ei-estado" role="status"><i class="ti ti-loader-2 ei-gira" aria-hidden="true"></i>{{ $t('gestaoBotaoProcurando') }}</p>
+            <p v-show="searchError" class="g-aviso" role="alert"><i class="ti ti-wifi-off" aria-hidden="true"></i><span>{{ $t('gestaoBotaoBuscaFalhou') }}</span></p>
+            <div v-show="!searchError && !searchLoading && searchResults && searchResults.length === 0" class="ei-nada">
+                <img src="app/img/grilo/mascote/grilo-duvida.webp" alt="" aria-hidden="true" class="ei-nada-grilo"/>
+                <p>{{ $t('gestaoBotaoNadaEncontrado') }}</p>
+            </div>
+        </section>
+
+        <details class="gm-avancado" v-if="searchProvider">
+            <summary>{{ $t('gestaoMaisOpcoes') }}</summary>
+            <div class="gm-avancado-corpo">
+                <div class="gm-grade">
+                    <div class="g-campo">
+                        <label for="searchProvider">{{ $t('gestaoBotaoBancoFiguras') }}</label>
+                        <select id="searchProvider" v-model="searchProvider" @change="searchInput(0); localStorageService.save(EDIT_ELEM_SELECTED_SEARCH_PROVIDER, searchProvider.name)">
+                            <option v-for="provider in searchProviders" :value="provider">{{provider.name}}</option>
+                        </select>
+                        <a class="g-dica" :href="searchProvider.url" target="_blank" rel="noopener">{{ $t('gestaoBotaoSobreBanco', [searchProvider.name]) }} <i class="ti ti-external-link" aria-hidden="true"></i></a>
                     </div>
-                    <div class="img-framing-controls">
-                        <button v-if="canCrop" class="u-full-width" @click="showCropper = true"><i class="fas fa-crop-alt"/> <span>{{ $t('cropImage') }}</span></button>
-                        <label for="imageFit">{{ $t('imageFit') }}</label>
-                        <select id="imageFit" class="u-full-width" :value="gridElement.image.fit || ''" @change="$set(gridElement.image, 'fit', $event.target.value)">
-                            <option value="">{{ $t('imageFitAuto') }}</option>
-                            <option :value="GridImage.FIT_COVER">{{ $t('imageFitCover') }}</option>
-                            <option :value="GridImage.FIT_CONTAIN">{{ $t('imageFitContain') }}</option>
+                    <div class="g-campo" v-if="searchProvider.searchLangs">
+                        <label for="searchLang">{{ $t('gestaoBotaoIdiomaBusca') }}</label>
+                        <select id="searchLang" v-model="searchLang" @change="searchInput(0); localStorageService.saveJSON(EDIT_ELEM_SEARCH_LANG_PREFIX + searchProvider.name, searchLang)">
+                            <option :value="null">{{ $t('gestaoBotaoIdiomaAtual') }}</option>
+                            <option v-for="value in searchProvider.searchLangs" :value="value">{{ $t('lang.' + value) }}</option>
                         </select>
                     </div>
                 </div>
-                <div v-if="gridElement.image.author">
-                    {{ $t('by') }} <a :href="gridElement.image.authorURL" target="_blank">{{gridElement.image.author}}</a>
-                </div>
-            </div>
-            <div class="four columns hide-mobile" v-show="hasImage">
-                <div class="drop-placeholder">
-                  <span><i class="fas fa-arrow-down"/> <span>{{ $t('dropNewImageHere') }}</span></span>
-                  <button @click="pasteImage()" :title="$t('pasteFromClipboard')" class="paste-btn"><i class="far fa-clipboard"/></button>
-                </div>
-            </div>
-        </div>
-        <div class="srow">
-            <label for="inputSearch" class="two columns">{{ $t('imageSearch') }}</label>
-            <div class="five columns">
-                <input id="inputSearch" type="text" v-focus v-model="searchText" @input="searchInput(500, $event)" :placeholder="'SEARCH_IMAGE_PLACEHOLDER' | translate"/>
-                <button @click="clearSearch" :aria-label="$t('clear')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="four columns" v-if="searchProvider">
-                <label for="searchProvider">{{ $t('searchProvider') }}</label>
-                <select id="searchProvider" v-model="searchProvider" @change="searchInput(0); localStorageService.save(EDIT_ELEM_SELECTED_SEARCH_PROVIDER, searchProvider.name)">
-                    <option v-for="provider in searchProviders" :value="provider">{{provider.name}}</option>
-                </select>
-                <a :href="searchProvider.url" target="_blank">{{ $t('moreInfo') }}</a>
-            </div>
-        </div>
-        <div class="srow" v-if="searchProvider && (searchProvider.options || searchProvider.searchLangs)">
-            <accordion class="offset-by-two ten columns" :acc-label="$t('settingsForImageSearch')" acc-label-type="span" acc-background-color="white">
-                <div class="srow">
-                    <label class="three columns" for="searchLang">{{$t('searchLang')}}</label>
-                    <select class="five columns" id="searchLang" v-model="searchLang" @change="searchInput(0); localStorageService.saveJSON(EDIT_ELEM_SEARCH_LANG_PREFIX + searchProvider.name, searchLang)">
-                        <option :value="null">{{ $t('automaticCurrentLanguage') }}</option>
-                        <option v-for="value in searchProvider.searchLangs" :value="value">{{ $t('lang.' + value) }}</option>
-                    </select>
-                </div>
                 <div v-for="option in searchProvider.options">
-                    <div class="srow" v-if="option.type === constants.OPTION_TYPES.BOOLEAN">
+                    <label class="g-marcar" v-if="option.type === constants.OPTION_TYPES.BOOLEAN">
                         <input :id="searchProvider.name + option.name" type="checkbox" v-model="option.value" @input="searchInput(0)"/>
+                        <span>{{$t(searchProvider.name + option.name)}}</span>
+                    </label>
+                    <div class="g-campo" v-if="option.type === constants.OPTION_TYPES.COLOR">
                         <label :for="searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</label>
+                        <div class="gm-campo-linha">
+                            <input :id="searchProvider.name + option.name" type="color" v-model="option.value" @input="searchInput(0)"/>
+                            <button type="button" class="g-btn" :disabled="!option.value" @click="option.value = undefined; searchInput(0);">{{ $t('gestaoBotaoSemCor') }}</button>
+                        </div>
+                        <span v-if="!option.value" class="g-dica">{{ $t('gestaoBotaoAgoraSemCor') }}</span>
                     </div>
-                    <div class="srow" v-if="option.type === constants.OPTION_TYPES.COLOR">
-                        <label class="three columns" :for="searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</label>
-                        <span class="two columns" v-if="!option.value">(transparent)</span>
-                        <input ref="colorInput" :class="option.value ? 'two columns' : ''" :style="!option.value ? 'height: 1px; width: 1px; opacity: 0' : ''" :id="searchProvider.name + option.name" type="color" v-model="option.value" @input="searchInput(0)"/>
-                        <input v-if="option.value" aria-hidden="true" disabled="true" :style="'height: 1px; width: 1px; opacity: 0'"/> <!-- just for styling reasons in order to keep position of other elements-->
-                        <button class="mx-2" @click="$refs.colorInput[0].click()">{{ $t('chooseColor') }}</button>
-                        <button class="mx-2" :disabled="!option.value" @click="option.value = undefined; searchInput(0);">{{$t('clear')}}</button>
-                    </div>
-                    <div class="srow" v-if="option.type === constants.OPTION_TYPES.SELECT">
-                        <label class="three columns" :for="searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</label>
-                        <select class="three columns" :id="searchProvider.name + option.name" v-model="option.value" @change="searchInput(0)">
-                            <option :value="undefined">{{ $t('noneSelected') }}</option>
+                    <div class="g-campo" v-if="option.type === constants.OPTION_TYPES.SELECT">
+                        <label :for="searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</label>
+                        <select :id="searchProvider.name + option.name" v-model="option.value" @change="searchInput(0)">
+                            <option :value="undefined">{{ $t('gestaoBotaoNenhum') }}</option>
                             <option v-for="value in option.options" :value="value">{{ $t(value) }}</option>
                         </select>
                     </div>
-                    <div class="srow" v-if="option.type === constants.OPTION_TYPES.SELECT_COLORS">
-                        <label class="three columns" :for="searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</label>
-                        <div class="nine columns colorSelector">
-                            <div class="inline">
-                                <button :aria-label="$t('noneSelected')" @click="option.value = undefined; afterColorChange(); searchInput(0);" :aria-selected="option.value === undefined">{{$t('noneSelected')}}</button>
-                            </div>
-                            <div v-for="(color, index) in option.colors" class="inline">
-                                <button :aria-label="option.options[index]" :title="option.colors[index]" @click="option.value = option.options[index]; afterColorChange(); searchInput(0);" :aria-selected="option.options[index] === option.value" :style="`background-color: ${color};`"></button>
-                            </div>
+                    <div class="g-campo" v-if="option.type === constants.OPTION_TYPES.SELECT_COLORS">
+                        <span class="ei-rotulo" :id="'rot-' + searchProvider.name + option.name">{{$t(searchProvider.name + option.name)}}</span>
+                        <div class="ei-cores" role="group" :aria-labelledby="'rot-' + searchProvider.name + option.name">
+                            <button type="button" class="g-btn ei-cor-nenhuma" :aria-pressed="(option.value === undefined).toString()" @click="option.value = undefined; afterColorChange(); searchInput(0);">{{ $t('gestaoBotaoNenhum') }}</button>
+                            <button v-for="(color, index) in option.colors" type="button" class="ei-cor" :aria-label="option.options[index]" :title="option.colors[index]"
+                                    :aria-pressed="(option.options[index] === option.value).toString()" :style="`background-color: ${color};`"
+                                    @click="option.value = option.options[index]; afterColorChange(); searchInput(0);"></button>
                         </div>
                     </div>
                 </div>
-            </accordion>
-        </div>
-        <div class="srow">
-            <div class="offset-by-two ten columns">
-                <div v-for="imgElement in searchResults" class="inline">
-                    <img v-if="imgElement.url" :src="imgElement.url" @click="gridElement.image = imgElement;" :title="$t('byAuthor', [imgElement.author])" width="60" height="60" class="inline img-result" role="button"/>
-                </div>
-                <div class="inline" v-show="searchResults && searchResults.length > 0 && hasNextChunk">
-                    <button @click="searchMore" style="height: 60px; margin: 0 0 0 0.5em;; padding: 0.7em; float: left">
-                        <i class="fas fa-plus"></i>
-                        <span>{{ $t('more') }}</span>
-                    </button>
-                </div>
-                <span v-show="searchLoading"><i class="fas fa-spinner fa-spin"></i> <span>{{ $t('searching') }}</span></span>
-                <span v-show="searchError"><i class="fas fa-times"></i> <span>{{ $t('searchFailedMaybeNotConnectedToInternet') }}</span></span>
-                <span v-show="!searchError && !searchLoading && searchResults && searchResults.length === 0">
-                                    <span><b>{{ $t('noSearchResults') }}</b></span>
-                                </span>
             </div>
-        </div>
+        </details>
     </div>
 </template>
 
@@ -149,7 +159,6 @@
     import {helpService} from "../../js/service/helpService";
     import {util} from "../../js/util/util";
     import {constants} from "../../js/util/constants.js";
-    import Accordion from "../components/accordion.vue";
     import ImageCropper from "../components/imageCropper.vue";
     import {dataService} from "../../js/service/data/dataService";
     import {openSymbolsService} from "../../js/service/pictograms/openSymbolsService.js";
@@ -164,7 +173,7 @@
 
     export default {
         props: ['gridElement', 'gridData', 'imageSearch'],
-        components: {Accordion, ImageCropper},
+        components: {ImageCropper},
         computed: {
             hasImage: function () {
                 return this.gridElement && this.gridElement.image && (this.gridElement.image.data || this.gridElement.image.url);
@@ -294,6 +303,24 @@
             clearImage() {
                 this.gridElement.image = JSON.parse(JSON.stringify(new GridImage()));
             },
+            abrirArquivo(id) {
+                // só apresentação: abre o seletor de arquivo/câmera escondido
+                let el = document.getElementById(id);
+                if (el) el.click();
+            },
+            focarBusca() {
+                // só apresentação: leva até o campo de busca (e já procura pelo texto do botão, se ainda não houver busca)
+                let texto = this.gridElement.label && this.gridElement.label[i18nService.getContentLang()];
+                if (!this.searchText && texto) {
+                    this.searchText = texto;
+                    this.searchInput(0);
+                }
+                let campo = this.$refs.busca;
+                if (campo) {
+                    campo.focus();
+                    if (campo.scrollIntoView) campo.scrollIntoView({block: 'center'});
+                }
+            },
             preventDefault(event) {
                 event.preventDefault();
             },
@@ -383,36 +410,23 @@
 </script>
 
 <style scoped>
-    .drop-placeholder {
-        border: 1px solid lightgray;
-        padding: 1em;
-        margin-top: 2.5em;
-        margin-bottom: 2.5em;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-    }
+    .ei-arquivo { display: none; }
 
-    .paste-btn {
-      padding: 0 0.25em;
-      margin-bottom: 0;
-    }
+    .ei-atual { display: flex; flex-wrap: wrap; gap: var(--g-e5); align-items: flex-start; }
+    .ei-previa-area { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: var(--g-e2); }
+    .ei-acoes { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: var(--g-e2); }
+    .ei-acoes .g-btn { justify-content: flex-start; text-align: left; }
+    .ei-encaixe { margin: var(--g-e1) 0; }
 
-    .img-preview-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1em;
-        align-items: flex-start;
-        margin-top: 1em;
-    }
     .img-preview-cell {
         position: relative;
-        width: 170px;
-        max-height: 260px;
-        border: 1px solid lightgray;
-        border-radius: 8px;
+        width: 100%;
+        max-width: 280px;
+        max-height: 320px;
+        border: 2px solid var(--g-borda);
+        border-radius: var(--g-raio);
         overflow: hidden;
-        background: white;
+        background: var(--g-superficie);
     }
     #imgPreview {
         position: absolute;
@@ -426,40 +440,66 @@
         object-fit: cover;
         object-position: center 30%;
     }
-    .img-framing-controls {
-        flex: 1;
-        min-width: 180px;
+    .ei-sem-imagem {
+        width: 100%; max-width: 280px; aspect-ratio: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--g-e2);
+        border: 2px dashed var(--g-borda-forte); border-radius: var(--g-raio);
+        background: var(--g-superficie-2); color: var(--g-tinta-2); text-align: center; padding: var(--g-e4);
+        font-weight: 700;
     }
+    .ei-sem-imagem .ti { font-size: 48px; color: var(--g-tinta-3); }
+    .ei-arraste { font-weight: 400; font-size: var(--g-t-legenda); }
+    .ei-autor { margin: 0; text-align: center; }
+    .ei-autor a { color: var(--g-folha-escura); }
 
-    .img-result:hover {
-        outline: 2px solid black;
+    .ei-pelo-texto { margin-bottom: var(--g-e4); max-width: 100%; }
+    .ei-resultados {
+        list-style: none; margin: 0 0 var(--g-e3); padding: 0;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: var(--g-e2);
     }
+    .ei-resultados > li { margin: 0; }
+    .ei-figura {
+        position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--g-e1);
+        width: 100%; aspect-ratio: 1; min-height: var(--g-alvo); height: auto;
+        margin: 0; padding: var(--g-e1);
+        border: 2px solid var(--g-borda); border-radius: var(--g-raio-p);
+        background: var(--g-superficie); color: var(--g-folha-escura); cursor: pointer;
+        font-family: var(--g-fonte); font-size: var(--g-t-legenda); font-weight: 700; text-transform: none; letter-spacing: 0; line-height: 1.2;
+    }
+    .ei-figura img { width: 100%; height: 100%; object-fit: contain; }
+    .ei-figura:hover { border-color: var(--g-borda-forte); }
+    .ei-figura[aria-pressed="true"] { border-color: var(--g-folha); border-width: 3px; background: var(--g-folha-clara); }
+    .ei-figura:focus-visible { outline: none; box-shadow: var(--g-foco); }
+    .ei-escolhida {
+        position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%;
+        display: grid; place-items: center; background: var(--g-folha); color: #fff; font-size: 16px;
+    }
+    .ei-mais { background: var(--g-folha-clara); border-style: dashed; }
+    .ei-mais .ti { font-size: 28px; }
+    .ei-nada { display: flex; align-items: center; gap: var(--g-e3); color: var(--g-tinta-2); font-weight: 700; }
+    .ei-nada p { margin: 0; }
+    .ei-nada-grilo { width: 72px; height: auto; flex: none; }
+    .ei-estado { display: flex; align-items: center; gap: var(--g-e2); color: var(--g-tinta-2); font-weight: 700; margin: 0 0 var(--g-e2); }
+    .ei-estado .ti { font-size: 1.4em; }
+    .ei-gira { animation: ei-girar 1s linear infinite; }
+    @keyframes ei-girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .ei-gira { animation: none; } }
 
-    .srow {
-        margin-top: 1em;
+    .ei-rotulo { font-weight: 700; }
+    .ei-cores { display: flex; flex-wrap: wrap; gap: var(--g-e2); }
+    .ei-cor {
+        width: var(--g-alvo); min-width: var(--g-alvo); height: var(--g-alvo); margin: 0; padding: 0;
+        border: 2px solid var(--g-borda-forte); border-radius: var(--g-raio-p); cursor: pointer;
     }
-
-    .colorSelector button[aria-selected="true"] {
-        outline: 5px dashed darkblue;
-    }
-
-    .colorSelector button {
-        margin-right: 0.5em;
-        padding: 0;
-        line-height: 1em;
-        height: 1.5em;
-        width: 3.5em;
-    }
-
-    @media (max-width: 850px) {
-        #inputSearch {
-            width: 80%;
-        }
-    }
+    .ei-cor[aria-pressed="true"], .ei-cor-nenhuma[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--g-superficie), 0 0 0 6px var(--g-folha); }
+    .ei-cor:focus-visible { outline: none; box-shadow: var(--g-foco); }
 
     @media (pointer: fine) {
         .take-photo {
             display: none;
         }
+    }
+    @media (pointer: coarse) {
+        .ei-arraste { display: none; }
     }
 </style>
