@@ -334,3 +334,137 @@ body.gf-reduce-motion .phrase-main {
     transition: none !important;
     transform: none !important;
 }
+
+/* ---------- acessibilidade: alvos de toque, campos e foco ----------
+ * Alvos de toque com 48px ou mais. As células e a barra de frases (#grid-container) ficam de fora:
+ * o tamanho delas vem da prancha.
+ */
+:root {
+    --gf-campo: #6F8274; /* borda de campos: 4,1:1 com branco (WCAG 1.4.11 pede 3:1) */
+}
+
+.button:not(#grid-container *),
+button:not(#grid-container *),
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+select:not(#grid-container *),
+input[type="text"]:not(#grid-container *),
+input[type="password"],
+input[type="number"]:not(#grid-container *),
+input[type="email"],
+input[type="search"]:not(#grid-container *),
+input[type="url"],
+input[type="tel"],
+input[type="date"] {
+    min-height: 48px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    font-family: var(--gf-texto);
+    font-size: 1rem;
+    color: var(--gf-tinta);
+    background-color: #FFFFFF;
+    border: 2px solid var(--gf-campo);
+    border-radius: 10px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--gf-mata);
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 1px;
+}
+
+/* caixas de marcar e opções maiores; o rótulo ao lado também recebe o toque */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin: 0 0.4em 0 0;
+    vertical-align: middle;
+    accent-color: var(--gf-mata);
+    cursor: pointer;
+}
+
+input[type="checkbox"] + label,
+input[type="radio"] + label {
+    padding: 12px 0;
+    cursor: pointer;
+}
+
+input[type="range"] {
+    min-height: 48px;
+    accent-color: var(--gf-mata);
+}
+
+/* foco do teclado sempre visível: anel verde (6,5:1 com branco) */
+:focus-visible:not(#grid-container *) {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 2px;
+}
+
+button:focus-visible:not(#grid-container *) {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: 2px;
+}
+
+/* links que só embrulham um botão: o anel vai no botão */
+a:has(> button):focus-visible {
+    outline: none;
+}
+
+a:focus-visible > button {
+    outline: 3px solid var(--gf-mata);
+    outline-offset: -3px;
+    background-color: var(--gf-folha);
+}
+
+/* botão do menu (três linhas) com área de toque inteira */
+button:has(> .fa-bars) {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+/* barra lateral nas cores do Grilo */
+.hg-sidebar nav button {
+    color: var(--gf-tinta);
+}
+
+.hg-sidebar nav li:hover button,
+.hg-sidebar nav li button:focus,
+.hg-sidebar nav button.selected {
+    background-color: var(--gf-folha);
+}
+
+.hg-sidebar nav button.selected {
+    border: 3px solid var(--gf-mata);
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+a:has(> .fa-bars) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
+    margin: 0.2em 0 0 0.3em !important; /* mesma largura total de antes: o logo não é empurrado */
+}

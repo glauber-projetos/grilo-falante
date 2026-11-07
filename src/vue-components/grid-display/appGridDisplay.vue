@@ -42,6 +42,9 @@ export default {
     },
     methods: {
         recalculate() {
+            if (!this.$refs.mainContainer) {
+                return; // debounced resize after the grid was closed
+            }
             let containerSize = this.$refs.mainContainer.getBoundingClientRect(); // don't use async util.getElementSize since it leads to problems in gridView initializing input methods too early
             let oneElementSize = gridUtil.getOneElementSize(containerSize, this.gridData);
             if (!this.oneElementSize || this.oneElementSize.width !== oneElementSize.width || this.oneElementSize.height !== oneElementSize.height) {
