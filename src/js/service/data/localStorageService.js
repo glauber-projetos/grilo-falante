@@ -14,6 +14,7 @@ let APP_SETTINGS = 'AG_APP_SETTINGS';
 let USER_SETTINGS = 'AG_USER_SETTINGS';
 let CURRENT_TOGGLE_LEVEL_KEY = 'CURRENT_TOGGLE_LEVEL';
 let GRILO_CONTA_KEY = 'GRILO_CONTA';
+let GRILO_CONTA_LIGACOES_KEY = 'GRILO_CONTA_LIGACOES';
 
 let localStorageService = {};
 localStorageService.KEY_CURRENT_TOGGLE_LEVEL = CURRENT_TOGGLE_LEVEL_KEY;
@@ -196,11 +197,8 @@ localStorageService.removeLocalUser = function (username) {
 function forgetAccountChild(username) {
     try {
         let conta = localStorageService.getJSON(GRILO_CONTA_KEY);
-        if (!conta || !conta.criancas) {
-            return;
-        }
         let changed = false;
-        for (let banco of Object.keys(conta.criancas)) {
+        for (let banco of Object.keys((conta && conta.criancas) || {})) {
             if (conta.criancas[banco] && conta.criancas[banco].usuarioLocal === username) {
                 delete conta.criancas[banco];
                 changed = true;
@@ -211,6 +209,23 @@ function forgetAccountChild(username) {
         }
     } catch (e) {
         log.warn('could not update GRILO_CONTA', e);
+    }
+    try {
+        // links kept after signing out (per account key) must not point to a removed profile either
+        let links = localStorageService.getJSON(GRILO_CONTA_LIGACOES_KEY);
+        if (!links) {
+            return;
+        }
+        for (let key of Object.keys(links)) {
+            for (let banco of Object.keys(links[key] || {})) {
+                if (links[key][banco] && links[key][banco].usuarioLocal === username) {
+                    delete links[key][banco];
+                }
+            }
+        }
+        localStorageService.saveJSON(GRILO_CONTA_LIGACOES_KEY, links);
+    } catch (e) {
+        log.warn('could not update GRILO_CONTA_LIGACOES', e);
     }
 }
 

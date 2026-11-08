@@ -17,11 +17,17 @@ import $ from '../externals/jquery.js';
 import { constants } from '../util/constants';
 
 const CHAVE = 'GRILO_CONTA';
+// banco -> perfil local de cada conta que já saiu deste aparelho, por key do servidor:
+// GRILO_CONTA_LIGACOES = { <key>: { <banco>: { usuarioLocal, nome, papel, url } } }
+// Sobrevive a sair(): quem entra de novo com a MESMA conta reaproveita as cópias locais (não baixa outra).
+// Outra conta nunca adota essas cópias. Enquanto ninguém entra, os perfis são só deste aparelho.
+const CHAVE_LIGACOES = 'GRILO_CONTA_LIGACOES';
 const TEMPO_LIMITE_MS = 20000;
 
 let contaSessao = {};
 
 contaSessao.CHAVE = CHAVE;
+contaSessao.CHAVE_LIGACOES = CHAVE_LIGACOES;
 contaSessao.EVENTO_CONTA_ALTERADA = 'grilo-conta-alterada';
 contaSessao.EVENTO_SINCRONIZACAO = 'grilo-sincronizacao';
 
@@ -163,6 +169,82 @@ contaSessao.esquecerUsuarioLocal = function (usuarioLocal) {
     let banco = contaSessao.bancoDoUsuario(usuarioLocal);
     if (banco) {
         contaSessao.esquecerCrianca(banco);
+    }
+};
+
+// ---------- ligações guardadas depois de sair ----------
+
+function lerLigacoes() {
+    try {
+        let dados = JSON.parse(window.localStorage.getItem(CHAVE_LIGACOES) || '{}');
+        return dados && typeof dados === 'object' ? dados : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function gravarLigacoes(dados) {
+    try {
+        if (Object.keys(dados).length === 0) {
+            window.localStorage.removeItem(CHAVE_LIGACOES);
+        } else {
+            window.localStorage.setItem(CHAVE_LIGACOES, JSON.stringify(dados));
+        }
+    } catch (e) {
+        log.warn('contaSessao: could not save GRILO_CONTA_LIGACOES', e);
+    }
+}
+
+/**
+ * guarda as crianças ligadas de uma conta que está saindo deste aparelho
+ */
+contaSessao.guardarLigacoes = function (key, criancas) {
+    if (!key || !criancas || Object.keys(criancas).length === 0) {
+        return;
+    }
+    let dados = lerLigacoes();
+    dados[key] = Object.assign({}, dados[key] || {}, JSON.parse(JSON.stringify(criancas)));
+    gravarLigacoes(dados);
+};
+
+/**
+ * devolve (e tira da lista) as crianças que esta conta tinha ligado neste aparelho
+ * @return {object} { <banco>: {usuarioLocal, ...} } (vazio se não houver)
+ */
+contaSessao.recuperarLigacoes = function (key) {
+    let dados = lerLigacoes();
+    let criancas = key && dados[key] ? dados[key] : {};
+    if (key && dados[key]) {
+        delete dados[key];
+        gravarLigacoes(dados);
+    }
+    return criancas;
+};
+
+contaSessao.descartarLigacoes = function (key) {
+    contaSessao.recuperarLigacoes(key);
+};
+
+/**
+ * um perfil local foi ligado a uma conta: nenhuma outra conta guardada aponta mais para ele
+ */
+contaSessao.soltarUsuarioLocal = function (usuarioLocal) {
+    let dados = lerLigacoes();
+    let mudou = false;
+    for (let key of Object.keys(dados)) {
+        for (let banco of Object.keys(dados[key] || {})) {
+            if (dados[key][banco] && dados[key][banco].usuarioLocal === usuarioLocal) {
+                delete dados[key][banco];
+                mudou = true;
+            }
+        }
+        if (dados[key] && Object.keys(dados[key]).length === 0) {
+            delete dados[key];
+            mudou = true;
+        }
+    }
+    if (mudou) {
+        gravarLigacoes(dados);
     }
 };
 

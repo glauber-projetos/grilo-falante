@@ -119,6 +119,7 @@ contaCriancasService.nesteAparelho = function (banco) {
  * liga um perfil local a uma criança da conta. A cópia local é tratada como completa (ela é a verdade).
  */
 contaCriancasService.ligarPerfil = function (banco, usuarioLocal, crianca = {}) {
+    contaSessao.soltarUsuarioLocal(usuarioLocal);
     contaSessao.guardarCrianca(banco, {
         usuarioLocal: usuarioLocal,
         nome: crianca.nome || (perfilService.getPerfil(usuarioLocal) || {}).nome || '',

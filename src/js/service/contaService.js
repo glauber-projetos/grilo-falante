@@ -61,6 +61,12 @@ function guardarSessao(resposta, aparelhoNome) {
         throw { erro: 'servidor', mensagem: contaSessao.MENSAGEM_SERVIDOR };
     }
     let mesmaConta = antes && antes.sessao && antes.sessao.key && antes.sessao.key === sessao.key;
+    if (antes && !mesmaConta && antes.sessao && antes.sessao.key) {
+        // outra conta entrando sem sair antes: a anterior guarda as suas ligações para quando voltar
+        contaSessao.guardarLigacoes(antes.sessao.key, antes.criancas);
+    }
+    // a mesma conta que já saiu deste aparelho reaproveita as cópias locais (não baixa uma segunda cópia)
+    let guardadas = contaSessao.recuperarLigacoes(sessao.key);
     let conta = {
         email: dados.email,
         nome: dados.nome,
@@ -68,7 +74,7 @@ function guardarSessao(resposta, aparelhoNome) {
         emailConfirmado: !!dados.emailConfirmado,
         sessao: { token: sessao.token, password: sessao.password, key: sessao.key, expira: sessao.expira },
         aparelhoNome: aparelhoNome || (mesmaConta && antes.aparelhoNome) || contaService.nomeDoAparelho(),
-        criancas: mesmaConta ? antes.criancas : {},
+        criancas: Object.assign({}, guardadas, mesmaConta ? antes.criancas : {}),
         entrarDeNovo: false
     };
     if (mesmaConta && antes.listaCriancas) {
@@ -146,6 +152,10 @@ contaService.entrar = async function ({ email, senha, aparelho } = {}) {
  * Sai da conta neste aparelho. Funciona sem internet. As cópias locais das crianças continuam (só neste aparelho).
  */
 contaService.sair = async function () {
+    let antes = contaSessao.ler();
+    if (antes && antes.sessao && antes.sessao.key) {
+        contaSessao.guardarLigacoes(antes.sessao.key, antes.criancas);
+    }
     if (contaService.temConta()) {
         try {
             await pedir('POST', '/conta/sair', undefined, comSessao);
@@ -213,13 +223,31 @@ contaService.trocarSenha = async function ({ senhaAtual, senhaNova, desconectarO
     return resposta;
 };
 
-contaService.trocarEmail = function ({ emailNovo, senha } = {}) {
-    return pedir('POST', '/conta/email/trocar', { emailNovo: limparEmail(emailNovo), senha: senha }, comSessao);
+/**
+ * Funciona também antes de confirmar o primeiro e-mail (corrigir erro de digitação logo depois do cadastro).
+ */
+contaService.trocarEmail = async function ({ emailNovo, senha } = {}) {
+    emailNovo = limparEmail(emailNovo);
+    let resposta = await pedir('POST', '/conta/email/trocar', { emailNovo: emailNovo, senha: senha }, comSessao);
+    contaSessao.atualizar({ emailPendente: emailNovo }, true);
+    return resposta;
 };
 
+/**
+ * O código chegou no e-mail novo, então o e-mail novo fica confirmado (mesmo se a conta ainda não estava).
+ */
 contaService.confirmarTrocaEmail = async function (codigo) {
     let conta = await pedir('POST', '/conta/email/trocar/confirmar', { codigo: String(codigo || '').trim() }, comSessao);
-    return atualizarDados(conta);
+    let atual = contaSessao.ler();
+    let pendente = atual ? atual.emailPendente : undefined;
+    if (atual && pendente !== undefined) {
+        delete atual.emailPendente;
+        contaSessao.gravar(atual, true);
+    }
+    let dados = Object.assign({}, conta || {});
+    dados.email = dados.email || pendente;
+    dados.emailConfirmado = true;
+    return atualizarDados(dados);
 };
 
 // ---------- aparelhos ----------
@@ -357,6 +385,8 @@ contaService.baixarTudo = function () {
  */
 contaService.apagarConta = async function (senha) {
     await pedir('DELETE', '/conta', { senha: senha }, comSessao);
+    // os bancos sumiram do servidor: as cópias locais ficam só neste aparelho, sem ligação guardada
+    contaSessao.descartarLigacoes(((contaSessao.ler() || {}).sessao || {}).key);
     contaSincronizacao.parar();
     contaSessao.apagar();
 };
