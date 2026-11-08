@@ -1,0 +1,1209 @@
+<title>Contas da família</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="tabler/tabler-icons-outline.min.css">
+<style>
+/* Layout: page = review desk (journeys on top, device in the middle, notes beside it); the device screen uses the app's own palette */
+:root {
+  --bg: #f1eee4;
+  --painel: #ffffff;
+  --tinta: #1f2a19;
+  --apoio: #5a5f51;
+  --linha: #dcd4c0;
+  --acento: #2f6b1f;
+  --acento-suave: #e4f2dc;
+  --moldura: #2b3127;
+  --fonte-titulo: "Baloo 2", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --fonte: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131711; --painel: #1c2119; --tinta: #e8ecdf; --apoio: #a4ab9a; --linha: #333b2d;
+    --acento: #93d273; --acento-suave: #233220; --moldura: #050604; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131711; --painel: #1c2119; --tinta: #e8ecdf; --apoio: #a4ab9a; --linha: #333b2d;
+  --acento: #93d273; --acento-suave: #233220; --moldura: #050604; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--tinta); font-family: var(--fonte); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.pagina { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.cabeca { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.cabeca h1 { font-family: var(--fonte-titulo); font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.cabeca p { margin: 4px 0 0; color: var(--apoio); max-width: 62ch; }
+.alternar { display: inline-flex; border: 1px solid var(--linha); border-radius: 999px; padding: 3px; background: var(--painel); }
+.alternar button {
+  font: inherit; font-weight: 700; font-size: 14px; border: 0; background: transparent; color: var(--apoio);
+  padding: 6px 14px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; min-height: 36px;
+}
+.alternar button[aria-pressed="true"] { background: var(--acento); color: var(--painel); }
+.jornadas { display: flex; flex-wrap: wrap; gap: 8px; }
+.jornadas button {
+  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; min-height: 40px; padding: 0 16px;
+  border-radius: 999px; border: 1px solid var(--linha); background: var(--painel); color: var(--tinta);
+}
+.jornadas button[aria-pressed="true"] { border-color: var(--acento); background: var(--acento-suave); color: var(--acento); }
+.mesa { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .mesa { grid-template-columns: minmax(0, 1fr); } }
+.palco { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+
+/* device */
+.aparelho {
+  width: 100%; max-width: 920px; aspect-ratio: 16 / 10.4; background: var(--moldura);
+  border-radius: 30px; padding: 14px; box-shadow: 0 12px 40px rgba(20, 30, 10, 0.18); position: relative;
+  min-height: 560px;
+}
+.aparelho[data-modo="celular"] { max-width: 380px; aspect-ratio: 9 / 18.5; border-radius: 40px; padding: 11px; }
+@media (max-width: 700px) { .aparelho, .aparelho[data-modo="celular"] { aspect-ratio: auto; height: 660px; } }
+.vidro { position: relative; width: 100%; height: 100%; border-radius: 18px; overflow: hidden; background: #fbf6ea; }
+.aparelho[data-modo="celular"] .vidro { border-radius: 30px; }
+
+/* steps of the journey */
+.passos { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 8px; width: 100%; max-width: 920px; }
+.passos .fora { grid-column: 1 / -1; text-align: center; }
+.passos ol { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; padding: 0; }
+.passos li button {
+  font: inherit; font-size: 13px; cursor: pointer; border: 1px solid var(--linha); background: var(--painel); color: var(--apoio);
+  border-radius: 10px; padding: 4px 10px; min-height: 34px; display: inline-flex; gap: 6px; align-items: center;
+}
+.passos li button .n { font-variant-numeric: tabular-nums; font-weight: 700; }
+.passos li button[aria-current="step"] { border-color: var(--acento); color: var(--acento); background: var(--acento-suave); font-weight: 700; }
+.passos .seta { font: inherit; border: 1px solid var(--linha); background: var(--painel); color: var(--tinta); border-radius: 10px; min-height: 34px; min-width: 40px; cursor: pointer; }
+.passos .seta:disabled { opacity: .35; cursor: default; }
+.fora { font-size: 13px; color: var(--apoio); }
+
+/* notes */
+.notas { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.nota { background: var(--painel); border: 1px solid var(--linha); border-radius: 16px; padding: 18px 18px 16px; }
+.nota h2 { font-family: var(--fonte-titulo); font-size: 21px; line-height: 1.15; margin: 0 0 10px; }
+.nota h3 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--apoio); margin: 14px 0 4px; }
+.nota h3:first-of-type { margin-top: 0; }
+.nota p { margin: 0; }
+.nota .tente { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: var(--acento-suave); font-size: 14px; }
+.nota ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.nota li b { display: block; }
+.nota li span { color: var(--apoio); font-size: 14px; }
+:focus-visible { outline: 3px solid #1b6fd8; outline-offset: 2px; }
+
+/* ================= app screen (fixed app palette) ================= */
+.app {
+  --g-folha: #3f8a2a; --g-folha-escura: #2f6b1f; --g-folha-clara: #e4f2dc;
+  --g-girassol: #ffd43b; --g-girassol-claro: #fff4c2; --g-coral: #ff7a59; --g-coral-escuro: #c94a2c;
+  --g-ceu: #e3f0ff; --g-ceu-escuro: #12406e; --g-lavanda: #efe9ff; --g-lavanda-escura: #3e2a85;
+  --g-pessego: #ffe8d6; --g-pessego-escuro: #7a3410;
+  --g-fundo: #fbf6ea; --g-superficie: #ffffff; --g-superficie-2: #f4eedd; --g-borda: #e6dcc3; --g-borda-forte: #cdbf9c;
+  --g-tinta: #263b1c; --g-tinta-2: #55594f; --g-tinta-3: #6f7464; --g-perigo: #b42318; --g-perigo-claro: #fde8e6;
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; background: var(--g-fundo); color: var(--g-tinta);
+  font-family: var(--fonte); font-size: 16px; line-height: 1.5; container-type: inline-size; color-scheme: light;
+}
+.app h1, .app h2 { font-family: var(--fonte-titulo); font-weight: 700; line-height: 1.15; margin: 0; text-wrap: balance; color: var(--g-tinta); }
+.app h1 { font-size: 30px; }
+.app h2 { font-size: 26px; }
+.app p { margin: 0; }
+.app .apoio { color: var(--g-tinta-2); }
+.app .dica { color: var(--g-tinta-3); font-size: 14px; }
+.app .ti { line-height: 1; }
+.app :focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1b6fd8; }
+.mascote { width: 150px; height: auto; max-width: 100%; display: block; }
+.centro { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 28px 22px; max-width: 600px; margin: 0 auto; }
+.pilha { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }
+
+/* split screens: art + form */
+.dividida { min-height: 100%; display: grid; grid-template-columns: 1fr; }
+.arte { display: none; }
+@container (min-width: 720px) {
+  .dividida { grid-template-columns: 0.85fr 1fr; }
+  .arte { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; text-align: center; padding: 32px; background: var(--g-folha-clara); }
+}
+.arte .mascote { width: 170px; }
+.arte-titulo { font-family: var(--fonte-titulo); font-size: 22px; font-weight: 700; line-height: 1.2; color: var(--g-folha-escura); }
+.arte-texto { color: var(--g-tinta-2); max-width: 30ch; }
+.form { padding: 22px 24px 28px; display: flex; flex-direction: column; gap: 14px; max-width: 480px; width: 100%; margin: 0 auto; justify-content: center; }
+.topo-form { display: flex; align-items: center; gap: 8px; margin-left: -8px; }
+
+/* buttons */
+.b {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
+  border-radius: 16px; border: 2px solid var(--g-borda); background: var(--g-superficie); color: var(--g-tinta);
+  font-family: var(--fonte); font-size: 16px; font-weight: 700; line-height: 1.2; cursor: pointer; text-align: center;
+}
+.b:hover { border-color: var(--g-borda-forte); }
+.b .ti { font-size: 22px; }
+.b-principal { background: var(--g-folha); border-color: var(--g-folha); color: #fff; }
+.b-principal:hover { background: var(--g-folha-escura); border-color: var(--g-folha-escura); }
+.b-grande { min-height: 56px; font-size: 18px; }
+.b-leve { background: transparent; border-color: transparent; }
+.b-leve:hover { background: var(--g-superficie-2); border-color: transparent; }
+.b-perigo { background: var(--g-perigo); border-color: var(--g-perigo); color: #fff; }
+.b-perigo:disabled { opacity: .45; cursor: not-allowed; }
+.b-icone { width: 48px; padding: 0; }
+.b-cheio { width: 100%; }
+.b-link { font: inherit; font-weight: 700; color: var(--g-folha-escura); background: none; border: 0; padding: 6px 4px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 40px; }
+
+/* fields */
+.campo { display: flex; flex-direction: column; gap: 4px; }
+.campo > label { font-weight: 700; }
+.campo input[type="email"], .campo input[type="password"], .campo input[type="text"] {
+  width: 100%; min-height: 48px; padding: 8px 12px; border: 2px solid var(--g-borda); border-radius: 16px;
+  background: var(--g-superficie); color: var(--g-tinta); font-family: var(--fonte); font-size: 18px;
+}
+.campo input:focus { border-color: var(--g-folha); outline: none; }
+.campo.erro input { border-color: var(--g-perigo); }
+.msg-erro { color: var(--g-perigo); font-size: 14px; font-weight: 700; display: flex; gap: 6px; align-items: flex-start; }
+.msg-erro .ti { font-size: 18px; margin-top: 1px; }
+.senha { position: relative; }
+.senha input { padding-right: 52px !important; }
+.senha .olho { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); }
+.medidor { display: flex; gap: 4px; margin-top: 4px; }
+.medidor i { flex: 1; height: 5px; border-radius: 3px; background: var(--g-borda); }
+.medidor[data-n="1"] i:nth-child(-n+1) { background: var(--g-coral); }
+.medidor[data-n="2"] i:nth-child(-n+2) { background: var(--g-girassol); }
+.medidor[data-n="3"] i:nth-child(-n+3) { background: var(--g-folha); }
+.marcar { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; padding: 12px; border: 2px solid var(--g-borda); border-radius: 16px; background: var(--g-superficie); }
+.marcar input { width: 24px; height: 24px; margin: 1px 0 0; accent-color: var(--g-folha); flex: none; }
+.marcar.erro { border-color: var(--g-perigo); }
+.aviso-erro { background: var(--g-perigo-claro); color: var(--g-perigo); border-radius: 14px; padding: 12px 14px; font-weight: 700; display: flex; flex-direction: column; gap: 6px; }
+.aviso-erro .acoes { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.aviso-erro .b-link { color: var(--g-perigo); }
+
+/* code boxes */
+.codigo { display: flex; gap: 8px; justify-content: flex-start; }
+.codigo input {
+  width: 46px; height: 58px; text-align: center; font-family: var(--fonte-titulo); font-size: 28px; font-weight: 700;
+  border: 2px solid var(--g-borda); border-radius: 14px; background: var(--g-superficie); color: var(--g-tinta); padding: 0;
+}
+.codigo input:focus { border-color: var(--g-folha); outline: none; }
+.codigo.erro input { border-color: var(--g-perigo); }
+.codigo .meio { width: 8px; }
+.linha-acoes { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
+
+/* cards */
+.cartoes { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; max-width: 640px; }
+@container (min-width: 560px) { .cartoes { grid-template-columns: 1fr 1fr; } }
+.cartao {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 18px; text-align: left; cursor: pointer;
+  border: 2px solid var(--g-borda); border-radius: 24px; background: var(--g-superficie); color: var(--g-tinta); font: inherit;
+}
+.cartao:hover { border-color: var(--g-folha); }
+.cartao .circ { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--g-folha-clara); color: var(--g-folha-escura); font-size: 28px; }
+.cartao b { font-family: var(--fonte-titulo); font-size: 20px; line-height: 1.2; }
+.cartao span { color: var(--g-tinta-2); font-size: 15px; }
+
+.topo-app { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--g-borda); background: var(--g-fundo); position: sticky; top: 0; z-index: 2; }
+.topo-app .titulo { font-family: var(--fonte-titulo); font-weight: 700; font-size: 20px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-conta { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 2px solid var(--g-borda); background: var(--g-superficie); font: inherit; font-size: 14px; font-weight: 700; color: var(--g-tinta); cursor: pointer; max-width: 60%; }
+.chip-conta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* profiles */
+.perfis { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.perfil { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 140px; padding: 14px 8px; border-radius: 24px; border: 2px solid var(--g-borda); background: var(--g-superficie); cursor: pointer; font: inherit; color: var(--g-tinta); }
+.perfil:hover { border-color: var(--g-folha); }
+.perfil .rosto { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-family: var(--fonte-titulo); font-size: 40px; font-weight: 800; }
+.perfil b { font-family: var(--fonte-titulo); font-size: 20px; }
+.perfil.novo { border-style: dashed; border-color: var(--g-borda-forte); }
+.perfil.novo .rosto { background: var(--g-superficie-2); color: var(--g-folha-escura); font-size: 34px; }
+.r-ana { background: var(--g-girassol-claro); color: var(--g-pessego-escuro); }
+.r-leo { background: var(--g-ceu); color: var(--g-ceu-escuro); }
+
+.caixa { width: 100%; border: 2px solid var(--g-borda); border-radius: 20px; background: var(--g-superficie); padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+.caixa.aviso { background: var(--g-girassol-claro); border-color: #f0d77a; }
+.caixa ol { margin: 0; padding-left: 22px; }
+.previa { display: flex; gap: 14px; align-items: center; }
+.previa .rosto { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-family: var(--fonte-titulo); font-size: 30px; font-weight: 800; flex: none; }
+
+.barra { width: 100%; max-width: 380px; height: 14px; border-radius: 999px; background: var(--g-superficie-2); overflow: hidden; border: 1px solid var(--g-borda); }
+.barra i { display: block; height: 100%; width: 0; background: var(--g-folha); border-radius: 999px; transition: width 200ms linear; }
+.icone-grande { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; background: var(--g-folha-clara); color: var(--g-folha-escura); font-size: 52px; }
+.icone-grande.perigo { background: var(--g-perigo-claro); color: var(--g-perigo); }
+.icone-grande.ceu { background: var(--g-ceu); color: var(--g-ceu-escuro); }
+
+/* account screen */
+.lista { padding: 8px 18px 28px; display: flex; flex-direction: column; gap: 18px; max-width: 720px; margin: 0 auto; }
+.secao h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--g-tinta-3); margin: 8px 0 6px; }
+.linhas { border: 2px solid var(--g-borda); border-radius: 20px; background: var(--g-superficie); overflow: hidden; }
+.linha { display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 60px; flex-wrap: wrap; }
+.linha + .linha { border-top: 1px solid var(--g-borda); }
+.linha .ti.lead { font-size: 26px; color: var(--g-folha-escura); }
+.linha .txt { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
+.linha .txt b { font-weight: 700; overflow-wrap: anywhere; }
+.linha .txt span { color: var(--g-tinta-3); font-size: 14px; }
+
+/* e-mail mock */
+.correio { padding: 20px; display: flex; flex-direction: column; gap: 14px; max-width: 640px; margin: 0 auto; }
+.correio .env { border: 2px solid var(--g-borda); border-radius: 18px; background: #fff; overflow: hidden; }
+.correio .cab { padding: 12px 16px; border-bottom: 1px solid var(--g-borda); font-size: 14px; color: var(--g-tinta-2); display: flex; flex-direction: column; gap: 2px; }
+.correio .cab b { color: var(--g-tinta); font-size: 16px; }
+.correio .corpo { padding: 22px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.correio .num { font-family: var(--fonte-titulo); font-size: 40px; font-weight: 800; letter-spacing: .08em; color: var(--g-folha-escura); background: var(--g-folha-clara); padding: 2px 18px; border-radius: 14px; font-variant-numeric: tabular-nums; }
+
+/* adult home mock */
+.inicio { padding: 16px 18px 26px; display: flex; flex-direction: column; gap: 16px; }
+.faixa { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; background: var(--g-girassol-claro); border: 2px solid #f0d77a; border-radius: 20px; padding: 12px 14px; }
+.faixa .ti.lead { font-size: 28px; color: var(--g-pessego-escuro); }
+.faixa p { flex: 1; min-width: 180px; font-weight: 700; }
+.grade-inicio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@container (min-width: 600px) { .grade-inicio { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.mini { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px; border-radius: 20px; border: 2px solid var(--g-borda); background: var(--g-superficie); font: inherit; font-weight: 700; color: var(--g-tinta); cursor: pointer; min-height: 96px; text-align: left; }
+.mini .ti { font-size: 30px; color: var(--g-folha-escura); }
+.mini.falar { background: var(--g-coral); border-color: var(--g-coral); color: #fff; }
+.mini.falar .ti { color: #fff; }
+
+/* board mock */
+.prancha { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--g-fundo); }
+.frase { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--g-superficie); border-bottom: 2px solid var(--g-borda); }
+.frase .palavras { flex: 1; min-width: 0; display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--fonte-titulo); font-size: 20px; font-weight: 700; }
+.frase .palavras span { background: var(--g-superficie-2); border-radius: 10px; padding: 0 10px; }
+.b-falar { background: var(--g-coral); border-color: var(--g-coral); color: #fff; }
+.grade { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 8px; min-height: 0; }
+.palavra { border-radius: 16px; border: 2px solid var(--g-borda); background: var(--g-superficie); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: inherit; font-family: var(--fonte-titulo); font-weight: 700; font-size: 18px; color: var(--g-tinta); cursor: pointer; min-height: 0; }
+.palavra .ti { font-size: 40px; }
+.p-amarelo { background: var(--g-girassol-claro); } .p-verde { background: var(--g-folha-clara); } .p-azul { background: var(--g-ceu); } .p-rosa { background: var(--g-pessego); }
+.rodape-prancha { display: flex; justify-content: flex-end; padding: 6px 10px 10px; }
+
+.aviso-app { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); background: #263b1c; color: #fff; font-family: var(--fonte); padding: 10px 16px; border-radius: 14px; font-size: 15px; font-weight: 700; max-width: calc(100% - 32px); width: max-content; box-shadow: 0 6px 20px rgba(0,0,0,.25); z-index: 5; }
+.dados-lista { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.dados-lista div { display: flex; gap: 12px; align-items: flex-start; }
+.dados-lista .ti { font-size: 26px; color: var(--g-folha-escura); flex: none; }
+.dados-lista b { display: block; }
+.radios { display: flex; flex-direction: column; gap: 8px; }
+.oculto { display: none !important; }
+
+/* professional dashboard */
+.painel { padding: 14px 18px 26px; display: flex; flex-direction: column; gap: 14px; }
+.painel-barra { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.busca { flex: 1; min-width: 180px; position: relative; }
+.busca .ti { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--g-tinta-3); }
+.busca input { width: 100%; min-height: 48px; padding: 8px 12px 8px 40px; border: 2px solid var(--g-borda); border-radius: 16px; background: var(--g-superficie); font-family: var(--fonte); font-size: 17px; color: var(--g-tinta); }
+.busca input:focus { border-color: var(--g-folha); outline: none; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; }
+.filtros button { font: inherit; font-size: 14px; font-weight: 700; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--g-borda); background: var(--g-superficie); color: var(--g-tinta-2); cursor: pointer; }
+.filtros button[aria-pressed="true"] { border-color: var(--g-folha); background: var(--g-folha-clara); color: var(--g-folha-escura); }
+.grade-criancas { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.c-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 20px; border: 2px solid var(--g-borda); background: var(--g-superficie); text-align: left; font: inherit; color: var(--g-tinta); cursor: pointer; }
+.c-card:hover { border-color: var(--g-folha); }
+.c-card .topo-c { display: flex; align-items: center; gap: 10px; }
+.c-card .rosto { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-family: var(--fonte-titulo); font-size: 22px; font-weight: 800; flex: none; }
+.c-card b { font-family: var(--fonte-titulo); font-size: 19px; line-height: 1.1; }
+.c-card .idade { color: var(--g-tinta-3); font-size: 14px; }
+.c-card .quando { color: var(--g-tinta-3); font-size: 13px; }
+.status { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; min-height: 28px; padding: 0 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.s-montando { background: var(--g-lavanda); color: var(--g-lavanda-escura); }
+.s-esperando { background: var(--g-girassol-claro); color: var(--g-pessego-escuro); }
+.s-familia { background: var(--g-folha-clara); color: var(--g-folha-escura); }
+.r-lav { background: var(--g-lavanda); color: var(--g-lavanda-escura); }
+.r-pes { background: var(--g-pessego); color: var(--g-pessego-escuro); }
+.vazio-busca { color: var(--g-tinta-2); padding: 18px 4px; }
+.bolha { align-self: stretch; background: #e7f6dd; border: 2px solid #c9e6b5; border-radius: 18px 18px 18px 4px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.bolha .rot { font-size: 13px; font-weight: 700; color: var(--g-folha-escura); display: flex; gap: 6px; align-items: center; }
+.cabeca-crianca { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cabeca-crianca .rosto { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; font-family: var(--fonte-titulo); font-size: 34px; font-weight: 800; }
+.cabeca-crianca h2 { font-size: 28px; }
+.linha-botoes { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (prefers-reduced-motion: reduce) { .barra i { transition: none; } }
+</style>
+
+<div class="pagina">
+  <header class="cabeca">
+    <div>
+      <h1>Contas da família</h1>
+      <p>Protótipo clicável do Grilo Falante para aprovar antes de programar. Toque nos botões da tela como se fosse o app. Nada aqui grava dados.</p>
+    </div>
+    <div class="alternar" role="group" aria-label="Tamanho da tela">
+      <button type="button" id="ver-tablet" aria-pressed="true"><i class="ti ti-device-tablet" aria-hidden="true"></i> Tablet</button>
+      <button type="button" id="ver-celular" aria-pressed="false"><i class="ti ti-device-mobile" aria-hidden="true"></i> Celular</button>
+    </div>
+  </header>
+
+  <nav class="jornadas" id="jornadas" aria-label="Caminhos"></nav>
+
+  <div class="mesa">
+    <section class="palco" aria-label="Tela do app">
+      <div class="aparelho" id="aparelho" data-modo="tablet">
+        <div class="vidro"><div class="app" id="app"></div></div>
+      </div>
+      <div class="passos" id="passos"></div>
+    </section>
+
+    <aside class="notas">
+      <section class="nota" id="nota" aria-live="polite"></section>
+      <section class="nota">
+        <h2>O que o protótipo já assume</h2>
+        <ol>
+          <li><b>A conta é da família.</b><span>E-mail do responsável e uma senha, pensada para uma criança. Se a família tiver outra, dá para acrescentar, mas sem aparecer no caminho de quem tem uma só.</span></li>
+          <li><b>"Esqueci a senha" sempre funciona.</b><span>A proteção fica no servidor: endereço seguro, um banco separado para cada família e backup diário. A outra opção é um código de recuperação que a família guarda; se perder a senha e o código, perde as pranchas.</span></li>
+          <li><b>Os e-mails saem de um Gmail só do Grilo Falante.</b><span>Grátis, até 500 por dia. Você cria esse Gmail.</span></li>
+          <li><b>O tablet da criança fica conectado para sempre.</b><span>Trocar a senha não derruba o tablet da criança, a não ser que você peça.</span></li>
+          <li><b>Sem conta continua possível.</b><span>Fica discreto, com o aviso do risco, e dá para levar tudo para uma conta depois.</span></li>
+          <li><b>A criança é da família.</b><span>O profissional monta e entrega por convite. Depois, a família decide se ele edita, só vê ou sai, e pode mudar quando quiser.</span></li>
+        </ol>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var st = { email: "maria@exemplo.com.br", jornada: "nova", tela: "entrada", crianca: "Ana", profAcesso: "editar" };
+  var appEl = document.getElementById("app");
+  var timers = [];
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function ic(n, extra) { return '<i class="ti ti-' + n + (extra ? " " + extra : "") + '" aria-hidden="true"></i>'; }
+  function mascote(n, w) { return '<img class="mascote" src="img/grilo-' + n + '.webp" alt="" width="' + (w || 150) + '" height="' + (w || 150) + '">'; }
+  function voltar(to) { return '<button type="button" class="b b-leve b-icone" data-go="' + to + '" aria-label="Voltar">' + ic("arrow-left") + "</button>"; }
+  function arte(n, t, x) { return '<aside class="arte">' + mascote(n, 170) + '<p class="arte-titulo">' + t + '</p><p class="arte-texto">' + x + "</p></aside>"; }
+  function chipConta() { return '<button type="button" class="chip-conta" data-go="conta">' + ic("user") + "<span>" + esc(st.email) + "</span></button>"; }
+  function campoSenha(id, rotulo, valor, dica, medidor) {
+    return '<div class="campo" id="c-' + id + '"><label for="' + id + '">' + rotulo + '</label><div class="senha"><input id="' + id + '" type="password" autocomplete="new-password" value="' + (valor || "") + '"><button type="button" class="b b-leve b-icone olho" data-olho="' + id + '" aria-label="Mostrar senha">' + ic("eye") + "</button></div>" +
+      (medidor ? '<div class="medidor" id="m-' + id + '" data-n="0" aria-hidden="true"><i></i><i></i><i></i></div>' : "") +
+      (dica ? '<p class="dica" id="d-' + id + '">' + dica + "</p>" : "") + '<p class="msg-erro oculto" id="e-' + id + '"></p></div>';
+  }
+  function codigoHtml() {
+    var h = '<div class="codigo" id="codigo" role="group" aria-label="Código de 6 números">';
+    for (var i = 0; i < 6; i++) {
+      if (i === 3) h += '<span class="meio" aria-hidden="true"></span>';
+      h += '<input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Número ' + (i + 1) + '" id="cod' + i + '">';
+    }
+    return h + '</div><p class="msg-erro oculto" id="e-codigo"></p>';
+  }
+
+  /* ---------- screens ---------- */
+  var S = {};
+
+  S["entrada"] = {
+    t: "Entrada",
+    h: function () {
+      return '<div class="centro">' + mascote("feliz", 150) +
+        '<h1 tabindex="-1">Oi! Eu sou o Grilo Falante</h1>' +
+        '<p class="apoio">Pranchas no tablet para a criança falar do jeito dela. Com a conta da família, as pranchas ficam guardadas: se o tablet quebrar ou for trocado, nada se perde.</p>' +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-go="criar">' + ic("user-plus") + ' Criar conta da família</button>' +
+        '<button type="button" class="b b-grande" data-go="entrar">' + ic("login-2") + " Já tenho conta</button></div>" +
+        '<div class="linha-acoes" style="justify-content:center"><button type="button" class="b-link" data-go="sem-conta">Usar sem conta, só neste tablet</button>' +
+        '<button type="button" class="b-link" data-go="criar-prof">Sou profissional: fono, terapeuta ou escola</button></div>' +
+        '<p class="dica">Grátis e sem anúncios.</p></div>';
+    },
+    o: "Uma porta só. A primeira escolha é a conta: criar ou entrar. Usar sem conta e a conta de profissional ficam em links discretos.",
+    p: "Hoje a entrada pergunta por \"Nova criança\" e esconde a conta num link pequeno, e para criar conta é preciso tocar antes em \"Entrar com conta\". A conta vem primeiro porque é ela que guarda as pranchas. O texto fala do tablet, que é onde a criança usa, e do maior medo da família: perder tudo."
+  };
+
+  S["criar"] = {
+    t: "Criar conta",
+    h: function () {
+      return '<div class="dividida">' + arte("apresentando", "As pranchas guardadas com segurança", "Se o tablet quebrar ou for trocado, é só entrar de novo e tudo volta.") +
+        '<form class="form" id="f-criar" novalidate><div class="topo-form">' + voltar("entrada") + '<h2 tabindex="-1">Criar conta da família</h2></div>' +
+        '<p class="apoio">Guarde bem este e-mail e esta senha: são eles que trazem as pranchas de volta.</p>' +
+        '<div class="campo" id="c-email"><label for="email">Seu e-mail</label><input id="email" type="email" autocomplete="email" value="' + esc(st.email) + '">' +
+        '<p class="dica">Serve para entrar e para recuperar a senha. Nada de propaganda.</p><p class="msg-erro oculto" id="e-email"></p></div>' +
+        campoSenha("senha", "Crie uma senha", "girassol24", "Pelo menos 8 letras ou números.", true) +
+        '<label class="marcar" id="c-aceite"><input type="checkbox" id="aceite"><span>Sou mãe, pai ou responsável pela criança e autorizo o Grilo Falante a guardar as pranchas, fotos e gravações dela para uso da família.</span></label>' +
+        '<p class="msg-erro oculto" id="e-aceite"></p>' +
+        '<button type="button" class="b-link" style="align-self:flex-start" data-go="dados">Como cuidamos dos dados</button>' +
+        '<div class="aviso-erro oculto" id="ja-existe"><span>' + ic("alert-triangle") + ' Este e-mail já tem uma conta.</span><div class="acoes"><button type="button" class="b-link" data-go="entrar">Entrar com ele</button><button type="button" class="b-link" data-go="esqueci">Esqueci a senha</button></div></div>' +
+        '<button type="submit" class="b b-principal b-grande b-cheio">Criar conta</button>' +
+        '<p class="apoio">Já tem conta? <button type="button" class="b-link" data-go="entrar">Entrar</button></p></form></div>';
+    },
+    depois: function () {
+      ligarMedidor("senha");
+      document.getElementById("f-criar").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var email = document.getElementById("email").value.trim();
+        var senha = document.getElementById("senha").value;
+        var aceite = document.getElementById("aceite").checked;
+        var ok = true;
+        limparErros();
+        document.getElementById("ja-existe").classList.add("oculto");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro("email", email.indexOf("@") < 0 ? "Falta o @ no e-mail. Exemplo: maria@gmail.com" : "Confira o e-mail. Exemplo: maria@gmail.com"); ok = false; }
+        if (senha.length < 8) { erro("senha", "A senha precisa de pelo menos 8 letras ou números. Faltam " + (8 - senha.length) + "."); ok = false; }
+        if (!aceite) { erro("aceite", "Marque a autorização para continuar. Sem ela não podemos guardar os dados da criança."); document.getElementById("c-aceite").classList.add("erro"); ok = false; }
+        if (ok && email.toLowerCase() === "ja@exemplo.com.br") { document.getElementById("ja-existe").classList.remove("oculto"); ok = false; }
+        if (ok && !navigator.onLine) { ir("erro-internet"); return; }
+        if (ok) { st.email = email; ir("codigo"); }
+      });
+    },
+    o: "Pede só o necessário: e-mail, senha e a autorização do responsável.",
+    p: "O e-mail é de verdade e serve para recuperar a senha. A autorização é exigida pela LGPD para guardar dados de crianças. Cada erro aparece embaixo do campo dele e diz como resolver.",
+    x: "Apague o @ do e-mail, use uma senha curta, deixe a autorização desmarcada ou use ja@exemplo.com.br, um e-mail que já tem conta."
+  };
+
+  S["dados"] = {
+    t: "Como cuidamos dos dados",
+    h: function () {
+      return '<div class="centro" style="justify-content:flex-start"><div class="topo-form" style="align-self:stretch">' + voltar("criar") + '<h2 tabindex="-1">Como cuidamos dos dados</h2></div>' +
+        '<div class="dados-lista">' +
+        "<div>" + ic("photo") + "<p><b>O que guardamos</b>As pranchas, as fotos e as gravações que você coloca, e o e-mail da conta.</p></div>" +
+        "<div>" + ic("shield-check") + "<p><b>Onde</b>Num servidor do Grilo Falante em São Paulo, com endereço seguro e um banco separado para cada família.</p></div>" +
+        "<div>" + ic("users") + "<p><b>Quem vê</b>Só quem entra na sua conta. O responsável pelo servidor só acessa para consertar problemas.</p></div>" +
+        "<div>" + ic("heart") + "<p><b>O que nunca fazemos</b>Vender, mostrar anúncios ou usar os dados da criança para outra coisa.</p></div>" +
+        "<div>" + ic("trash") + "<p><b>Apagar tudo</b>Em Conta da família você baixa uma cópia ou apaga a conta e tudo dentro dela.</p></div>" +
+        "</div><p class=\"dica\">Texto provisório. A versão final está sendo escrita em separado.</p></div>";
+    },
+    o: "Um resumo de uma tela, em português simples, aberto a partir do cadastro e da conta.",
+    p: "Quem autoriza guardar dados de uma criança precisa entender o que está autorizando. A política completa fica num link dentro deste resumo."
+  };
+
+  function telaCodigo(volta, segue, arteNome, arteTit, arteTxt) {
+    return {
+      t: "Código",
+      h: function () {
+        return '<div class="dividida">' + arte(arteNome, arteTit, arteTxt) +
+          '<div class="form"><div class="topo-form">' + voltar(volta) + '<h2 tabindex="-1">Confira seu e-mail</h2></div>' +
+          '<p class="apoio">Mandamos um código de 6 números para <b>' + esc(st.email) + "</b>. Ele vale por 15 minutos.</p>" +
+          codigoHtml() + '<p class="apoio oculto" id="conferindo">' + ic("refresh") + " Conferindo…</p>" +
+          '<p class="dica">Não chegou? Olhe no spam ou no lixo eletrônico.</p>' +
+          '<div class="linha-acoes"><button type="button" class="b b-leve" id="reenviar" disabled>Mandar de novo em 0:45</button>' +
+          '<button type="button" class="b-link" data-go="' + volta + '">Trocar o e-mail</button></div>' +
+          '<button type="button" class="b" data-go="email-codigo">' + ic("mail") + " Ver o e-mail que chega</button></div></div>";
+      },
+      depois: function () { ligarCodigo(segue); ligarReenvio(); },
+      o: "Um código de 6 números chega por e-mail e é digitado no próprio app.",
+      p: "No tablet é mais fácil copiar 6 números do que abrir um link do e-mail e voltar para o app. O botão de mandar de novo espera 45 segundos para evitar abuso.",
+      x: "Digite qualquer código de 6 números. O código 000000 mostra o erro."
+    };
+  }
+  S["codigo"] = telaCodigo("criar", "familia-vazia", "explicando", "Falta pouco", "O código prova que o e-mail é seu. Assim dá para recuperar a senha se você esquecer.");
+  S["prof-codigo"] = telaCodigo("criar-prof", "prof-painel", "explicando", "Falta pouco", "Com o e-mail confirmado, as famílias sabem que o convite vem mesmo de você.");
+  S["esqueci-codigo"] = telaCodigo("esqueci", "nova-senha", "pensando", "Quase lá", "Depois do código você cria a senha nova. As pranchas continuam todas lá.");
+
+  S["email-codigo"] = {
+    t: "O e-mail que chega",
+    h: function () {
+      return '<div class="correio"><div class="topo-form">' + voltar(st.voltaEmail || "codigo") + '<h2 tabindex="-1">O e-mail que chega</h2></div>' +
+        '<div class="env"><div class="cab"><b>482 913 é o seu código do Grilo Falante</b><span>De: Grilo Falante (Gmail do projeto, a criar)</span><span>Para: ' + esc(st.email) + "</span></div>" +
+        '<div class="corpo">' + mascote("feliz", 72) + "<p>Oi! Use este código no Grilo Falante para confirmar seu e-mail:</p>" +
+        '<span class="num">482 913</span><p>Ele vale por 15 minutos.</p>' +
+        '<p class="dica">Se não foi você que pediu, ignore este e-mail. Nada muda na sua conta.</p></div></div></div>';
+    },
+    o: "O e-mail é curto: assunto com o próprio código, o número grande e o aviso do que fazer se não foi você.",
+    p: "Com o código no assunto, a pessoa nem precisa abrir o e-mail: a notificação do celular já mostra o número."
+  };
+
+  S["familia-vazia"] = {
+    t: "Conta pronta",
+    h: function () {
+      return '<div class="topo-app"><span class="titulo">Grilo Falante</span>' + chipConta() + "</div>" +
+        '<div class="centro">' + mascote("aprovando", 120) + '<h1 tabindex="-1">Conta pronta. Agora, a criança.</h1>' +
+        '<p class="apoio">Como você quer começar?</p><div class="cartoes">' +
+        '<button type="button" class="cartao" data-go="nova-crianca"><span class="circ">' + ic("plus") + "</span><b>Começar do zero</b><span>O grilo ajuda a montar as primeiras pranchas.</span></button>" +
+        '<button type="button" class="cartao" data-go="arquivo"><span class="circ">' + ic("file-upload") + "</span><b>Trazer de um arquivo</b><span>Já usava o Grilo Falante ou o AsTeRICS Grid? Abra o arquivo .grd.</span></button>" +
+        "</div></div>";
+    },
+    o: "A conta nasce vazia e oferece os dois jeitos de começar, lado a lado.",
+    p: "É aqui que o arquivo do Cadu entra, uma vez só. Depois disso, o tablet não precisa de arquivo."
+  };
+
+  S["nova-crianca"] = {
+    t: "Nova criança",
+    h: function () {
+      return '<div class="form" style="max-width:560px"><div class="topo-form">' + voltar("familia-vazia") + '<h2 tabindex="-1">Nova criança</h2></div>' +
+        '<div class="campo"><label for="nome">Como a criança se chama?</label><input id="nome" type="text" value="Ana" autocomplete="off"></div>' +
+        '<button type="button" class="b" data-aviso="Abre a câmera ou a galeria.">' + ic("photo") + " Escolher uma foto (opcional)</button>" +
+        '<fieldset class="radios" style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:6px">Para começar</legend>' +
+        '<label class="marcar"><input type="radio" name="inicio" checked><span><b>Prancha pronta</b><br><span class="dica">Com as palavras que mais se usa no dia a dia.</span></span></label>' +
+        '<label class="marcar"><input type="radio" name="inicio"><span><b>Prancha vazia</b><br><span class="dica">Para montar tudo do seu jeito.</span></span></label></fieldset>' +
+        '<button type="button" class="b b-principal b-grande b-cheio" data-go="pronto">Criar</button></div>';
+    },
+    o: "O assistente de nova criança que já existe continua, agora dentro da conta.",
+    p: "Esta tela só resume o assistente. O que muda é onde a criança fica guardada: na conta, e não só no aparelho."
+  };
+
+  S["arquivo"] = {
+    t: "Arquivo",
+    h: function () {
+      return '<div class="form" style="max-width:560px"><div class="topo-form">' + voltar("familia-vazia") + '<h2 tabindex="-1">Trazer de um arquivo</h2></div>' +
+        '<p class="apoio">Escolha o arquivo .grd guardado neste aparelho. Ele é usado uma vez só.</p>' +
+        '<button type="button" class="b b-grande" id="escolher">' + ic("file-upload") + " Escolher arquivo</button>" +
+        '<div class="caixa oculto" id="previa"><div class="previa"><span class="rosto r-ana">A</span><div><b style="font-family:var(--fonte-titulo);font-size:22px">Ana</b><p class="apoio">30 pranchas · 10 frases favoritas · 212 fotos</p><p class="dica">ana-2026-11-07.grd</p></div></div>' +
+        '<p>Vai para a conta <b>' + esc(st.email) + "</b>.</p></div>" +
+        '<button type="button" class="b b-principal b-grande b-cheio oculto" id="levar" data-go="arquivo-enviando">' + ic("cloud-upload") + " Levar para a conta</button></div>";
+    },
+    depois: function () {
+      document.getElementById("escolher").addEventListener("click", function () {
+        document.getElementById("previa").classList.remove("oculto");
+        document.getElementById("levar").classList.remove("oculto");
+        this.innerHTML = ic("refresh") + " Escolher outro arquivo";
+      });
+    },
+    o: "Mostra o que tem no arquivo antes de levar: nome da criança, pranchas, frases e fotos.",
+    p: "Assim você confere que escolheu o arquivo certo antes de mandar para a conta. Os exemplos usam uma criança inventada, a Ana.",
+    x: "Toque em Escolher arquivo. No app de verdade, abre o seletor de arquivos do aparelho."
+  };
+
+  S["arquivo-enviando"] = {
+    t: "Enviando",
+    h: function () {
+      return '<div class="centro"><span class="icone-grande">' + ic("cloud-upload") + '</span><h2 tabindex="-1">Levando a Ana para a conta</h2>' +
+        '<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="212" aria-valuenow="0" id="barra"><i></i></div>' +
+        '<p class="apoio" id="contagem">0 de 212 fotos</p>' +
+        '<p class="dica">Pode deixar o app aberto. Se a internet cair, ele continua de onde parou.</p></div>';
+    },
+    depois: function () { progresso(212, "fotos", "pronto"); },
+    o: "Mostra o andamento em fotos, que é o que demora.",
+    p: "Com 200 fotos, o envio pode levar alguns minutos numa internet fraca. Ver o número subindo evita que a pessoa feche o app achando que travou."
+  };
+
+  S["pronto"] = {
+    t: "Pronto",
+    h: function () {
+      return '<div class="centro">' + mascote("festa", 130) + '<h1 tabindex="-1">Tudo guardado na conta</h1>' +
+        '<p class="apoio">As pranchas da Ana já estão salvas.</p>' +
+        '<div class="caixa"><b>No tablet da Ana:</b><ol><li>Abra o Grilo Falante.</li><li>Toque em <b>Já tenho conta</b>.</li><li>Entre com <b>' + esc(st.email) + "</b>.</li></ol></div>" +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-crianca="Ana" data-go="aparelho-crianca">Já estou no tablet da Ana</button>' +
+        '<button type="button" class="b b-leve" data-go="inicio">Ir para o início</button></div></div>';
+    },
+    o: "Termina dizendo o próximo passo no tablet, com o e-mail certo já escrito.",
+    p: "Hoje não existe esse fechamento. A pessoa fica sem saber se deu certo e o que fazer no tablet."
+  };
+
+  S["entrar"] = {
+    t: "Entrar",
+    h: function () {
+      return '<div class="dividida">' + arte("confiante", "Que bom te ver", "Entre uma vez e o tablet fica conectado.") +
+        '<form class="form" id="f-entrar" novalidate><div class="topo-form">' + voltar("entrada") + '<h2 tabindex="-1">Entrar na conta da família</h2></div>' +
+        '<div class="campo" id="c-email"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" value="' + esc(st.email) + '"><p class="msg-erro oculto" id="e-email"></p></div>' +
+        campoSenha("senha", "Senha", "", "", false) +
+        '<div class="aviso-erro oculto" id="nao-confere"><span>' + ic("alert-triangle") + ' E-mail ou senha não conferem.</span><span style="font-weight:400">Tente de novo ou crie uma senha nova.</span><div class="acoes"><button type="button" class="b-link" data-go="esqueci">Esqueci a senha</button></div></div>' +
+        '<button type="submit" class="b b-principal b-grande b-cheio">Entrar</button>' +
+        '<button type="button" class="b-link" style="align-self:flex-start" data-go="esqueci">Esqueci a senha</button>' +
+        '<p class="apoio">Não tem conta? <button type="button" class="b-link" data-go="criar">Criar conta da família</button></p></form></div>';
+    },
+    depois: function () {
+      document.getElementById("f-entrar").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        limparErros();
+        document.getElementById("nao-confere").classList.add("oculto");
+        var email = document.getElementById("email").value.trim();
+        var senha = document.getElementById("senha").value;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro("email", "Confira o e-mail. Exemplo: maria@gmail.com"); return; }
+        if (!senha) { erro("senha", "Digite a senha."); return; }
+        if (senha.length < 8) { document.getElementById("nao-confere").classList.remove("oculto"); return; }
+        st.email = email; ir("baixando");
+      });
+    },
+    o: "E-mail e senha, com \"Esqueci a senha\" sempre à vista.",
+    p: "Não há \"lembrar de mim\" para marcar: o aparelho fica conectado até alguém tocar em Desconectar. Quando a senha erra, a mensagem já oferece criar uma senha nova.",
+    x: "Qualquer senha com 8 letras ou mais entra. Uma senha curta mostra o erro."
+  };
+
+  S["baixando"] = {
+    t: "Baixando",
+    h: function () {
+      st.crianca = "Ana";
+      return '<div class="centro"><span class="icone-grande ceu">' + ic("cloud-download") + '</span><h2 tabindex="-1">Trazendo as pranchas da Ana</h2>' +
+        '<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="barra"><i></i></div>' +
+        '<p class="apoio" id="contagem">0 de 30 pranchas</p></div>';
+    },
+    depois: function () { progresso(30, "pranchas", "aparelho-crianca"); },
+    o: "Baixa as pranchas da conta para o tablet e segue direto para a criança.",
+    p: "Depois desta primeira vez, o aparelho funciona sem internet e só troca as mudanças quando tiver conexão."
+  };
+
+  function inicioHtml(semConta) {
+    var c = [["Falar", "volume", "falar"], ["Frases", "message-circle", ""], ["Pranchas", "layout-grid", ""], ["Editar", "pencil", ""], ["Ajustes", "adjustments", ""], ["Sem internet", "wifi-off", ""], ["Ajuda", "help-circle", ""], [semConta ? "Responsável" : "Conta da família", semConta ? "lock" : "user", ""]];
+    var h = '<div class="topo-app"><span class="rosto r-ana" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-family:var(--fonte-titulo)">A</span><span class="titulo">Ana</span>' + (semConta ? "" : chipConta()) + '</div><div class="inicio"><h2 class="oculto" tabindex="-1">Início</h2>' +
+      (semConta ? '<div class="faixa">' + ic("cloud", "lead") + '<p>As pranchas da Ana estão só neste tablet.</p><button type="button" class="b b-principal" data-go="levar-para-conta">Guardar na conta</button></div>' : "") + '<div class="grade-inicio">';
+    c.forEach(function (x) {
+      h += x[0] === "Conta da família" ? '<button type="button" class="mini" data-go="conta">' + ic(x[1]) + x[0] + "</button>" :
+        x[0] === "Falar" ? '<button type="button" class="mini falar" data-crianca="Ana" data-go="prancha">' + ic(x[1]) + x[0] + "</button>" :
+        '<button type="button" class="mini ' + x[2] + '" data-aviso="Abre ' + x[0] + '.">' + ic(x[1]) + x[0] + "</button>";
+    });
+    return h + "</div></div>";
+  }
+
+  S["inicio"] = {
+    t: "Início",
+    h: function () { return inicioHtml(false); },
+    o: "Com uma criança só, não há tela de escolher criança: o app abre no Início da Ana. A conta fica no canto e num cartão.",
+    p: "Quase toda família tem uma criança usando o app. Perguntar \"Quem vai falar?\" toda vez seria um passo à toa. Uma segunda criança continua possível em Conta da família."
+  };
+
+  S["aparelho-crianca"] = {
+    t: "Preparar aparelho",
+    h: function () {
+      var c = st.crianca, art = c === "Pedro" ? "do" : "da", fotos = c === "Pedro" ? "64 imagens neste tablet, cerca de 12 MB" : "212 imagens neste tablet, cerca de 40 MB";
+      return '<div class="form" style="max-width:620px"><div class="topo-form">' + voltar("inicio") + '<h2 tabindex="-1">Preparar o tablet ' + (c === "Pedro" ? "do " : "da ") + c + "</h2></div>" +
+        '<p class="apoio">Só na primeira vez. Isto fica guardado neste tablet.</p>' +
+        '<div class="linhas"><div class="linha">' + ic("wifi-off", "lead") + '<div class="txt"><b>Usar sem internet</b><span>Guarda as ' + fotos + '.</span></div><button type="button" class="b" data-liga="Guardado">Guardar agora</button></div>' +
+        '<div class="linha">' + ic("lock", "lead") + '<div class="txt"><b>Modo Criança</b><span>' + (c === "Pedro" ? "O " : "A ") + c + ' não sai da prancha. Para sair, segure Responsável por 3 segundos.</span></div><button type="button" class="b" data-liga="Ligado">Ligar</button></div></div>' +
+        '<button type="button" class="b b-principal b-grande b-cheio" data-go="prancha">Abrir a prancha ' + art + " " + c + "</button></div>";
+    },
+    depois: function () {
+      appEl.querySelectorAll("[data-liga]").forEach(function (b) {
+        b.addEventListener("click", function () { b.innerHTML = ic("circle-check") + " " + b.getAttribute("data-liga"); b.disabled = true; });
+      });
+    },
+    o: "Na primeira vez no tablet, oferece o que fica só nele: imagens sem internet e Modo Criança.",
+    p: "Hoje essas duas coisas ficam escondidas em telas diferentes e é fácil esquecer. No tablet da criança, elas são o que mais importa."
+  };
+
+  S["prancha"] = {
+    t: "Prancha",
+    h: function () {
+      var w = [["Eu", "user", "p-amarelo"], ["Quero", "heart", "p-verde"], ["Água", "glass", "p-azul"], ["Comer", "tools-kitchen-2", "p-azul"], ["Brincar", "ball-football", "p-rosa"], ["Mamãe", "woman", "p-amarelo"], ["Sim", "check", "p-verde"], ["Não", "x", "p-rosa"]];
+      var h = '<div class="prancha"><div class="frase"><div class="palavras" aria-label="Frase"><span>Eu</span><span>quero</span><span>água</span></div><button type="button" class="b b-falar" data-aviso="Fala: Eu quero água.">' + ic("volume") + ' Falar</button></div><div class="grade">';
+      w.forEach(function (p) { h += '<button type="button" class="palavra ' + p[2] + '" data-aviso="' + p[0] + '">' + ic(p[1]) + p[0] + "</button>"; });
+      return h + '</div><div class="rodape-prancha"><button type="button" class="b" data-go="inicio">' + ic("lock") + ' Responsável</button></div></div><h2 class="oculto" tabindex="-1">Prancha</h2>';
+    },
+    o: "A prancha não muda neste trabalho. Ela aparece só para fechar o caminho.",
+    p: "O caminho termina onde a criança começa a falar."
+  };
+
+  S["esqueci"] = {
+    t: "Esqueci a senha",
+    h: function () {
+      st.voltaEmail = "esqueci-codigo";
+      return '<div class="dividida">' + arte("pensando", "Acontece com todo mundo", "Você recebe um código no e-mail e cria uma senha nova. As pranchas não se perdem.") +
+        '<form class="form" id="f-esqueci" novalidate><div class="topo-form">' + voltar("entrar") + '<h2 tabindex="-1">Esqueceu a senha?</h2></div>' +
+        '<p class="apoio">Escreva o e-mail da conta. Mandamos um código para criar uma senha nova.</p>' +
+        '<div class="campo" id="c-email"><label for="email">E-mail da conta</label><input id="email" type="email" autocomplete="email" value="' + esc(st.email) + '"><p class="msg-erro oculto" id="e-email"></p></div>' +
+        '<button type="submit" class="b b-principal b-grande b-cheio">Mandar código</button></form></div>';
+    },
+    depois: function () {
+      document.getElementById("f-esqueci").addEventListener("submit", function (ev) {
+        ev.preventDefault(); limparErros();
+        var email = document.getElementById("email").value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro("email", "Confira o e-mail. Exemplo: maria@gmail.com"); return; }
+        st.email = email; ir("esqueci-codigo");
+      });
+    },
+    o: "Recuperar a senha é o mesmo código de 6 números do cadastro.",
+    p: "Uma vez aprendido, o código serve para as duas coisas. Por segurança, a tela diz a mesma coisa exista ou não uma conta com aquele e-mail."
+  };
+
+  S["nova-senha"] = {
+    t: "Senha nova",
+    h: function () {
+      return '<form class="form" id="f-nova" novalidate style="max-width:520px"><div class="topo-form">' + voltar(st.jornada === "conta" ? "conta" : "esqueci") + '<h2 tabindex="-1">Crie uma senha nova</h2></div>' +
+        campoSenha("senha", "Senha nova", "", "Pelo menos 8 letras ou números.", true) +
+        '<label class="marcar"><input type="checkbox" id="derrubar"><span><b>Desconectar os outros aparelhos</b><br><span class="dica">Deixe desmarcado se o tablet da criança usa esta conta. Ele continua funcionando sem você precisar entrar de novo.</span></span></label>' +
+        '<button type="submit" class="b b-principal b-grande b-cheio">Salvar senha</button></form>';
+    },
+    depois: function () {
+      ligarMedidor("senha");
+      document.getElementById("f-nova").addEventListener("submit", function (ev) {
+        ev.preventDefault(); limparErros();
+        var s = document.getElementById("senha").value;
+        if (s.length < 8) { erro("senha", "A senha precisa de pelo menos 8 letras ou números. Faltam " + (8 - s.length) + "."); return; }
+        st.derrubou = document.getElementById("derrubar").checked; ir("senha-ok");
+      });
+    },
+    o: "Senha nova, com a escolha de desconectar ou não os outros aparelhos.",
+    p: "O comum seria desconectar todos. Aqui isso deixaria a criança sem prancha até alguém entrar de novo no tablet, por isso fica desmarcado.",
+    x: "Uma senha curta mostra o erro. Marque a caixa para ver a outra mensagem no fim."
+  };
+
+  S["senha-ok"] = {
+    t: "Senha trocada",
+    h: function () {
+      return '<div class="centro">' + mascote("aprovando", 130) + '<h2 tabindex="-1">Senha trocada</h2>' +
+        '<p class="apoio">Mandamos um aviso para <b>' + esc(st.email) + "</b>. " + (st.derrubou ? "Os outros aparelhos vão pedir a senha nova." : "Os outros aparelhos continuam conectados.") + "</p>" +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-go="inicio">Continuar</button></div></div>';
+    },
+    o: "Confirma a troca e avisa por e-mail.",
+    p: "O aviso por e-mail protege a família se outra pessoa trocar a senha sem permissão."
+  };
+
+  S["conta"] = {
+    t: "Conta da família",
+    h: function () {
+      return '<div class="topo-app">' + voltar("inicio") + '<span class="titulo">Conta da família</span></div><h2 class="oculto" tabindex="-1">Conta da família</h2><div class="lista">' +
+        '<div class="secao"><h3>Entrar</h3><div class="linhas">' +
+        '<div class="linha">' + ic("mail", "lead") + '<div class="txt"><b>' + esc(st.email) + '</b><span>E-mail da conta</span></div><button type="button" class="b" data-aviso="Pede o e-mail novo e confirma com um código, como no cadastro.">Trocar</button></div>' +
+        '<div class="linha">' + ic("key", "lead") + '<div class="txt"><b>Senha</b><span>Trocada há 2 meses</span></div><button type="button" class="b" data-go="nova-senha">Trocar</button></div></div></div>' +
+        '<div class="secao"><h3>Aparelhos conectados</h3><div class="linhas">' +
+        '<div class="linha">' + ic("device-tablet", "lead") + '<div class="txt"><b>Tablet da Ana</b><span>Este tablet · agora</span></div></div>' +
+        '<div class="linha">' + ic("device-tablet", "lead") + '<div class="txt"><b>Tablet antigo</b><span>Usado há 3 semanas</span></div><button type="button" class="b" data-aviso="Tablet antigo desconectado. Se alguém abrir, ele pede e-mail e senha.">Desconectar</button></div></div></div>' +
+        '<div class="secao"><h3>Criança</h3><div class="linhas">' +
+        '<div class="linha"><span class="rosto r-ana" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800">A</span><div class="txt"><b>Ana</b><span>30 pranchas · 212 fotos</span></div></div></div>' +
+        '<button type="button" class="b-link" data-aviso="Abre Nova criança. Para famílias com mais de uma criança usando o app.">Adicionar outra criança</button></div>' +
+        '<div class="secao"><h3>Quem ajuda a Ana</h3><div class="linhas">' +
+        '<div class="linha">' + ic("user", "lead") + '<div class="txt"><b>Juliana · fonoaudióloga</b><span>Ajuda a Ana · pode editar as pranchas</span></div><button type="button" class="b" data-aviso="Escolha: pode editar, só ver ou sem acesso.">Mudar</button><button type="button" class="b" data-aviso="A Juliana não vê mais a Ana. Ela recebe um aviso.">Tirar acesso</button></div>' +
+        '<div class="linha">' + ic("user-plus", "lead") + '<div class="txt"><b>Convidar alguém para ajudar</b><span>Uma terapeuta, a escola ou outro familiar</span></div><button type="button" class="b" data-aviso="Cria um convite com link e código, como o da Juliana.">Convidar</button></div></div></div>' +
+        '<div class="secao"><h3>Seus dados</h3><div class="linhas">' +
+        '<div class="linha">' + ic("download", "lead") + '<div class="txt"><b>Baixar uma cópia de tudo</b><span>Um arquivo .grd com tudo da Ana</span></div><button type="button" class="b" data-aviso="Preparando a cópia. O arquivo vai para Downloads.">Baixar</button></div>' +
+        '<div class="linha">' + ic("shield-check", "lead") + '<div class="txt"><b>Como cuidamos dos dados</b></div><button type="button" class="b" data-go="dados">Ler</button></div>' +
+        '<div class="linha">' + ic("trash", "lead") + '<div class="txt"><b>Apagar a conta</b><span>Apaga a conta e tudo dentro dela</span></div><button type="button" class="b" data-go="apagar-conta">Apagar</button></div></div></div>' +
+        '<button type="button" class="b b-leve" style="align-self:flex-start" data-aviso="Este aparelho saiu da conta.">' + ic("logout") + " Desconectar este aparelho</button></div>";
+    },
+    o: "Tudo da conta numa tela só: e-mail, senha, tablets conectados, a criança, quem ajuda e os dados.",
+    p: "Os aparelhos conectados aparecem com nome e último uso. Se um tablet for perdido, dá para tirar ele da conta daqui. Baixar e apagar são direitos da LGPD.",
+    x: "Toque em Trocar, Desconectar e Baixar para ver as mensagens."
+  };
+
+  S["apagar-conta"] = {
+    t: "Apagar conta",
+    h: function () {
+      return '<div class="form" style="max-width:560px"><div class="topo-form">' + voltar("conta") + '<h2 tabindex="-1">Apagar a conta e tudo dentro dela?</h2></div>' +
+        '<div class="caixa"><b>Isto apaga:</b><ul style="margin:0;padding-left:20px"><li>as pranchas, fotos e gravações da Ana;</li><li>o acesso em todos os aparelhos conectados;</li><li>as cópias de segurança do servidor, em até 14 dias.</li></ul></div>' +
+        '<p class="apoio"><b>Não tem como desfazer.</b> Se quiser guardar, baixe uma cópia antes.</p>' +
+        '<button type="button" class="b" data-aviso="Preparando a cópia. O arquivo vai para Downloads.">' + ic("download") + " Baixar uma cópia antes</button>" +
+        '<div class="campo"><label for="confirma">Para confirmar, escreva APAGAR</label><input id="confirma" type="text" autocomplete="off"></div>' +
+        '<button type="button" class="b b-perigo b-grande b-cheio" id="apagar" disabled data-go="conta-apagada">' + ic("trash") + " Apagar a conta</button></div>";
+    },
+    depois: function () {
+      var c = document.getElementById("confirma"), b = document.getElementById("apagar");
+      c.addEventListener("input", function () { b.disabled = c.value.trim().toUpperCase() !== "APAGAR"; });
+    },
+    o: "Diz exatamente o que some, oferece a cópia antes e pede para escrever APAGAR.",
+    p: "Apagar dados de uma criança não pode acontecer por um toque errado. O backup some em até 14 dias porque é o tempo que as cópias diárias ficam guardadas.",
+    x: "Escreva APAGAR para liberar o botão."
+  };
+
+  S["conta-apagada"] = {
+    t: "Conta apagada",
+    h: function () {
+      return '<div class="centro">' + mascote("triste", 120) + '<h2 tabindex="-1">Conta apagada</h2>' +
+        '<p class="apoio">Mandamos uma confirmação para <b>' + esc(st.email) + "</b>.</p>" +
+        '<div class="pilha"><button type="button" class="b b-grande" data-go="entrada">Voltar ao início</button></div></div>';
+    },
+    o: "Confirma e avisa por e-mail.",
+    p: "O e-mail de confirmação também serve de alerta se não foi o dono da conta que apagou."
+  };
+
+  S["sem-conta"] = {
+    t: "Sem conta",
+    h: function () {
+      return '<div class="centro">' + mascote("orientando", 120) + '<h2 tabindex="-1">Usar sem conta</h2>' +
+        '<div class="caixa aviso"><b>' + ic("alert-triangle") + " Tudo fica só neste tablet.</b><p>Se ele quebrar, for perdido ou trocado, as pranchas se perdem junto.</p></div>" +
+        '<p class="apoio">Você pode criar a conta depois e levar tudo, sem perder nada.</p>' +
+        '<div class="pilha"><button type="button" class="b b-grande" data-go="inicio-sem-conta">Entendi, usar sem conta</button>' +
+        '<button type="button" class="b b-principal b-grande" data-go="criar">' + ic("user-plus") + " Criar conta da família</button></div></div>";
+    },
+    o: "Avisa o risco uma vez, sem bloquear quem quer usar sem conta.",
+    p: "Algumas famílias não têm e-mail ou não querem conta. Elas continuam podendo usar, sabendo o que arriscam."
+  };
+
+  S["inicio-sem-conta"] = {
+    t: "Início sem conta",
+    h: function () { return inicioHtml(true); },
+    o: "No Início, uma faixa lembra que as pranchas estão só neste tablet e oferece guardar na conta.",
+    p: "É o caminho do perfil que hoje está no tablet do Cadu: sem arquivo, um toque leva tudo para a conta."
+  };
+
+  S["levar-para-conta"] = {
+    t: "Guardar na conta",
+    h: function () {
+      return '<div class="centro"><div class="topo-form" style="align-self:stretch">' + voltar("inicio-sem-conta") + '<h2 tabindex="-1">Guardar a Ana numa conta</h2></div>' +
+        '<p class="apoio">As pranchas, fotos e gravações vão para a conta. Neste tablet, nada muda.</p><div class="cartoes">' +
+        '<button type="button" class="cartao" data-go="criar"><span class="circ">' + ic("user-plus") + "</span><b>Criar conta da família</b><span>Primeira vez com conta.</span></button>" +
+        '<button type="button" class="cartao" data-go="entrar"><span class="circ">' + ic("login-2") + "</span><b>Já tenho conta</b><span>Entre com o e-mail e a senha da família.</span></button></div></div>";
+    },
+    o: "Leva a criança que estava só neste tablet para uma conta nova ou já existente.",
+    p: "Depois de criar a conta ou entrar, o envio é o mesmo de \"Trazer de um arquivo\", com a barra de fotos."
+  };
+
+  S["erro-internet"] = {
+    t: "Sem internet",
+    h: function () {
+      return '<div class="centro"><span class="icone-grande perigo">' + ic("wifi-off") + '</span><h2 tabindex="-1">Sem internet agora</h2>' +
+        '<p class="apoio">Criar a conta precisa de internet só neste momento. Depois, o app funciona sem internet.</p>' +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-go="criar">' + ic("refresh") + ' Tentar de novo</button></div>' +
+        '<button type="button" class="b-link" data-go="sem-conta">Usar sem conta por enquanto</button></div>';
+    },
+    o: "Explica que a internet só é necessária agora e oferece seguir sem conta.",
+    p: "Muitas famílias usam internet do celular, que cai. A mensagem tranquiliza: o app não depende de internet no dia a dia."
+  };
+
+  /* ---------- professional ---------- */
+  var KIDS = [
+    { n: "Pedro", i: 4, s: "montando", m: "Mudou hoje", r: "r-lav", abre: "prof-crianca" },
+    { n: "Lia", i: 6, s: "esperando", m: "Convite enviado ontem", r: "r-ana" },
+    { n: "Davi", i: 5, s: "familia", a: "Você pode editar", m: "A família mudou há 2 dias", r: "r-leo" },
+    { n: "Sofia", i: 8, s: "familia", a: "Você pode editar", m: "Você mudou há 3 dias", r: "r-pes" },
+    { n: "Miguel", i: 3, s: "familia", a: "Você só vê", m: "A família mudou há 1 semana", r: "r-ana" },
+    { n: "Helena", i: 7, s: "familia", a: "Você pode editar", m: "Você mudou há 2 semanas", r: "r-lav" },
+    { n: "Theo", i: 9, s: "montando", m: "Mudou há 3 dias", r: "r-leo" }
+  ];
+  var STATUS = { montando: ["Montando", "s-montando", "pencil"], esperando: ["Esperando a família", "s-esperando", "mail-forward"], familia: ["Com a família", "s-familia", "users"] };
+  function pilula(s) { var x = STATUS[s]; return '<span class="status ' + x[1] + '">' + ic(x[2]) + " " + x[0] + "</span>"; }
+
+  S["criar-prof"] = {
+    t: "Conta de profissional",
+    h: function () {
+      return '<div class="dividida">' + arte("apresentando", "Para quem cuida de muitas crianças", "Monte as pranchas de cada criança, entregue para a família e continue ajudando.") +
+        '<form class="form" id="f-prof" novalidate><div class="topo-form">' + voltar("entrada") + '<h2 tabindex="-1">Conta de profissional</h2></div>' +
+        '<div class="campo"><label for="pnome">Seu nome</label><input id="pnome" type="text" value="Juliana Costa" autocomplete="name"><p class="dica">As famílias veem este nome no convite.</p></div>' +
+        '<fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:6px">Você é</legend><div class="filtros" id="profissao">' +
+        '<button type="button" aria-pressed="true">Fonoaudióloga(o)</button><button type="button" aria-pressed="false">Terapeuta ocupacional</button><button type="button" aria-pressed="false">Professora(or) ou escola</button><button type="button" aria-pressed="false">Outra</button></div></fieldset>' +
+        '<div class="campo" id="c-email"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" value="juliana.fono@exemplo.com.br"><p class="msg-erro oculto" id="e-email"></p></div>' +
+        campoSenha("senha", "Crie uma senha", "fono2026pranchas", "Pelo menos 8 letras ou números.", true) +
+        '<label class="marcar" id="c-aceite"><input type="checkbox" id="aceite"><span>Só vou cadastrar crianças com autorização dos responsáveis. A família confirma ao receber as pranchas.</span></label><p class="msg-erro oculto" id="e-aceite"></p>' +
+        '<button type="submit" class="b b-principal b-grande b-cheio">Criar conta de profissional</button></form></div>';
+    },
+    depois: function () {
+      ligarMedidor("senha");
+      ligarChips("profissao");
+      document.getElementById("f-prof").addEventListener("submit", function (ev) {
+        ev.preventDefault(); limparErros();
+        var email = document.getElementById("email").value.trim(), ok = true;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro("email", "Confira o e-mail. Exemplo: nome@gmail.com"); ok = false; }
+        if (document.getElementById("senha").value.length < 8) { erro("senha", "A senha precisa de pelo menos 8 letras ou números."); ok = false; }
+        if (!document.getElementById("aceite").checked) { erro("aceite", "Marque a declaração para continuar."); document.getElementById("c-aceite").classList.add("erro"); ok = false; }
+        if (ok) { st.email = email; ir("prof-codigo"); }
+      });
+    },
+    o: "Uma conta própria para quem atende várias crianças, com nome e profissão.",
+    p: "O nome e a profissão aparecem no convite, para a família saber quem preparou as pranchas. A declaração lembra que os dados são da criança e que a família vai confirmar.",
+    x: "Desmarque a declaração e tente criar a conta."
+  };
+
+  S["prof-painel"] = {
+    t: "Minhas crianças",
+    h: function () {
+      return '<div class="topo-app"><span class="titulo">Minhas crianças</span><button type="button" class="chip-conta" data-aviso="Abre a sua conta: e-mail, senha, aparelhos e modelos.">' + ic("user") + "<span>Juliana · Fono</span></button></div>" +
+        '<div class="painel"><h2 class="oculto" tabindex="-1">Minhas crianças</h2><div class="painel-barra"><label class="busca"><span class="oculto">Procurar criança</span>' + ic("search") + '<input id="busca" type="search" placeholder="Procurar pelo nome" autocomplete="off"></label>' +
+        '<button type="button" class="b b-principal" data-go="prof-nova">' + ic("plus") + " Nova criança</button></div>" +
+        '<div class="filtros" id="filtros"><button type="button" data-f="todas" aria-pressed="true">Todas (7)</button><button type="button" data-f="montando" aria-pressed="false">Montando (2)</button><button type="button" data-f="esperando" aria-pressed="false">Esperando a família (1)</button><button type="button" data-f="familia" aria-pressed="false">Com a família (4)</button></div>' +
+        '<div class="grade-criancas" id="grade-criancas"></div>' +
+        '<div class="linha-acoes"><button type="button" class="b b-leve" data-aviso="Seus modelos: Primeiras palavras e Rotina da escola.">' + ic("layout-grid") + " Meus modelos (2)</button></div></div>";
+    },
+    depois: function () {
+      var filtro = "todas", busca = document.getElementById("busca"), grade = document.getElementById("grade-criancas");
+      function desenhar() {
+        var q = busca.value.trim().toLowerCase();
+        var lista = KIDS.filter(function (k) { return (filtro === "todas" || k.s === filtro) && (!q || k.n.toLowerCase().indexOf(q) >= 0); });
+        grade.innerHTML = lista.length ? lista.map(function (k) {
+          return '<button type="button" class="c-card" ' + (k.abre ? 'data-go="' + k.abre + '"' : 'data-aviso="Abre o ' + k.n + ': prancha, edição e quem tem acesso."') + '><span class="topo-c"><span class="rosto ' + k.r + '">' + k.n[0] + "</span><span><b>" + k.n + '</b><br><span class="idade">' + k.i + " anos</span></span></span>" + pilula(k.s) + (k.a ? '<span class="idade">' + k.a + "</span>" : "") + '<span class="quando">' + k.m + "</span></button>";
+        }).join("") : '<p class="vazio-busca">Nenhuma criança com esse nome.</p>';
+        ligarBotoes(grade);
+      }
+      busca.addEventListener("input", desenhar);
+      document.querySelectorAll("#filtros [data-f]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          filtro = b.getAttribute("data-f");
+          document.querySelectorAll("#filtros [data-f]").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
+          desenhar();
+        });
+      });
+      desenhar();
+    },
+    o: "Todas as crianças do profissional numa tela, com busca, filtros por situação e a última mudança de cada uma.",
+    p: "Quem atende 20 ou 30 crianças precisa achar a próxima em segundos, entre uma sessão e outra. A situação mostra o que falta: montar, esperar a família ou acompanhar.",
+    x: "Procure \"so\", use os filtros e abra o Pedro."
+  };
+
+  S["prof-nova"] = {
+    t: "Nova criança",
+    h: function () {
+      return '<div class="form" style="max-width:580px"><div class="topo-form">' + voltar("prof-painel") + '<h2 tabindex="-1">Nova criança</h2></div>' +
+        '<div class="campo"><label for="nome">Nome da criança</label><input id="nome" type="text" value="Pedro" autocomplete="off"></div>' +
+        '<div class="campo"><label for="idade">Idade (opcional)</label><input id="idade" type="text" value="4 anos" autocomplete="off"></div>' +
+        '<fieldset class="radios" style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:6px">Começar com</legend>' +
+        '<label class="marcar"><input type="radio" name="base" checked><span><b>Meu modelo: Primeiras palavras</b><br><span class="dica">40 palavras que você montou e usa com várias crianças.</span></span></label>' +
+        '<label class="marcar"><input type="radio" name="base"><span><b>Uma cópia das pranchas de outra criança</b><br><span class="dica">Copia as pranchas, sem as fotos da família dela.</span></span></label>' +
+        '<label class="marcar"><input type="radio" name="base"><span><b>Prancha vazia</b></span></label></fieldset>' +
+        '<p class="dica">Fotos da família podem ficar para depois: a família põe quando receber.</p>' +
+        '<button type="button" class="b b-principal b-grande b-cheio" data-go="prof-crianca">Criar</button></div>';
+    },
+    o: "Criar uma criança a partir de um modelo seu, de uma cópia de outra criança ou do zero.",
+    p: "O profissional repete muito trabalho entre crianças parecidas. Copiar não leva as fotos da outra família, para não misturar dados de crianças diferentes."
+  };
+
+  S["prof-crianca"] = {
+    t: "Criança",
+    h: function () {
+      return '<div class="topo-app">' + voltar("prof-painel") + '<span class="titulo">Pedro</span></div><div class="lista">' +
+        '<div class="cabeca-crianca"><span class="rosto r-lav">P</span><div><h2 tabindex="-1">Pedro</h2><p class="apoio">4 anos · 18 pranchas · 64 fotos</p></div>' + pilula("montando") + "</div>" +
+        '<div class="linha-botoes"><button type="button" class="b b-grande" data-crianca="Pedro" data-go="prancha">' + ic("player-play") + ' Abrir a prancha</button><button type="button" class="b b-grande" data-aviso="Abre a edição das pranchas do Pedro.">' + ic("pencil") + " Editar pranchas</button></div>" +
+        '<div class="caixa"><b style="font-family:var(--fonte-titulo);font-size:20px">Entregar para a família</b><p class="apoio">Quando terminar de montar, mande um convite. A família cria a conta dela e o Pedro passa a ser dela. Você continua ajudando, se a família deixar.</p>' +
+        '<button type="button" class="b b-principal b-grande" style="align-self:flex-start" data-go="prof-convite">' + ic("mail-forward") + " Convidar a família</button></div>" +
+        '<div class="secao"><h3>Quem tem acesso</h3><div class="linhas"><div class="linha">' + ic("user", "lead") + '<div class="txt"><b>Você</b><span>Responsável até a família aceitar</span></div></div></div></div></div>';
+    },
+    o: "A página de cada criança: abrir a prancha, editar e, quando estiver pronta, entregar para a família.",
+    p: "Entregar é um passo claro, com nome. Até lá a criança fica só com o profissional; depois, passa a ser da família."
+  };
+
+  S["prof-convite"] = {
+    t: "Convite",
+    h: function () {
+      return '<div class="form" style="max-width:600px"><div class="topo-form">' + voltar("prof-crianca") + '<h2 tabindex="-1">Convidar a família do Pedro</h2></div>' +
+        '<fieldset class="radios" style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:6px">Depois que a família aceitar, você:</legend>' +
+        '<label class="marcar"><input type="radio" name="acesso" value="editar" checked><span><b>Continua podendo editar as pranchas</b><br><span class="dica">Bom para quem acompanha a criança em terapia.</span></span></label>' +
+        '<label class="marcar"><input type="radio" name="acesso" value="ver"><span><b>Só pode ver</b><br><span class="dica">Para acompanhar sem mexer.</span></span></label>' +
+        '<label class="marcar"><input type="radio" name="acesso" value="sair"><span><b>Sai do Pedro</b><br><span class="dica">A família fica sozinha com as pranchas.</span></span></label></fieldset>' +
+        '<p class="dica">A família confirma ou muda isso ao aceitar, e pode mudar quando quiser.</p>' +
+        '<button type="button" class="b b-principal b-grande b-cheio" id="gerar">' + ic("link") + " Criar o convite</button></div>";
+    },
+    depois: function () {
+      document.getElementById("gerar").addEventListener("click", function () {
+        var v = appEl.querySelector('input[name="acesso"]:checked').value;
+        st.profAcesso = v; ir("prof-convite-enviado");
+      });
+    },
+    o: "Antes de convidar, o profissional diz que acesso quer manter depois da entrega.",
+    p: "Fica claro para os dois lados o que vai acontecer. Quem decide no fim é a família."
+  };
+
+  function textoAcesso() { return st.profAcesso === "ver" ? "só ver" : st.profAcesso === "sair" ? "sair" : "editar"; }
+
+  S["prof-convite-enviado"] = {
+    t: "Convite pronto",
+    h: function () {
+      return '<div class="form" style="max-width:600px"><div class="topo-form">' + voltar("prof-convite") + '<h2 tabindex="-1">Convite pronto</h2></div>' +
+        '<p class="apoio">Mande para a família. O convite vale 7 dias e só pode ser usado uma vez.</p>' +
+        '<div class="bolha"><span class="rot">' + ic("message-circle") + ' Mensagem para o WhatsApp</span><p id="msg">Olá! Aqui é a Juliana, fonoaudióloga do Pedro. Preparei as pranchas de comunicação dele no Grilo Falante. Para receber, abra o link e confirme o código 7Q2K-M9XD. glauber-projetos.github.io/grilo-falante/#convite (vale 7 dias)</p></div>' +
+        '<div class="linha-botoes"><button type="button" class="b b-principal b-grande" id="copiar">' + ic("copy") + ' Copiar mensagem</button><button type="button" class="b b-grande" data-aviso="Mostra um código QR na tela para a família ler com o celular na sessão.">' + ic("qrcode") + " Mostrar na tela</button></div>" +
+        '<div class="campo"><label for="emailfam">Ou mande por e-mail</label><input id="emailfam" type="email" placeholder="e-mail da família" autocomplete="off"></div>' +
+        '<button type="button" class="b" style="align-self:flex-start" data-aviso="Convite enviado por e-mail.">' + ic("mail") + " Mandar por e-mail</button>" +
+        '<div class="caixa"><span>' + pilula("esperando") + '</span><p class="dica">Quando a família aceitar, o Pedro muda para "Com a família" em Minhas crianças.</p>' +
+        '<button type="button" class="b-link" style="align-self:flex-start" data-go="familia-convite">Ver o que a família recebe</button></div></div>';
+    },
+    depois: function () {
+      document.getElementById("copiar").addEventListener("click", function () {
+        var t = document.getElementById("msg").textContent;
+        try { navigator.clipboard.writeText(t).then(function () { avisar("Mensagem copiada. Cole no WhatsApp da família."); }, function () { avisar("Selecione a mensagem e copie."); }); } catch (e) { avisar("Selecione a mensagem e copie."); }
+      });
+    },
+    o: "O convite sai pronto para colar no WhatsApp, além de e-mail e código QR para mostrar na sessão.",
+    p: "A maioria das famílias conversa com a terapeuta pelo WhatsApp. O código curto confirma que a família abriu o convite certo. O endereço do link ainda é um exemplo.",
+    x: "Toque em Copiar mensagem."
+  };
+
+  S["familia-convite"] = {
+    t: "Família recebe",
+    h: function () {
+      st.crianca = "Pedro";
+      return '<div class="centro">' + mascote("apresentando", 120) + '<h1 tabindex="-1">Pranchas do Pedro para vocês</h1>' +
+        '<p class="apoio">A Juliana, fonoaudióloga, preparou as pranchas de comunicação do Pedro.</p>' +
+        '<div class="caixa"><div class="previa"><span class="rosto r-lav">P</span><div><b style="font-family:var(--fonte-titulo);font-size:22px">Pedro</b><p class="apoio">18 pranchas · 64 fotos</p><p class="dica">Código 7Q2K-M9XD · vale até 14/11</p></div></div></div>' +
+        '<p class="apoio">Ao aceitar, o Pedro fica na conta da sua família. Vocês decidem quem mais pode mexer.</p>' +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-go="familia-aceite">Aceitar e criar conta da família</button>' +
+        '<button type="button" class="b b-grande" data-go="familia-aceite">Já tenho conta</button></div>' +
+        '<button type="button" class="b-link" data-aviso="Convite recusado. Nada foi guardado e a Juliana vai saber.">Não conheço esta pessoa</button></div>';
+    },
+    o: "O link do convite abre o app direto nesta tela: quem preparou, o que tem e o que acontece ao aceitar.",
+    p: "A família precisa confiar antes de aceitar. Por isso aparecem o nome e a profissão de quem mandou, o código para conferir com a mensagem e a opção de recusar."
+  };
+
+  S["familia-aceite"] = {
+    t: "Aceitar",
+    h: function () {
+      var a = textoAcesso();
+      return '<div class="form" style="max-width:580px"><div class="topo-form">' + voltar("familia-convite") + '<h2 tabindex="-1">Receber o Pedro</h2></div>' +
+        '<div class="campo"><label for="email">Seu e-mail</label><input id="email" type="email" value="' + esc(st.email.indexOf("juliana") === 0 ? "maria@exemplo.com.br" : st.email) + '" autocomplete="email"></div>' +
+        campoSenha("senha", "Crie uma senha", "girassol24", "Pelo menos 8 letras ou números. Se já tem conta, use a sua senha.", false) +
+        '<fieldset class="radios" style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:6px">A Juliana pode:</legend>' +
+        '<label class="marcar"><input type="radio" name="jul"' + (a === "editar" ? " checked" : "") + '><span><b>Editar as pranchas</b>' + (a === "editar" ? '<br><span class="dica">Foi o que ela pediu.</span>' : "") + "</span></label>" +
+        '<label class="marcar"><input type="radio" name="jul"' + (a === "só ver" ? " checked" : "") + '><span><b>Só ver</b>' + (a === "só ver" ? '<br><span class="dica">Foi o que ela pediu.</span>' : "") + "</span></label>" +
+        '<label class="marcar"><input type="radio" name="jul"' + (a === "sair" ? " checked" : "") + '><span><b>Nada: ela sai do Pedro</b></span></label></fieldset>' +
+        '<label class="marcar" id="c-aceite"><input type="checkbox" id="aceite"><span>Sou mãe, pai ou responsável pelo Pedro e autorizo o Grilo Falante a guardar as pranchas, fotos e gravações dele para uso da família e de quem eu escolher.</span></label><p class="msg-erro oculto" id="e-aceite"></p>' +
+        '<button type="button" class="b b-principal b-grande b-cheio" id="aceitar">Aceitar o Pedro</button>' +
+        '<p class="dica">Em seguida chega o código no seu e-mail, como em qualquer conta nova.</p></div>';
+    },
+    depois: function () {
+      document.getElementById("aceitar").addEventListener("click", function () {
+        limparErros();
+        if (!document.getElementById("aceite").checked) { erro("aceite", "Marque a autorização para receber o Pedro."); document.getElementById("c-aceite").classList.add("erro"); return; }
+        ir("familia-recebeu");
+      });
+    },
+    o: "Numa tela só: conta da família, o acesso da profissional e a autorização do responsável.",
+    p: "É aqui que o responsável dá o consentimento da LGPD, inclusive para os dados que a profissional já colocou. O acesso dela vem marcado com o que ela pediu, mas a família pode mudar.",
+    x: "Tente aceitar sem marcar a autorização."
+  };
+
+  S["familia-recebeu"] = {
+    t: "Pedro na família",
+    h: function () {
+      var a = textoAcesso();
+      var ajuda = a === "sair" ? '<p class="apoio">A Juliana saiu do Pedro. Você pode convidar alguém depois, em Conta da família.</p>' :
+        '<div class="linha" style="padding:0">' + ic("user", "lead") + '<div class="txt"><b>Juliana · fonoaudióloga</b><span>' + (a === "editar" ? "Pode editar as pranchas" : "Só vê as pranchas") + '</span></div><button type="button" class="b" data-go="conta">Mudar</button></div>' +
+        '<p class="dica">' + (a === "editar" ? "Quando a Juliana mudar uma prancha, a mudança chega no tablet do Pedro." : "A Juliana acompanha as pranchas, mas não muda nada.") + "</p>";
+      return '<div class="centro">' + mascote("festa", 120) + '<h1 tabindex="-1">O Pedro está na conta da família</h1>' +
+        '<div class="caixa"><b>Quem ajuda o Pedro</b>' + ajuda + "</div>" +
+        '<div class="pilha"><button type="button" class="b b-principal b-grande" data-crianca="Pedro" data-go="aparelho-crianca">Preparar o tablet do Pedro</button></div></div>';
+    },
+    o: "Confirma a entrega e mostra quem continua ajudando a criança.",
+    p: "Para a profissional, o Pedro passa para \"Com a família\" em Minhas crianças, e ela continua abrindo ele do mesmo jeito."
+  };
+
+  function ligarChips(id) {
+    var bs = document.querySelectorAll("#" + id + " button");
+    bs.forEach(function (b) { b.addEventListener("click", function () { bs.forEach(function (o) { o.setAttribute("aria-pressed", o === b); }); }); });
+  }
+
+  /* ---------- journeys ---------- */
+  var J = [
+    { id: "nova", nome: "Família nova", passos: ["entrada", "criar", "codigo", "familia-vazia", "arquivo", "arquivo-enviando", "pronto"] },
+    { id: "aparelho", nome: "No tablet da criança", passos: ["entrada", "entrar", "baixando", "aparelho-crianca", "prancha", "inicio"] },
+    { id: "senha", nome: "Esqueci a senha", passos: ["entrar", "esqueci", "esqueci-codigo", "nova-senha", "senha-ok"] },
+    { id: "conta", nome: "Conta da família", passos: ["conta", "apagar-conta", "conta-apagada"] },
+    { id: "semconta", nome: "Sem conta", passos: ["entrada", "sem-conta", "inicio-sem-conta", "levar-para-conta"] },
+    { id: "erros", nome: "Quando dá errado", passos: ["criar", "entrar", "codigo", "erro-internet"] },
+    { id: "prof", nome: "Profissional", passos: ["entrada", "criar-prof", "prof-codigo", "prof-painel", "prof-nova", "prof-crianca", "prof-convite", "prof-convite-enviado"] },
+    { id: "convite", nome: "Família recebe convite", passos: ["familia-convite", "familia-aceite", "familia-recebeu", "aparelho-crianca"] }
+  ];
+  function jornada() { return J.filter(function (j) { return j.id === st.jornada; })[0]; }
+
+  function desenharJornadas() {
+    var nav = document.getElementById("jornadas");
+    nav.innerHTML = J.map(function (j) { return '<button type="button" data-j="' + j.id + '" aria-pressed="' + (j.id === st.jornada) + '">' + j.nome + "</button>"; }).join("");
+    nav.querySelectorAll("[data-j]").forEach(function (b) {
+      b.addEventListener("click", function () { st.jornada = b.getAttribute("data-j"); ir(jornada().passos[0], true); });
+    });
+  }
+  function desenharPassos() {
+    var j = jornada(), i = j.passos.indexOf(st.tela), el = document.getElementById("passos");
+    var h = '<button type="button" class="seta" id="ant" aria-label="Tela anterior do caminho"' + (i <= 0 ? " disabled" : "") + ">←</button><ol>";
+    j.passos.forEach(function (p, k) {
+      h += '<li><button type="button" data-passo="' + p + '"' + (k === i ? ' aria-current="step"' : "") + '><span class="n">' + (k + 1) + "</span> " + S[p].t + "</button></li>";
+    });
+    h += '</ol><button type="button" class="seta" id="prox" aria-label="Próxima tela do caminho"' + (i < 0 || i >= j.passos.length - 1 ? " disabled" : "") + ">→</button>";
+    if (i < 0) h += '<span class="fora">Tela extra: ' + S[st.tela].t + "</span>";
+    el.innerHTML = h;
+    el.querySelectorAll("[data-passo]").forEach(function (b) { b.addEventListener("click", function () { ir(b.getAttribute("data-passo"), true); }); });
+    document.getElementById("ant").addEventListener("click", function () { ir(j.passos[i - 1], true); });
+    document.getElementById("prox").addEventListener("click", function () { ir(j.passos[i + 1], true); });
+  }
+  function desenharNota() {
+    var s = S[st.tela];
+    document.getElementById("nota").innerHTML = "<h2>" + s.t + "</h2><h3>O que acontece</h3><p>" + s.o + "</p><h3>Por que assim</h3><p>" + s.p + "</p>" + (s.x ? '<p class="tente"><b>Experimente:</b> ' + s.x + "</p>" : "");
+  }
+
+  /* ---------- behaviour ---------- */
+  function limparTimers() { timers.forEach(function (t) { clearInterval(t); clearTimeout(t); }); timers = []; }
+  function ir(id, viaPassos) {
+    if (!S[id]) id = "entrada";
+    limparTimers(); tirarAviso();
+    if (id === "codigo") st.voltaEmail = "codigo";
+    st.tela = id;
+    appEl.innerHTML = S[id].h();
+    appEl.scrollTop = 0;
+    ligarBotoes(appEl);
+    appEl.querySelectorAll("[data-olho]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var inp = document.getElementById(b.getAttribute("data-olho")), ver = inp.type === "password";
+        inp.type = ver ? "text" : "password";
+        b.innerHTML = ic(ver ? "eye-off" : "eye");
+        b.setAttribute("aria-label", ver ? "Esconder senha" : "Mostrar senha");
+      });
+    });
+    if (S[id].depois) S[id].depois();
+    desenharPassos(); desenharNota();
+    try { if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id); } catch (e) { /* ignore */ }
+    if (iniciado && !viaPassos) { var t = appEl.querySelector("h1[tabindex], h2[tabindex]"); if (t) t.focus({ preventScroll: true }); }
+  }
+  function ligarBotoes(raiz) {
+    raiz.querySelectorAll("[data-go]").forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        if (b.hasAttribute("data-crianca")) st.crianca = b.getAttribute("data-crianca");
+        ir(b.getAttribute("data-go"));
+      });
+    });
+    raiz.querySelectorAll("[data-aviso]").forEach(function (b) { b.addEventListener("click", function () { avisar(b.getAttribute("data-aviso")); }); });
+  }
+  function avisar(msg) {
+    tirarAviso();
+    var a = document.createElement("div"); a.className = "aviso-app"; a.setAttribute("role", "status"); a.textContent = msg;
+    appEl.parentNode.appendChild(a);
+    timers.push(setTimeout(tirarAviso, 2600));
+  }
+  function tirarAviso() {
+    var a = appEl.parentNode.querySelector(".aviso-app");
+    if (a) a.remove();
+  }
+  function erro(id, msg) {
+    var e = document.getElementById("e-" + id), c = document.getElementById("c-" + id);
+    if (e) { e.innerHTML = ic("alert-triangle") + " " + msg; e.classList.remove("oculto"); }
+    if (c) c.classList.add("erro");
+  }
+  function limparErros() {
+    appEl.querySelectorAll(".msg-erro").forEach(function (e) { e.classList.add("oculto"); });
+    appEl.querySelectorAll(".erro").forEach(function (e) { e.classList.remove("erro"); });
+  }
+  function ligarMedidor(id) {
+    var inp = document.getElementById(id), m = document.getElementById("m-" + id), d = document.getElementById("d-" + id);
+    function medir() {
+      var v = inp.value, n = v.length === 0 ? 0 : v.length < 8 ? 1 : (/\d/.test(v) && /[a-zA-Z]/.test(v) && v.length >= 10) ? 3 : 2;
+      m.setAttribute("data-n", n);
+      d.textContent = n === 0 ? "Pelo menos 8 letras ou números." : n === 1 ? "Curta demais: faltam " + (8 - v.length) + "." : n === 2 ? "Serve. Misturar letras e números deixa mais forte." : "Boa senha.";
+    }
+    inp.addEventListener("input", medir); medir();
+  }
+  function ligarCodigo(segue) {
+    var caixas = [].slice.call(appEl.querySelectorAll(".codigo input"));
+    function cheio() { return caixas.every(function (c) { return /^\d$/.test(c.value); }); }
+    function conferir() {
+      var cod = caixas.map(function (c) { return c.value; }).join("");
+      var e = document.getElementById("e-codigo"), g = document.getElementById("codigo"), conf = document.getElementById("conferindo");
+      if (cod === "000000") {
+        g.classList.add("erro"); e.innerHTML = ic("alert-triangle") + " Código errado. Confira o e-mail mais recente ou peça outro."; e.classList.remove("oculto");
+        return;
+      }
+      g.classList.remove("erro"); e.classList.add("oculto"); conf.classList.remove("oculto");
+      timers.push(setTimeout(function () { ir(segue); }, 900));
+    }
+    caixas.forEach(function (c, i) {
+      c.addEventListener("input", function () {
+        c.value = c.value.replace(/\D/g, "").slice(-1);
+        if (c.value && i < 5) caixas[i + 1].focus();
+        if (cheio()) conferir();
+      });
+      c.addEventListener("keydown", function (ev) { if (ev.key === "Backspace" && !c.value && i > 0) caixas[i - 1].focus(); });
+      c.addEventListener("paste", function (ev) {
+        var t = (ev.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+        if (!t) return; ev.preventDefault();
+        t.split("").forEach(function (d, k) { if (caixas[k]) caixas[k].value = d; });
+        if (cheio()) conferir(); else caixas[Math.min(t.length, 5)].focus();
+      });
+    });
+  }
+  function ligarReenvio() {
+    var b = document.getElementById("reenviar"), s = 45;
+    var t = setInterval(function () {
+      s -= 1;
+      if (s <= 0) { clearInterval(t); b.disabled = false; b.textContent = "Mandar de novo"; return; }
+      b.textContent = "Mandar de novo em 0:" + (s < 10 ? "0" : "") + s;
+    }, 1000);
+    timers.push(t);
+    b.addEventListener("click", function () { avisar("Código novo enviado. Ele vale por 15 minutos."); b.disabled = true; });
+  }
+  function progresso(total, palavra, segue) {
+    var barra = document.getElementById("barra"), cont = document.getElementById("contagem"), n = 0, passos = 22;
+    var t = setInterval(function () {
+      n += 1;
+      var v = Math.min(total, Math.round(total * n / passos));
+      barra.firstChild.style.width = (100 * v / total) + "%";
+      barra.setAttribute("aria-valuenow", v);
+      cont.textContent = v + " de " + total + " " + palavra;
+      if (n >= passos) { clearInterval(t); timers.push(setTimeout(function () { ir(segue); }, 500)); }
+    }, 150);
+    timers.push(t);
+  }
+
+  /* device size */
+  var ap = document.getElementById("aparelho"), bt = document.getElementById("ver-tablet"), bc = document.getElementById("ver-celular");
+  function modo(m) {
+    ap.setAttribute("data-modo", m);
+    bt.setAttribute("aria-pressed", m === "tablet"); bc.setAttribute("aria-pressed", m === "celular");
+    try { localStorage.setItem("proto-contas-modo", m); } catch (e) { /* ignore */ }
+  }
+  bt.addEventListener("click", function () { modo("tablet"); });
+  bc.addEventListener("click", function () { modo("celular"); });
+  try { var salvo = localStorage.getItem("proto-contas-modo"); if (salvo === "celular") modo("celular"); } catch (e) { /* ignore */ }
+
+  var iniciado = false;
+  function porHash() {
+    var id = (location.hash || "").replace("#", "");
+    if (!S[id]) id = "entrada";
+    if (jornada().passos.indexOf(id) < 0) {
+      var achou = J.filter(function (j) { return j.passos.indexOf(id) >= 0; })[0];
+      if (achou) st.jornada = achou.id;
+    }
+    desenharJornadas();
+    ir(id, true);
+  }
+  window.addEventListener("hashchange", function () { if (location.hash.replace("#", "") !== st.tela) porHash(); });
+  porHash();
+  iniciado = true;
+})();
+</script>
