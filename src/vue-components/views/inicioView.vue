@@ -1,6 +1,10 @@
 <template>
     <div class="g-tela overflow-content inicio">
-        <g-topo marca-completa :mostrar-inicio="false"></g-topo>
+        <g-topo marca-completa :mostrar-inicio="false">
+            <a v-if="temConta" href="#conta" class="inicio-chip-conta" :aria-label="'Conta da família: ' + emailConta">
+                <i class="ti ti-user" aria-hidden="true"></i><span>{{ emailConta }}</span>
+            </a>
+        </g-topo>
 
         <div class="g-conteudo inicio-conteudo">
             <section class="inicio-boas" aria-labelledby="inicioOi">
@@ -15,6 +19,17 @@
                 </div>
                 <img class="inicio-mascote" src="app/img/grilo/mascote/grilo-feliz.webp" alt=""/>
             </section>
+
+            <div v-if="entrarDeNovo" class="inicio-faixa" role="status">
+                <i class="ti ti-cloud-x" aria-hidden="true"></i>
+                <p>Entre de novo na conta para guardar as mudanças. As pranchas continuam neste tablet.</p>
+                <a href="#conta/entrar" class="g-btn g-btn-principal">Entrar</a>
+            </div>
+            <div v-else-if="soNoAparelho" class="inicio-faixa">
+                <i class="ti ti-cloud" aria-hidden="true"></i>
+                <p>{{ perfil.nome ? 'As pranchas de ' + perfil.nome + ' estão só neste tablet.' : 'As pranchas estão só neste tablet.' }}</p>
+                <a href="#conta/guardar" class="g-btn g-btn-principal">Guardar na conta</a>
+            </div>
 
             <nav :aria-label="$t('cascaInicio')">
                 <div class="inicio-grade">
@@ -62,7 +77,11 @@
                         <i class="ti ti-info-circle" aria-hidden="true"></i>
                         <span>{{ $t('inicioSobre') }}<small>{{ $t('inicioSobreDica') }}</small></span>
                     </a>
-                    <a href="#welcome" class="inicio-mais-item">
+                    <a v-if="temConta" href="#conta" class="inicio-mais-item">
+                        <i class="ti ti-user" aria-hidden="true"></i>
+                        <span>Conta da família<small>E-mail, senha e aparelhos</small></span>
+                    </a>
+                    <a v-if="mostrarTrocar" href="#welcome" class="inicio-mais-item">
                         <i class="ti ti-users" aria-hidden="true"></i>
                         <span>{{ $t('inicioTrocar') }}<small>{{ $t('inicioTrocarDica') }}</small></span>
                     </a>
@@ -81,6 +100,9 @@
     import {MainVue} from '../../js/vue/mainVue';
     import {dataService} from '../../js/service/data/dataService';
     import {offlineService} from '../../js/service/offlineService';
+    import {contaApi} from './conta/contaApi';
+    import {contaFluxo} from './conta/contaFluxo';
+    import $ from '../../js/externals/jquery';
 
     export default {
         components: { GTopo },
@@ -89,12 +111,34 @@
                 favoritas: null,
                 pranchas: null,
                 offline: null, // {total, cached, missing (number)}
-                offlineSuportado: offlineService.isSupported()
+                offlineSuportado: offlineService.isSupported(),
+                conta: contaApi.getConta(),
+                estadoSync: contaApi.estadoSincronizacao()
             }
         },
         computed: {
             perfil() {
                 return this.$root.perfil || {};
+            },
+            temConta() {
+                return !!(this.conta && this.conta.email);
+            },
+            emailConta() {
+                return (this.conta && this.conta.email) || '';
+            },
+            soNoAparelho() {
+                // the account keeps the boards; without it they are only on this device
+                let c = this.conta;
+                let usuario = this.$root.currentUser;
+                let naConta = !!(c && c.email) && Object.values(c.criancas || {}).some((k) => k && k.usuarioLocal === usuario);
+                return !!usuario && !naConta;
+            },
+            entrarDeNovo() {
+                return this.temConta && (this.estadoSync === 'entrar-de-novo' || !!this.conta.entrarDeNovo) && contaFluxo.usuarioNaConta(this.$root.currentUser);
+            },
+            mostrarTrocar() {
+                // a family with one child and the account has nothing to switch to
+                return !this.temConta || contaFluxo.perfisSoNoAparelho().length + Object.keys(contaFluxo.criancasNoAparelho()).length > 1;
             },
             textoFrases() {
                 if (this.favoritas === null || this.favoritas === 0) {
@@ -159,6 +203,14 @@
         },
         mounted() {
             this.carregar();
+            this._contaMudou = () => (this.conta = contaApi.getConta());
+            this._sync = (ev, dados) => (this.estadoSync = dados && dados.estado ? dados.estado : null);
+            $(document).on(contaApi.EVENTO_CONTA_ALTERADA, this._contaMudou);
+            $(document).on(contaApi.EVENTO_SINCRONIZACAO, this._sync);
+        },
+        beforeDestroy() {
+            $(document).off(contaApi.EVENTO_CONTA_ALTERADA, this._contaMudou);
+            $(document).off(contaApi.EVENTO_SINCRONIZACAO, this._sync);
         }
     }
 </script>
@@ -173,6 +225,64 @@
         width: 100%;
         box-sizing: border-box;
         padding-top: var(--g-e5);
+    }
+
+    /* ---------- conta da família ---------- */
+    .inicio-chip-conta {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--g-e2);
+        min-height: var(--g-alvo);
+        max-width: 260px;
+        padding: 0 var(--g-e4);
+        border-radius: var(--g-raio-pilula);
+        border: 2px solid var(--g-borda);
+        background: var(--g-superficie);
+        color: var(--g-tinta);
+        font-size: var(--g-t-legenda);
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .inicio-chip-conta:hover {
+        border-color: var(--g-folha);
+        color: var(--g-tinta);
+    }
+    .inicio-chip-conta span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .inicio-chip-conta .ti {
+        font-size: 20px;
+        flex: none;
+    }
+    .inicio-faixa {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--g-e3) var(--g-e4);
+        margin-bottom: var(--g-e5);
+        padding: var(--g-e3) var(--g-e4);
+        border-radius: var(--g-raio-g);
+        border: 2px solid #f0d77a;
+        background: var(--g-girassol-claro);
+        color: #4a3b00;
+    }
+    .inicio-faixa > .ti {
+        font-size: 30px;
+        color: var(--g-pessego-escuro);
+        flex: none;
+    }
+    .inicio-faixa p {
+        flex: 1;
+        min-width: 200px;
+        margin: 0;
+        font-weight: 700;
+        font-size: var(--g-t-grande);
+    }
+    @media (max-width: 600px) {
+        .inicio-chip-conta span { display: none; }
+        .inicio-chip-conta { padding: 0; width: var(--g-alvo); justify-content: center; }
     }
 
     /* ---------- boas-vindas ---------- */

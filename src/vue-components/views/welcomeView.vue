@@ -2,6 +2,33 @@
     <div class="overflow-content g-tela entrada">
         <setup-wizard-view v-if="novaCrianca" :nova-crianca="true" @fechar="fecharNovaCrianca()"/>
 
+        <!-- Grilo Falante: nothing on this device yet: the account comes first (prototipo-contas "Entrada") -->
+        <template v-else-if="mostrarEntradaConta">
+            <header class="entrada-topo">
+                <img src="app/img/grilo/icone-app.png" alt="" aria-hidden="true" class="entrada-marca"/>
+                <span class="entrada-nome-app">Grilo Falante</span>
+                <span class="g-espaco"></span>
+                <button type="button" class="g-btn g-btn-leve" @click="abrirAjuda()">
+                    <i class="ti ti-help-circle" aria-hidden="true"></i> {{ $t('entradaAjuda') }}
+                </button>
+            </header>
+            <main class="entrada-centro">
+                <img src="app/img/grilo/mascote/grilo-feliz.webp" alt="" aria-hidden="true" class="entrada-grilo"/>
+                <h1 class="entrada-titulo">Oi! Eu sou o Grilo Falante</h1>
+                <p class="g-apoio entrada-lead">Pranchas no tablet para a criança falar do jeito dela. Com a conta da família, as pranchas ficam guardadas: se o tablet quebrar ou for trocado, nada se perde.</p>
+                <div class="entrada-pilha">
+                    <a href="#conta/criar" class="g-btn g-btn-principal g-btn-grande">
+                        <i class="ti ti-user-plus" aria-hidden="true"></i> Criar conta da família
+                    </a>
+                    <a href="#conta/entrar" class="g-btn g-btn-grande">
+                        <i class="ti ti-login-2" aria-hidden="true"></i> Já tenho conta
+                    </a>
+                </div>
+                <a href="#conta/sem-conta" class="entrada-link entrada-link-a">Usar sem conta, só neste tablet</a>
+                <p class="g-dica">Grátis e sem anúncios.</p>
+            </main>
+        </template>
+
         <template v-else>
             <header class="entrada-topo">
                 <img src="app/img/grilo/icone-app.png" alt="" aria-hidden="true" class="entrada-marca"/>
@@ -27,7 +54,8 @@
                                 <span v-else aria-hidden="true">{{ p.inicial }}</span>
                             </span>
                             <span class="entrada-perfil-nome">{{ p.nome }}</span>
-                            <span v-if="p.online" class="g-pilula"><i class="ti ti-cloud" aria-hidden="true"></i> {{ $t('entradaContaOnline') }}</span>
+                            <span v-if="p.naConta" class="g-pilula"><i class="ti ti-cloud-check" aria-hidden="true"></i> Na conta</span>
+                            <span v-else-if="p.online" class="g-pilula"><i class="ti ti-cloud" aria-hidden="true"></i> {{ $t('entradaContaOnline') }}</span>
                             <span v-if="p.usuario === usuarioAtivo && !gerenciando" class="g-pilula g-pilula-ok">{{ $t('entradaAbertoAgora') }}</span>
                             <span v-if="!p.compativel" class="g-dica">{{ $t('entradaVersaoNova') }}</span>
                             <span v-if="entrandoEm === p.usuario" class="entrada-girando" aria-hidden="true"><i class="ti ti-loader-2"></i></span>
@@ -63,7 +91,12 @@
                 <input ref="arquivo" type="file" class="g-oculto-leitor" tabindex="-1" aria-hidden="true"
                        accept=".grd,.obz,.obf,.json,application/json" @change="arquivoEscolhido($event)"/>
 
-                <p class="g-dica entrada-rodape">
+                <p v-if="temConta" class="g-dica entrada-rodape">
+                    <i class="ti ti-cloud-check" aria-hidden="true"></i>
+                    As crianças marcadas "Na conta" ficam guardadas na conta da família.
+                    <a href="#conta" class="entrada-link entrada-link-a"><i class="ti ti-user" aria-hidden="true"></i> Conta da família</a>
+                </p>
+                <p v-else class="g-dica entrada-rodape">
                     <i class="ti ti-device-tablet" aria-hidden="true"></i>
                     {{ $t('entradaSemSenha') }}
                     <button type="button" class="entrada-link" @click="entrarComConta()">{{ $t('entradaEntrarComConta') }}</button>
@@ -174,6 +207,8 @@
     import { perfilService } from "../../js/service/perfilService";
     import { perfilArquivoService } from "../../js/service/perfilArquivoService";
     import SetupWizardView from "../wizard/setupWizardView.vue";
+    import { contaApi } from "./conta/contaApi";
+    import { contaFluxo } from "./conta/contaFluxo";
 
     export default {
         components: { SetupWizardView },
@@ -187,10 +222,17 @@
                 novaCrianca: false,
                 importacao: null,
                 remover: null,
-                removendo: false
+                removendo: false,
+                temConta: contaApi.temConta(),
+                semContaEscolhido: contaFluxo.escolheuSemConta(),
+                carregado: false
             };
         },
         computed: {
+            mostrarEntradaConta() {
+                // the picker stays for families with profiles on this device (and after "Usar sem conta")
+                return this.carregado && !this.perfis.length && !this.temConta && !this.semContaEscolhido;
+            },
             resumoArquivo() {
                 if (!this.importacao) {
                     return '';
@@ -226,8 +268,11 @@
                 let semNome = this.$t('entradaSemNome');
                 this.perfis = usuarios.map(u => Object.assign(perfilService.cartao(u, semNome), {
                     online: online.includes(u),
+                    naConta: contaFluxo.usuarioNaConta(u),
                     compativel: modelUtil.hasValidMajorModelVersion(u)
                 }));
+                this.temConta = contaApi.temConta();
+                this.carregado = true;
             },
             async entrar(perfil) {
                 if (this.entrandoEm || this.gerenciando) {
@@ -245,6 +290,11 @@
                 this.entrandoEm = null;
             },
             abrirNovaCrianca() {
+                if (contaApi.temConta()) {
+                    // with the family account the new child goes to the account
+                    contaFluxo.set({ voltarNova: 'welcome' });
+                    return contaFluxo.ir('nova-crianca');
+                }
                 this.novaCrianca = true;
             },
             fecharNovaCrianca() {
@@ -252,7 +302,7 @@
                 this.carregarPerfis();
             },
             entrarComConta() {
-                Router.toLogin();
+                contaFluxo.ir('entrar');
             },
             abrirAjuda() {
                 helpService.openHelp();
@@ -371,6 +421,10 @@
         mounted() {
             this.carregarPerfis();
             document.addEventListener('keydown', this.aoTeclar);
+            if (this.temConta && !this.perfis.length) {
+                // signed in, but no child on this device yet: bring them (or start one)
+                contaFluxo.seguirDepoisDeEntrar().catch((e) => log.warn('entrada: account', e));
+            }
         },
         beforeDestroy() {
             document.removeEventListener('keydown', this.aoTeclar);
@@ -539,6 +593,20 @@
     }
     @media (prefers-reduced-motion: reduce) {
         .entrada-girando .ti { animation: none; }
+    }
+    .entrada-pilha {
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-e3);
+        width: 100%;
+        max-width: 380px;
+        margin-top: var(--g-e2);
+    }
+    .entrada-link-a {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--g-e1);
+        font-size: var(--g-t-corpo);
     }
     .entrada-acoes {
         display: flex;

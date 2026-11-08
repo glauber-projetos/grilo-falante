@@ -9,7 +9,7 @@ import ManageGridsView from '../vue-components/views/manageGridsView.vue';
 import GridEditView from '../vue-components/views/gridEditView.vue';
 import GridView from '../vue-components/views/gridView.vue';
 import LoginView from '../vue-components/views/loginView.vue';
-import RegisterView from '../vue-components/views/registerView.vue';
+import ContaView from '../vue-components/views/contaView.vue';
 import AddOfflineView from '../vue-components/views/addOfflineView.vue';
 import WelcomeView from '../vue-components/views/welcomeView.vue';
 import AboutView from '../vue-components/views/aboutView.vue';
@@ -27,6 +27,14 @@ let NO_DB_VIEWS = ['#login', '#register', '#welcome', '#add', '#about', '#help',
 // Grilo Falante: arriving at "#main" from one of these (or when the app opens) follows the opening rules,
 // see openingRoute(): child mode on -> the board, otherwise -> the adult home "#inicio".
 let ENTRY_VIEWS = ['#login', '#register', '#welcome', '#add'];
+// Grilo Falante: the family account screens ("#conta", "#conta/criar", ...) work without an open profile
+// and count as entry screens too
+let CONTA_PREFIX = '#conta';
+
+function isContaHash(hash) {
+    let base = (hash || '').split('?')[0];
+    return base === CONTA_PREFIX || base.startsWith(CONTA_PREFIX + '/');
+}
 
 let Router = {};
 let navigoInstance = null;
@@ -108,8 +116,16 @@ Router.init = function (injectIdParam, initialHash) {
             loadVueView(LoginView);
         },
         register: function () {
-            helpService.setHelpLocation('06_users', '#online-users');
-            loadVueView(RegisterView);
+            // Grilo Falante: creating an account is now "Criar conta da família"
+            Router.to('#conta/criar', { noHistory: true });
+        },
+        conta: function () {
+            helpService.setHelpLocationIndex();
+            loadVueView(ContaView, { tela: 'familia' });
+        },
+        'conta/:tela': function (params) {
+            helpService.setHelpLocationIndex();
+            loadVueView(ContaView, { tela: params.tela });
         },
         add: function () {
             helpService.setHelpLocation('06_users', '#offline-users');
@@ -344,7 +360,7 @@ function getValidHash() {
     if (!databaseService.getCurrentUsedDatabase()) {
         // Grilo Falante: without an open profile always "Quem vai falar hoje?" (#welcome lists the saved profiles);
         // #login is only "Entrar com conta"
-        hashToUse = NO_DB_VIEWS.includes(hashToUse) ? hashToUse : null;
+        hashToUse = NO_DB_VIEWS.includes(hashToUse) || isContaHash(hashToUse) ? hashToUse : null;
         hashToUse = hashToUse || '#welcome';
     }
     return hashToUse;
@@ -388,7 +404,7 @@ function isOpening() {
         return true;
     }
     let lastBase = _lastRoutedHash.split('?')[0];
-    return ENTRY_VIEWS.includes(lastBase);
+    return ENTRY_VIEWS.includes(lastBase) || isContaHash(lastBase);
 }
 
 function openingRoute() {
