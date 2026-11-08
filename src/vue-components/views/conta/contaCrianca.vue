@@ -20,7 +20,7 @@
                     <button type="button" class="ct-cartao" @click="ir('arquivo')">
                         <span class="ct-circ"><i class="ti ti-file-upload" aria-hidden="true"></i></span>
                         <b>Trazer de um arquivo</b>
-                        <span>Já usava o Grilo Falante ou o AsTeRICS Grid? Abra o arquivo .grd.</span>
+                        <span>Tem as pranchas num arquivo .grd? Abra aqui.</span>
                     </button>
                     <button v-for="p in perfisAqui" :key="p.usuario" type="button" class="ct-cartao" @click="levar(p)">
                         <span class="g-avatar ct-circ" :style="p.foto ? {} : {background: p.cor, color: '#fff'}">

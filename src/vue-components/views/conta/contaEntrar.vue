@@ -32,7 +32,7 @@
             </button>
             <button type="button" class="ct-link ct-link-inicio" @click="esqueci()">Esqueci a senha</button>
             <p class="g-apoio">Não tem conta? <button type="button" class="ct-link" @click="ir('criar')">Criar conta da família</button></p>
-            <p class="g-dica"><a href="#login" class="ct-link">Tenho uma conta do app antigo (AsTeRICS Grid)</a></p>
+            <p class="g-dica"><a href="#login" class="ct-link">Tenho uma conta antiga, só com nome de usuário</a></p>
         </form>
     </conta-dividida>
 </template>
