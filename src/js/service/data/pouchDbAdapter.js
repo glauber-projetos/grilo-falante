@@ -24,6 +24,7 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
     let _syncState = constants.DB_SYNC_STATE_FAIL;
     let _closed = false;
     let _openLocalPromise = null;
+    let _remoteAddress = remoteCouchDbAddress || null;
 
     /**
      * inits the class, opens databases, sets up synchronization.
@@ -50,8 +51,24 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
         }
 
         if (remoteCouchDbAddress) {
+            let openRemotePromise = openDbInternal(remoteCouchDbAddress, true);
+            if (!onlyRemote && thiz.wasCurrentDatabaseSynced()) {
+                // Grilo Falante: the local copy is complete, so a remote that can't be reached (no internet, server
+                // down, session refused with 401) must never stop the profile from opening. The local data is kept;
+                // EVENT_DB_CONNECTION_LOST carries the error so the account service can retry or ask to sign in again.
+                openRemotePromise = openRemotePromise.catch((err) => {
+                    log.info('remote database not reachable, using local database only', err && err.status);
+                    _openLocalPromise.then(() => {
+                        triggerConnectionLost(err);
+                    });
+                    return null;
+                });
+            }
             promises.push(
-                openDbInternal(remoteCouchDbAddress, true).then((dbHandler) => {
+                openRemotePromise.then((dbHandler) => {
+                    if (!dbHandler) {
+                        return Promise.resolve();
+                    }
                     _remoteDb = dbHandler;
                     if (!onlyRemote) {
                         return _openLocalPromise.then(() => {
@@ -77,7 +94,7 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
         let returnPromise = Promise.all(promises);
         returnPromise.then(() => {
             $(document).trigger(constants.EVENT_DB_INITIALIZED);
-        });
+        }).catch(() => {}); // the caller handles the rejection of returnPromise
         return returnPromise;
     };
 
@@ -106,6 +123,12 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
      * @return {*}
      */
     thiz.startSync = function (remoteCouchDbAddress) {
+        if (_remoteDb && remoteCouchDbAddress && remoteCouchDbAddress !== _remoteAddress && _openLocalPromise) {
+            // Grilo Falante: same database, new session (signed in again) -> swap the remote without closing local DB
+            thiz.cancelSync();
+            _remoteDb.close();
+            _remoteDb = null;
+        }
         if (_remoteDb || !_openLocalPromise) {
             log.warn('startSync() is not possible if remote database is already open, or local database not opened');
             return;
@@ -116,8 +139,26 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
             })
             .then((dbHandler) => {
                 _remoteDb = dbHandler;
+                _remoteAddress = remoteCouchDbAddress;
                 return setupSync();
+            })
+            .catch((err) => {
+                // Grilo Falante: no internet or session refused: keep working on the local database
+                log.info('could not start sync', err && err.status);
+                triggerConnectionLost(err);
             });
+    };
+
+    /**
+     * Grilo Falante: stops the synchronization and closes the remote database, keeps the local database open
+     */
+    thiz.stopSync = function () {
+        thiz.cancelSync();
+        if (_remoteDb) {
+            _remoteDb.close();
+            _remoteDb = null;
+        }
+        _remoteAddress = null;
     };
 
     /**
@@ -288,7 +329,7 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
                     .on('error', function (err) {
                         log.info('couchdb error');
                         log.error(err);
-                        triggerConnectionLost();
+                        triggerConnectionLost(err);
                     })
                     .on('complete', async function (info) {
                         log.debug('sync complete event');
@@ -345,7 +386,7 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
                     .on('error', function (err) {
                         log.info('couchdb error');
                         log.info(err);
-                        triggerConnectionLost();
+                        triggerConnectionLost(err);
                     });
             }
         });
@@ -367,7 +408,11 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
         }
     }
 
-    function triggerConnectionLost() {
+    /**
+     * @param err (optional) the PouchDB error; err.status === 401 means the session was refused. Local data is never
+     *        touched here, only the remote database is closed.
+     */
+    function triggerConnectionLost(err) {
         if (_closed) {
             return;
         }
@@ -376,7 +421,10 @@ function PouchDbAdapter(databaseName, remoteCouchDbAddress, onlyRemote, justCrea
             _remoteDb.close();
             _remoteDb = null;
         }
-        $(document).trigger(constants.EVENT_DB_CONNECTION_LOST);
+        if (!_useLocalDb && _db && thiz.wasCurrentDatabaseSynced()) {
+            _useLocalDb = true;
+        }
+        $(document).trigger(constants.EVENT_DB_CONNECTION_LOST, [err || null, databaseName]);
         setSyncState(constants.DB_SYNC_STATE_FAIL);
     }
 

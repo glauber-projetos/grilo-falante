@@ -8,6 +8,8 @@ import { Router } from '../router';
 import { webradioService } from './webradioService.js';
 import { MainVue } from '../vue/mainVue.js';
 import {util} from "../util/util.js";
+import { contaSessao } from './contaSessao';
+import { contaSincronizacao } from './contaSincronizacao';
 
 let loginService = {};
 
@@ -104,7 +106,9 @@ loginService.loginStoredUser = function (user, dontRoute) {
         if (loginService.getLoggedInUsername() === user) {
             return resolve();
         } else {
-            loginService.logout();
+            // Grilo Falante: switching profiles (children) closes the open database but never ends a session
+            // on the server (no superlogin.logout)
+            loginService.fecharPerfil();
         }
 
         if (savedOnlineUsers.includes(user) && localStorageService.isDatabaseSynced(user)) {
@@ -128,8 +132,13 @@ loginService.loginStoredUser = function (user, dontRoute) {
                 });
         } else if (savedLocalUsers.includes(user)) {
             localStorageService.setAutologinUser(user);
-            databaseService.initForUser(user, user).then(() => {
+            // Grilo Falante: a child of the family account is a LOCAL profile (no password, not encrypted) that
+            // syncs with the child's database on the server. Without a valid session it just opens locally.
+            databaseService.initForUser(user, user, urlDaContaPara(user)).then(() => {
                 resolve();
+            }).catch((reason) => {
+                log.warn('could not open profile', reason);
+                reject(reason);
             });
         }
     });
@@ -148,18 +157,43 @@ loginService.loginStoredUser = function (user, dontRoute) {
  * logs out a logged in user from remote superlogin
  */
 loginService.logout = function () {
-    log.debug('logging out user: ' + _loggedInUser);
+    let user = _loggedInUser;
+    loginService.fecharPerfil();
+    if (user) {
+        superlogin.logout(user);
+    }
+};
+
+/**
+ * Grilo Falante: closes the open profile (database, radio, auto-retry) WITHOUT ending any session on the server.
+ * Used when switching children: the family account stays signed in on this device.
+ */
+loginService.fecharPerfil = function () {
+    log.debug('closing profile: ' + (_loggedInUser || databaseService.getCurrentUsedDatabase()));
     $(document).trigger(constants.EVENT_USER_CHANGING);
     loginService.stopAutoRetryLogin();
     webradioService.stop();
     MainVue.clearTooltip();
     databaseService.closeCurrentDatabase();
-    if (_loggedInUser) {
-        superlogin.logout(_loggedInUser);
-    }
     _loggedInUser = null;
     _loginInfo = null;
+    _lastParamUser = null;
+    _lastParamHashedPw = null;
+    _lastParamSaveUser = null;
 };
+
+/**
+ * Grilo Falante: sync address for a profile that belongs to the family account, or undefined (local only).
+ * No address when the local copy is not complete yet or when the server refused the session (sign in again).
+ */
+function urlDaContaPara(user) {
+    let banco = contaSessao.bancoDoUsuario(user);
+    let conta = contaSessao.ler();
+    if (!banco || !conta || conta.entrarDeNovo || !localStorageService.isDatabaseSynced(user)) {
+        return undefined;
+    }
+    return contaSessao.urlComSessao(banco) || undefined;
+}
 
 /**
  * registers with remote couchdb (superlogin), and logs in after successful registration.
@@ -213,7 +247,7 @@ loginService.register = function (user, plainPassword, saveUser = true) {
  * @return {*}
  */
 loginService.registerOffline = function (username, hashedUserPassword) {
-    loginService.logout();
+    loginService.fecharPerfil();
     localStorageService.saveUserPassword(username, '');
     localStorageService.setAutologinUser(username);
     return databaseService.registerForUser(username, hashedUserPassword);
@@ -416,8 +450,10 @@ function getConfig() {
 
 function init() {
     $(document).on(constants.EVENT_DB_CONNECTION_LOST, function (e) {
-        log.info('connection lost! auto-retrying login after 10 seconds...');
-        if (_lastParamUser && _lastParamHashedPw) {
+        // Grilo Falante: only retry the old (superlogin) login for the profile that is open now; account children
+        // are handled by contaSincronizacao
+        if (_lastParamUser && _lastParamHashedPw && databaseService.getCurrentUsedDatabase() === _lastParamUser) {
+            log.info('connection lost! auto-retrying login...');
             autoRetryLogin(_lastParamUser, _lastParamHashedPw, _lastParamSaveUser);
         }
     });
@@ -430,5 +466,6 @@ function init() {
 }
 
 init();
+contaSincronizacao.iniciar();
 
 export { loginService };

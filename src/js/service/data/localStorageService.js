@@ -13,6 +13,7 @@ let CURRENT_VERSION_KEY = 'AG_CURRENT_VERSION_KEY';
 let APP_SETTINGS = 'AG_APP_SETTINGS';
 let USER_SETTINGS = 'AG_USER_SETTINGS';
 let CURRENT_TOGGLE_LEVEL_KEY = 'CURRENT_TOGGLE_LEVEL';
+let GRILO_CONTA_KEY = 'GRILO_CONTA';
 
 let localStorageService = {};
 localStorageService.KEY_CURRENT_TOGGLE_LEVEL = CURRENT_TOGGLE_LEVEL_KEY;
@@ -184,7 +185,34 @@ localStorageService.removeLocalUser = function (username) {
     if (autologinUser === username) {
         localStorageService.setAutologinUser('');
     }
+    forgetAccountChild(username);
 };
+
+/**
+ * Grilo Falante: the local profile of a child of the family account was removed from this device. The child stays in
+ * the account (server), only the link to this local copy in GRILO_CONTA.criancas is dropped.
+ * (written here directly, without importing contaSessao, to keep this module free of dependencies)
+ */
+function forgetAccountChild(username) {
+    try {
+        let conta = localStorageService.getJSON(GRILO_CONTA_KEY);
+        if (!conta || !conta.criancas) {
+            return;
+        }
+        let changed = false;
+        for (let banco of Object.keys(conta.criancas)) {
+            if (conta.criancas[banco] && conta.criancas[banco].usuarioLocal === username) {
+                delete conta.criancas[banco];
+                changed = true;
+            }
+        }
+        if (changed) {
+            localStorageService.saveJSON(GRILO_CONTA_KEY, conta);
+        }
+    } catch (e) {
+        log.warn('could not update GRILO_CONTA', e);
+    }
+}
 
 /**
  * returns all saved users as a string list

@@ -313,6 +313,15 @@ pouchDbService.isSyncEnabled = function () {
     return _pouchDbAdapter ? _pouchDbAdapter.isSyncEnabled() : null;
 };
 
+/**
+ * Grilo Falante: stops synchronization and closes the remote database, the local database stays open
+ */
+pouchDbService.stopSync = function () {
+    if (_pouchDbAdapter) {
+        _pouchDbAdapter.stopSync();
+    }
+};
+
 pouchDbService.pauseSync = function () {
     _pausedSyncManually = true;
     getPouchDbAdapter().cancelSync();

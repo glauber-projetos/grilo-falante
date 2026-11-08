@@ -9,6 +9,7 @@
  */
 import { nomeExibicao, inicial, corDoPerfil } from './perfilNomes';
 import $ from '../externals/jquery';
+import { contaSessao } from './contaSessao';
 
 // mesmo valor de MainVue.EVENT_PERFIL_ALTERADO: o topo e o Início atualizam nome e foto
 const EVENT_PERFIL_ALTERADO = 'grilo-perfil-alterado';
@@ -86,6 +87,14 @@ perfilService.removerPerfil = function (usuario) {
         gravar(todos);
         avisar();
     }
+};
+
+/**
+ * @return {boolean} true se o perfil é de uma criança da conta da família (sincroniza com o servidor);
+ *         false se é só deste aparelho
+ */
+perfilService.ehDaConta = function (usuario) {
+    return contaSessao.ehDaConta(usuario);
 };
 
 /**

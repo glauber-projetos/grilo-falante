@@ -261,6 +261,28 @@ databaseService.registerForUser = function (username, hashedUserPassword, userDa
 };
 
 /**
+ * Grilo Falante: (re)starts the synchronization of the database that is open now, without closing it and without
+ * EVENT_USER_CHANGING (the board on screen stays). Used after the internet comes back or after signing in again,
+ * when the remote address changes (new session).
+ * @param username the user whose database should be synced; nothing happens if another database is open
+ * @param userDatabaseURL remote address with session, e.g. https://<token>:<password>@db.<host>/<banco>
+ * @return {Promise<boolean>} true if sync was (re)started
+ */
+databaseService.religarSync = function (username, userDatabaseURL) {
+    if (!username || !userDatabaseURL || pouchDbService.getOpenedDatabaseName() !== username) {
+        return Promise.resolve(false);
+    }
+    return Promise.resolve(pouchDbService.initDatabase(username, userDatabaseURL)).then(() => true);
+};
+
+/**
+ * Grilo Falante: stops synchronization of the open database, keeps the local database open and untouched
+ */
+databaseService.pararSync = function () {
+    pouchDbService.stopSync();
+};
+
+/**
  * deletes the local database belonging to the given username
  * @param user the name of the user whose database should be deleted
  * @return {*}
