@@ -1515,7 +1515,7 @@
   "wizardDoLater": "Do it later",
   "wizardNameQuestion": "What is the child's name?",
   "wizardNameLabel": "Name of the child",
-  "wizardNamePlaceholder": "e.g. Cadu",
+  "wizardNamePlaceholder": "e.g. Ana",
   "wizardPhotoTitle": "Photo of the child",
   "wizardPhotoHint": "The photo becomes the \"I\" button of the board.",
   "wizardPhotoAlt": "Photo of {name}",
